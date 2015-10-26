@@ -1,0 +1,15 @@
+
+julian () {
+    if [[ $# -eq 0 ]]; then
+	date +%Y.%j
+    elif [[ $1 =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2} ]]; then
+	date -u -d $1 +%Y.%j	
+    elif [[ $1 =~ ^[0-9]{4}.[0-9]{3} ]]; then
+	declare y d
+	read y d <<< $(echo $1 | perl -nle 'print s/\D/ /r')
+	date -u -d "$y-01-01 $((d-1)) days" +%F
+    else
+	echo 'unknown request'
+    fi
+}
+

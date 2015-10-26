@@ -1,0 +1,28 @@
+
+
+_prep () {
+    declare OPTIND OPTARG
+    declare opt f=~/.base.fnc b=~/.base.sh p=~/.base.pl y=~/.base.py type
+    while getopts 'p:b:f:y:' opt; do
+	[[ -s $OPTARG ]] && echo "$OPTARG exist: skipping" && continue
+	cp ${!opt} $OPTARG
+	[[ $opt =~ f ]] && sed -i '' "s/Zz/$OPTRG" $OPTARG
+	[[ $opt =~ [pby] ]] && chmod 755 $OPTARG
+	OPTARG=''
+    done
+    shift $((OPTIND-1))
+}
+
+prep () {
+    declare n
+    for n in "$@"; do
+	case $n in
+	    *pl) $(_prep -p $n) ;;
+	    *py) $(_prep -y $n) ;;
+	    *sh) $(_prep -b $n) ;;
+	    *fnc) $(_prep -f ${n%.fn}) ;;
+	esac
+    done
+}
+
+

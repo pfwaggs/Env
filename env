@@ -1,0 +1,24 @@
+pushd /Users/wapembe/ENV/fmaster >/dev/null
+[[ $VERBOSE ]] && echo basevars || echo -n .; . basevars
+[[ $VERBOSE ]] && echo aliases || echo -n .; . aliases
+[[ $VERBOSE ]] && echo L || echo -n .; . L
+[[ $VERBOSE ]] && echo commas || echo -n .; . commas
+[[ $VERBOSE ]] && echo dfx || echo -n .; . dfx
+[[ $VERBOSE ]] && echo ffunc || echo -n .; . ffunc
+[[ $VERBOSE ]] && echo julian || echo -n .; . julian
+[[ $VERBOSE ]] && echo killdir || echo -n .; . killdir
+[[ $VERBOSE ]] && echo lsu || echo -n .; . lsu
+[[ $VERBOSE ]] && echo mkwdir || echo -n .; . mkwdir
+[[ $VERBOSE ]] && echo pd || echo -n .; . pd
+[[ $VERBOSE ]] && echo prep || echo -n .; . prep
+[[ $VERBOSE ]] && echo psfu || echo -n .; . psfu
+[[ $VERBOSE ]] && echo qdirs || echo -n .; . qdirs
+[[ $VERBOSE ]] && echo qload || echo -n .; . qload
+[[ $VERBOSE ]] && echo setprompt || echo -n .; . setprompt
+[[ $VERBOSE ]] && echo show || echo -n .; . show
+[[ $VERBOSE ]] && echo spx || echo -n .; . spx
+[[ $VERBOSE ]] && echo types || echo -n .; . types
+[[ $VERBOSE ]] && echo vpurge || echo -n .; . vpurge
+echo done 
+mkpc
+popd >/dev/null

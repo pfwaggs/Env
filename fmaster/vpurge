@@ -1,0 +1,11 @@
+#START.vpurge AAA
+vpurge() {
+    declare -a tmp
+    declare x out
+    IFS=$':\n'; read -a tmp <<< $1; IFS=$' \n\t'
+    for x in ${tmp[@]}; do
+	[[ $out =~ :$x ]] && continue || out+=:$x
+    done
+    echo ${out:1}
+}
+#END.vpurge ZZZ

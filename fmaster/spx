@@ -1,0 +1,4 @@
+
+
+spx () { echo $@ | aspell -a; }
+

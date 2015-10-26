@@ -1,0 +1,4 @@
+
+
+typef () { declare -a p; type -a $1 | while read -a p; do file ${p[-1]}; done; }
+typel () { declare -a p; type -a $1 | while read -a p; do ls -l ${p[-1]}; done; }

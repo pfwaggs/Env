@@ -1,0 +1,20 @@
+
+
+unalias -a
+alias ..='cd ..'
+alias c='clear'
+alias ?='dirs -l -v'
+alias edit='$EDITOR'
+alias h='history'
+alias vimh='vim "+:help" "+:only"'
+alias l='ls -F'
+alias ll='l -l'
+alias lr='ll -R'
+alias now='date -u; date +"%a %h %d %T"; date +%s | commas'
+alias p='$PAGER'
+alias su'=/bin/su'
+alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
+alias vi='$VISUAL'
+alias vm='vim'
+alias make='gnumake'
+

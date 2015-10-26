@@ -1,0 +1,9 @@
+
+
+killdir () {
+    [[ -f .wpr ]] && echo write protect ring found && return 0
+    read -p "remove \"${1:-${OLDPWD##*/}} ?\" ";
+    [[ ${REPLY:0:1} = @(y|Y) ]] && rm -rf "${1:-${OLDPWD##*/}}"
+}
+
+

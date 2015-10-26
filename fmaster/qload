@@ -1,0 +1,17 @@
+
+
+qload () {
+    [[ $# ]] || return 0
+    declare dir file item
+    for file in "$@"; do
+	if [[ $file =~ / ]]; then
+	    source "$file"
+	else
+	    for dir in ${ENV_DIRS[@]}; do
+		[[ -s "$dir/$file" ]] && source "$dir/$file"
+	    done
+	fi
+    done
+}
+
+
