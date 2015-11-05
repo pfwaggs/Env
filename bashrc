@@ -16,5 +16,6 @@ HISTFILE=~/.bh-$(date "+%F").$$
 #fi
 
 #. ~/env/COMMON_env
-. ~/envsync/env
+export ENV_BASE=~/Github/ENV
+. $ENV_BASE/env
 PATH=$(vpurge $PATH)
