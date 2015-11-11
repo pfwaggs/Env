@@ -1,14 +1,16 @@
 
 full = $(wildcard *)
-firsts = basevars aliases
-ignore = $(firsts) Makefile env \#%
+pre = bashrc_pre
+post = bashrc_post
+firsts = aliases basevars
+ignore = $(pre) $(post) $(firsts) Makefile \#%
 list = $(firsts) $(filter-out $(ignore), $(full))
-dest = ../env
+dest = ~/.bashrc
 all: $(list)
-	@echo "pushd $${PWD} >/dev/null" | tee $(dest)
+	@cat $(pre) | tee $(dest)
+	@echo "pushd $${PWD} >/dev/null" | tee -a $(dest)
 	@for n in $?; do echo "[[ \$$VERBOSE ]] && echo $$n || echo -n .; . $$n"; done | tee -a $(dest)
-	@echo "echo done "| tee -a $(dest)
-	@echo mkpc | tee -a $(dest)
 	@echo "popd >/dev/null" | tee -a $(dest)
-
+	@echo "echo \$$ENV_STATE "| tee -a $(dest)
+	@cat $(post) | tee -a $(dest)
 

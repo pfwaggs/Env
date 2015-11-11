@@ -1,14 +1,13 @@
 
-PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PATH=~/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export MANPATH=/usr/share/man:/usr/local/share/man
+export TZ=America/New_York
 LANG=C
-umask 0022
+umask 0037
 
 #. ~/.bash_profile-local
 shopt -s extglob
 
-PATH=~/bin:$PATH
-#PATH=~/bin:$(brew --prefix coreutils)/libexec/gnubin:$PATH
 export CDPATH=".:..:~"
 pager=$(type -p less)
 export PAGER=${pager:-$(type -p more)}

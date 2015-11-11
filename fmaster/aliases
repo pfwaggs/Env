@@ -16,5 +16,5 @@ alias su'=/bin/su'
 alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
 alias vi='$VISUAL'
 alias vm='vim'
-alias make='gnumake'
+#alias make='gnumake'
 

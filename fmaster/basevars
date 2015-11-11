@@ -5,14 +5,16 @@ host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
 #host2=${host//[0-9]*}
 #host2=${host//$host2/$host2 }
 pcbase='printf "]1;%s]2;%s" "$host:$PWD" "$host2:$n:$PWD"'
-[[ $TERM == xterm ]] && PROMPT_COMMAND=$pcbase
-
-declare -A ct pc
-ct=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
-pc=([user]=blue [host]=cyan [spath]=green [lpath]=green [prmt]=green [xtra]=red)
-
-declare -a base_prompt po
-base_prompt=(xtra host user spath lpath prmt)
-po=(host prmt)
+#[[ $TERM =~ xterm ]] && PROMPT_COMMAND=$pcbase
 ENV_STATE=normal
+
+#
+#declare -A ct pc
+#ct=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
+#pc=([user]=blue [host]=cyan [spath]=green [lpath]=green [prmt]=green [xtra]=red)
+#
+#declare -a base_prompt po
+#base_prompt=(xtra host user spath lpath prmt)
+#po=(host prmt)
+#
 

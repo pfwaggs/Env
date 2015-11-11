@@ -1,4 +1,4 @@
-pushd /Users/wapembe/ENV/fmaster >/dev/null
+pushd /home/pfwaggs/ENV/fmaster >/dev/null
 [[ $VERBOSE ]] && echo basevars || echo -n .; . basevars
 [[ $VERBOSE ]] && echo aliases || echo -n .; . aliases
 [[ $VERBOSE ]] && echo L || echo -n .; . L
