@@ -3,7 +3,7 @@
 _mkwdir () {
     declare d="$1$(date +%F)"
     declare num=$(ls -d "$d"* 2>/dev/null | wc -l)
-    printf -v d "${d}_%02d" $((++num))
+    printf "${d}_%02d" $((++num))
 }
 
 mkwdir () {
