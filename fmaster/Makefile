@@ -8,6 +8,7 @@ list = $(firsts) $(filter-out $(ignore), $(full))
 dest = ~/.bashrc
 all: $(list)
 	@cat $(pre) | tee $(dest)
+	@echo "unset -f \$$(compgen -A function)" | tee -a $(dest)
 	@echo "pushd $${PWD} >/dev/null" | tee -a $(dest)
 	@for n in $?; do echo "[[ \$$VERBOSE ]] && echo $$n || echo -n .; . $$n"; done | tee -a $(dest)
 	@echo "popd >/dev/null" | tee -a $(dest)
