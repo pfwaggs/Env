@@ -1,5 +1,4 @@
 
-
 qload () {
     [[ $# ]] || return 0
     declare dir file item
@@ -7,8 +6,10 @@ qload () {
 	if [[ $file =~ / ]]; then
 	    source "$file"
 	else
-	    for dir in ${ENV_DIRS[@]}; do
-		[[ -s "$dir/$file" ]] && source "$dir/$file"
+	    for dir in ${ENV_DIRS//:/ }; do
+		[[ ! -s "$dir/$file" ]] && continue
+		read -p "load $dir/$file ?" ans
+		[[ $ans == y* ]] && source "$dir/$file" || continue
 	    done
 	fi
     done

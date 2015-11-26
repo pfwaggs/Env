@@ -2,6 +2,7 @@
 
 unalias -a
 alias ..='cd ..'
+alias ...='cd ../..'
 alias c='clear'
 alias ?='dirs -l -v'
 alias edit='$EDITOR'
@@ -16,5 +17,6 @@ alias su'=/bin/su'
 alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
 alias vi='$VISUAL'
 alias vm='vim'
+alias brewon='source ~/perl5/perlbrew/etc/bashrc'
 #alias make='gnumake'
 
