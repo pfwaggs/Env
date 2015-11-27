@@ -6,7 +6,7 @@ _prep () {
     while getopts 'p:b:f:y:' opt; do
 	[[ -s $OPTARG ]] && echo "$OPTARG exist: skipping" && continue
 	cp ${!opt} $OPTARG
-	[[ $opt =~ f ]] && sed -i '' "s/Zz/$OPTRG" $OPTARG
+	[[ $opt =~ f ]] && sed -i '' "s/Zz/$OPTARG/" $OPTARG
 	[[ $opt =~ [pby] ]] && chmod 755 $OPTARG
 	OPTARG=''
     done

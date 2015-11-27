@@ -5,4 +5,5 @@ set -C -b -o vi
 
 HISTFILE=~/.bh-$(date "+%F").$$
 
-export ENV_DIRS=$PWD
+export ENV_DIRS=~/ENV/fmaster
+

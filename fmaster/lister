@@ -1,0 +1,7 @@
+
+# vim: ai si sw=4 sts=4 et ft=sh fdc=4 fmr=AAA,ZZZ fdm=marker
+
+lister () {
+    delcare n
+    for n in $(~/helpers/bin/pickme.pl $@); do echo $n; done
+}
