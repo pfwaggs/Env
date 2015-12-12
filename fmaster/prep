@@ -2,7 +2,7 @@
 
 _prep () {
     declare OPTIND OPTARG
-    declare opt f=~/.base.fnc b=~/.base.sh p=~/.base.pl y=~/.base.py type
+    declare type opt f=$ENV_BASE/base.fnc b=$ENV_BASE/base.sh p=$ENV_BASE/base.pl y=$ENV_BASE/base.py
     while getopts 'p:b:f:y:' opt; do
 	[[ -s $OPTARG ]] && echo "$OPTARG exist: skipping" && continue
 	cp ${!opt} $OPTARG
