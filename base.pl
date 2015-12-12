@@ -4,7 +4,7 @@
 
 use warnings;
 use strict;
-use feature ':5.10';
+use v5.18;
 
 #use Getopt::Long qw( :config no_ignore_case auto_help );
 #my %opts;
@@ -14,4 +14,14 @@ use feature ':5.10';
 #use Pod::Usage;
 #use File::Basename;
 #use Cwd;
+
+use Path::Tiny;
+use JSON::PP;
+use Data::Printer;
+
+BEGIN {
+    my $tmp = path("~/helpers")->stringify;
+    unshift @INC, "$tmp/lib" unless grep {/$tmp/} @INC;
+}
+use Menu;
 
