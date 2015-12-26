@@ -2,10 +2,16 @@
 
 host=${HOSTNAME%%.*}
 host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
-#host2=${host//[0-9]*}
-#host2=${host//$host2/$host2 }
-pcbase='printf "]1;%s]2;%s" "$host:$PWD" "$host2:$n:$PWD"'
-#[[ $TERM =~ xterm ]] && PROMPT_COMMAND=$pcbase
+#pcbase='printf "]1;%s]2;%s" "$host:$PWD" "$host2:$n:$PWD"'
+if [[ $MACHTYPE =~ apple ]]; then
+    pc_s=$'\e]0;'
+    pc_e=$'\a'
+    [[ $TERM =~ xterm ]] && PROMPT_COMMAND='echo -ne $pc_s${PWD#${PWD%/*/*}/}$pc_e'
+else
+    pc_base=$'\e]0;\w\a'
+#   pcbase='printf "]1;%s]2;%s" "$host:$PWD" "$host2:$n:$PWD"'
+    [[ $TERM =~ xterm ]] && PROMPT_COMMAND='echo -ne $pc_base'
+fi
 ENV_STATE=normal
 
 #
