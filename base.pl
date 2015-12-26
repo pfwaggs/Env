@@ -2,6 +2,7 @@
 
 # vim: ai si sw=4 sts=4 et fdc=4 fmr=AAA,ZZZ fdm=marker
 
+# normal junk #AAA
 use warnings;
 use strict;
 use v5.18;
@@ -19,9 +20,14 @@ use Path::Tiny;
 use JSON::PP;
 use Data::Printer;
 
+our $dir;
 BEGIN {
-    my $tmp = path("~/helpers")->stringify;
-    unshift @INC, "$tmp/lib" unless grep {/$tmp/} @INC;
+    our $dir = Path::Tiny->cwd;
+    $dir = path($dir)->parent if $dir =~ m{/bin$};
+    $dir = path($dir)->stringify;
+    unshift @INC, "$dir/lib" unless grep {/$dir/} @INC;
 }
 use Menu;
+
+#ZZZ
 
