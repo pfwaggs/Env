@@ -20,12 +20,9 @@ use Path::Tiny;
 use JSON::PP;
 use Data::Printer;
 
-our $dir;
 BEGIN {
-    our $dir = Path::Tiny->cwd;
-    $dir = path($dir)->parent if $dir =~ m{/bin$};
-    $dir = path($dir)->stringify;
-    unshift @INC, "$dir/lib" unless grep {/$dir/} @INC;
+    use experimental qw(smartmatch);
+    unshift @INC, grep {! ($_ ~~ @INC)} map {"$_"} grep {path($_)->is_dir} map {path("$_/lib")->realpath} '.', '..';
 }
 use Menu;
 
