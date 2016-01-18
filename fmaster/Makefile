@@ -1,4 +1,5 @@
 
+SHELL = /bin/bash
 full = $(wildcard *)
 pre = bashrc_pre
 post = bashrc_post
