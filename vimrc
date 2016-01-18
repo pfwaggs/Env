@@ -45,5 +45,5 @@ set foldmethod=marker
 set foldmarker=AAA,ZZZ
 
 "abbreviations
-:source ~/.vim/vimrc-abbr
-:source ~/.vim/vimrc-maps
+:source ~/.vimrc-abbr
+:source ~/.vimrc-maps
