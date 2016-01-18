@@ -5,3 +5,12 @@ set -C -b -o vi
 
 HISTFILE=~/.bh-$(date "+%F").$$
 
+export CDPATH=".:..:~"
+pager=$(type -p less)
+export PAGER=${pager:-$(type -p more)}
+[ "${PAGER##*/}" = "less" ] && export LESS='-RCMqsu~'
+
+editor=$(type -p vim)
+export EDITOR=${editor:-$(type -p vi)}
+export VISUAL=$EDITOR
+
