@@ -5,7 +5,11 @@ post = bashrc_post
 firsts = aliases basevars
 ignore = $(pre) $(post) $(firsts) Makefile \#%
 list = $(firsts) $(filter-out $(ignore), $(full))
-homedir = $${PWD/\/ENV*}/testing
+ifdef DEST
+    homedir = $(DEST)
+else
+    homedir = $(realpath ../..)
+endif
 bashrc = $(homedir)/.bashrc
 prep_files = $(addprefix base., pm pl fnc sh)
 dot_files = bash_profile exrc vimrc vimrc-abbr vimrc-maps
