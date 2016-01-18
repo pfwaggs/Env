@@ -1,4 +1,4 @@
-package Pkgname;
+package zZz;
 
 use strict;
 use warnings;
