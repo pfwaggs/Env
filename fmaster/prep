@@ -2,11 +2,12 @@
 
 _prep () {
     declare OPTIND OPTARG
-    declare type opt f=$ENV_BASE/base.fnc b=$ENV_BASE/base.sh p=$ENV_BASE/base.pl y=$ENV_BASE/base.py m=$ENV_BASE/base.pm
+    declare type opt f=~/.base.fnc b=~/.base.sh p=~/.base.pl y=~/.base.py m=~/.base.pm
     while getopts 'p:b:f:y:m:' opt; do
 	[[ -s $OPTARG ]] && echo "$OPTARG exist: skipping" && continue
 	cp ${!opt} $OPTARG
-	[[ $opt =~ f ]] && sed -i '' "s/Zz/$OPTARG/" $OPTARG
+	[[ $opt =~ f ]] && sed -i '' "s/zZz/$OPTARG/" $OPTARG
+	[[ $opt =~ m ]] && sed -i '' "s/zZz/${OPTARG/.pm}/" $OPTARG
 	[[ $opt =~ [pby] ]] && chmod 755 $OPTARG
 	OPTARG=''
     done
