@@ -45,3 +45,15 @@ dots:
 	@echo copying $(dot_files);
 	@for d in $(dot_files); do cp $(DOTFILE_DIR)/$$d $(DEST)/.$$d; done
 
+work: $(MISC_DIR) $(FUNCTION_DIR) $(DOTFILE_DIR)
+	@echo making work copies
+	@( echo '#### Makefile'; cat Makefile ) | enscript -2 -r -DDuplex:true;
+	@for d in $^; do \
+	    echo $$d; \
+	    pushd $$d >/dev/null; \
+	    for n in *; do \
+		echo "#### $$n"; \
+		cat $$n; \
+	    done | enscript -2 -r -DDuplex:true; \
+	    popd >/dev/null; \
+	done
