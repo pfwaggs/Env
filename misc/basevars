@@ -10,7 +10,7 @@ else
     pc_linux=$'\e]0;\w\a'
     [[ $TERM =~ xterm ]] && PROMPT_COMMAND='echo -ne $pc_linux'
 fi
-ENV_STATE=normal
+STATE=normal
 
 #
 #declare -A ct pc

@@ -1,0 +1,14 @@
+
+prep () {
+    declare name type DIR=$ENV/prep_files
+    source $DIR/map
+    for name in $@; do
+	read name type <<< ${name/:/ }
+	[[ -s $name ]] && echo "$name exists: skipping" && continue
+	cp $DIR/${map[$type]} $name
+	[[ 0 -eq $? ]] && echo "copy failed" && continue
+	[[ $type =~ (fnc|pm) ]] && sed -i -e "s/zZz/$name/" $name
+	[[ $type =~ (sh|pl) ]] && chmod 755 $name
+	echo prepped $name as ${map[$type]}
+    done
+}

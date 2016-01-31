@@ -1,0 +1,10 @@
+
+# vim: ai si sw=4 sts=4 et ft=sh fdc=4 fmr=AAA,ZZZ fdm=marker
+
+tll () {
+    declare n
+    for n in $@; do
+        [[ $(type -t $n) != file ]] && echo "skipping $n" && continue
+        for n in $(type -aP $n); do ls -l "$n"; done
+    done
+}

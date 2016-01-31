@@ -1,5 +1,4 @@
 
-
 unalias -a
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -15,8 +14,8 @@ alias now='date -u; date +"%a %h %d %T"; date +%s | commas'
 alias p='$PAGER'
 alias su'=/bin/su'
 alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
-alias vi='$VISUAL'
 alias vm='vim'
+alias vi='$VISUAL'
 alias brewon='source ~/perl5/perlbrew/etc/bashrc'
 #alias make='gnumake'
 
