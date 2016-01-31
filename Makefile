@@ -22,18 +22,19 @@ bashrc:
 	@echo building $@
 	@[[ -f $(bashrc) ]] && mv $(bashrc) $(bashrc).old || echo no bashrc
 	@cp $(MISC_DIR)/bashrc_pre $(bashrc)
+	@echo "declare -x ENV=$${PWD}" >> $(bashrc)
 	@echo >> $(bashrc)
 
 	@echo "pushd $${PWD}/$(MISC_DIR) >/dev/null" >> $(bashrc)
 	@echo "list=\"aliases basevars\"" >> $(bashrc)
-	@echo "for n in \$$list; do echo [[ \$$VERBOSE ]] && echo \$$PWD/\$$n || echo -n .; . \$$n; done" >> $(bashrc)
+	@echo "for n in \$$list; do [[ \$$VERBOSE ]] && echo \$$PWD/\$$n || echo -n .; . \$$n; done" >> $(bashrc)
 	@echo "popd >/dev/null" >> $(bashrc)
 	@echo >> $(bashrc)
 
 	@echo "unset -f \$$(compgen -A function)" >> $(bashrc)
 	@echo "pushd $${PWD}/$(FUNCTION_DIR) >/dev/null" >> $(bashrc)
 	@echo "list=\$$(ls | grep -v '#')" >> $(bashrc)
-	@echo "for n in \$$list; do echo [[ \$$VERBOSE ]] && echo \$$PWD/\$$n || echo -n .; . \$$n; done" >> $(bashrc)
+	@echo "for n in \$$list; do [[ \$$VERBOSE ]] && echo \$$PWD/\$$n || echo -n .; . \$$n; done" >> $(bashrc)
 	@echo "popd >/dev/null" >> $(bashrc)
 	@echo >> $(bashrc)
 

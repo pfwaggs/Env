@@ -1,15 +1,16 @@
 
 qload () {
     [[ $# ]] || return 0
-    declare dir file
+    declare path file
     for file in "$@"; do
 	if [[ $file =~ / ]]; then
 	    source "$file"
 	else
-	    for dir in ${ENV_DIRS//:/ }; do
-		[[ ! -s "$dir/functions/$file" ]] && continue
-		read -p "load $dir/functions/$file ?" ans
-		[[ $ans == y* ]] && source "$dir/functions/$file" || continue
+	    for path in ${ENV//:/ }; do
+		path+=/functions/$file
+		[[ ! -s "$path" ]] && continue
+		read -p "load $path ?" ans
+		[[ $ans == y* ]] && source "$path" || continue
 	    done
 	fi
     done
