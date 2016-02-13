@@ -9,6 +9,7 @@ prep () {
 	[[ 0 -ne $? ]] && echo "copy failed" && continue
 	[[ $type =~ (fnc|pm) ]] && sed -i -e "s/zZz/$name/" $name
 	[[ $type =~ (sh|pl) ]] && chmod 755 $name
+	[[ $type =~ (pl|pm) ]] && mv $name $name.$type && name+=.$type
 	echo prepped $name as ${map[$type]}
     done
 }
