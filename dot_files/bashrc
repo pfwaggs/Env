@@ -1,37 +1,29 @@
-[ -z "$(echo $- | grep i)" ] && return 0
+
+[[ ! $- =~ i ]] && return 0
 trap "unset HISTFILE" EXIT
 
 set -C -b -o vi
 
 HISTFILE=~/.bh-$(date "+%F").$$
 
-export CDPATH=".:..:../..:~"
-
-export PAGER=$(type -p less || type -p more)
-[[ ${PAGER##*/} =~ "less" ]] && export LESS='-RCMqsu~'
-
-export EDITOR=$(type -p vim || type -p vi)
-export VISUAL=$EDITOR
-
-export TERM=xterm-256color
-reset
-
-#######################################
-declare -x ENV=/Users/wapembe/ENV
-
-pushd /Users/wapembe/ENV/misc >/dev/null
-list="aliases basevars"
-for n in $list; do [[ $VERBOSE ]] && echo $PWD/$n || echo -n .; . $n; done
-popd >/dev/null
-
+################################################################
+unalias -a
 unset -f $(compgen -A function)
-pushd /Users/wapembe/ENV/functions >/dev/null
-list=$(ls | grep -v '#')
-for n in $list; do [[ $VERBOSE ]] && echo $PWD/$n || echo -n .; . $n; done
-popd >/dev/null
+complete -r
 
+for dir in ~/ENV/{misc,functions}; do
+    pushd $dir >/dev/null
+    for n in $(ls -I#*); do
+	[[ $VERBOSE ]] && echo $PWD/$n || echo -n .
+	. ./$n
+    done
+    echo finished $PWD
+    ENV+=:$PWD
+    popd >/dev/null
+done
+export ENV=${ENV/:}
 echo $STATE 
+################################################################
 
-#####################################
 PATH=$(vpurge $PATH)
 mkpc
