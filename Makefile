@@ -18,9 +18,13 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-.PHONY: dots work $(dot_files)
+.PHONY: dots work check $(dot_files)
 
-all: dots
+all: check
+
+check:
+	@echo checking dot files
+	@for f in $(dot_files); do diff -q ~/.$$f $(DOTFILE_DIR)/$$f; done
 
 dots:
 	@echo copying $(dot_files)
