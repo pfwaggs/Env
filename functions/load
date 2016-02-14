@@ -1,0 +1,47 @@
+
+load () {
+    declare path file dir n ans
+    case $# in
+	0)
+	    echo reloading all
+	    read -p 'are you sure? ' ans
+	    [[ ! $ans =~ ^[yY] ]] && echo stopping now && return 1
+	    unalias -a
+	    unset -f $(compgen -A function)
+	    complete -r
+
+	    for dir in ${ENV//:/ }; do
+		pushd $dir >/dev/null
+		for n in $(ls -I#*); do
+		    [[ $VERBOSE ]] && echo $PWD/$n || echo -n .
+		    . ./$n
+		done
+		echo finished $PWD
+		popd >/dev/null
+	    done
+	    ;;
+	*)
+	    for file in "$@"; do
+		if [[ -s $file ]]; then
+		    source "$file"
+		    echo sourced $file
+		elif [[ -d $file ]]; then
+		    pushd $file >/dev/null
+		    for n in $(ls -I#*); do
+			[[ $VERBOSE ]] && echo $PWD/$n || echo -n .
+			. ./$n
+		    done
+		    echo finished $PWD
+		    popd >/dev/null
+		else
+		    for dir in ${ENV//:/ }; do
+			[[  -s "$dir/$file" ]] && path=$dir/$file || break
+			read -p "load $path ?" ans
+			[[ $ans =~ ^[yY] ]] && source "$path" || echo skipping $path
+		    done
+		fi
+	    done
+	    ;;
+    esac
+}
+

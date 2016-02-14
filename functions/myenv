@@ -1,0 +1,26 @@
+
+myenv () {
+    declare -a retry
+    case $1 in
+	LIST)
+	    shift
+	    for x in $@; do echo $x = ${!x}; done
+	    ;;
+	list)
+	    shift
+	    for x in $@; do
+		[[ -n ${!x} ]] && retry+=($x) && continue
+		x=${x,,}
+		[[ -n ${!x} ]] && retry+=($x) && continue
+		x=${x^^}
+		[[ -n ${!x} ]] && retry+=($x) && continue
+		echo ${retry[@]}
+	    done
+	    myenv LIST ${retry[@]}
+	    ;;
+	*)
+	    myenv list $@
+	    ;;
+    esac
+}
+
