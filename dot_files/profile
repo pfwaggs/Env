@@ -1,0 +1,7 @@
+
+PATH=~/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export MANPATH=/usr/share/man:/usr/local/share/man
+export TZ=America/New_York
+LANG=C
+umask 0037
+
