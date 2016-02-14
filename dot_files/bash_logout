@@ -1,7 +1,7 @@
-# ~/.bash_logout: executed by bash(1) when login shell exits.
-
-# when leaving the console clear the screen to increase privacy
-
-if [ "$SHLVL" = 1 ]; then
-    [ -x /usr/bin/clear_console ] && /usr/bin/clear_console -q
-fi
+clear
+/usr/local/bin/fortune
+printf "\n"
+sleep 5
+[ $SHLVL -ne 1 ] && return 0
+[ -n "$SSH_AGENT_PID" ] && kill -n 15 $SSH_AGENT_PID
+printf "%s closed subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
