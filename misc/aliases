@@ -18,4 +18,4 @@ alias vm='vim'
 alias vi='$VISUAL'
 alias brewon='source ~/perl5/perlbrew/etc/bashrc'
 #alias make='gnumake'
-
+alias kodit='ssh pfwaggs@upkkb4ed1811.pfwaggs.koding.io'
