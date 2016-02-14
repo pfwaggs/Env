@@ -18,7 +18,7 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-.PHONY: dots work
+.PHONY: dots work $(dot_files)
 
 all: dots
 
@@ -27,6 +27,10 @@ dots:
 	@for d in $(dot_files); do \
 	    cp $(DOTFILE_DIR)/$$d $(DEST)/.$$d; \
 	done
+
+$(dot_files):
+	@echo copying $@
+	@cp $(DOTFILE_DIR)/$@ $(DEST)/.$@
 
 work:
 	@echo making work copy
