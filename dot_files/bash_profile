@@ -6,7 +6,7 @@ case $(uname -s) in
     Darwin)
 	    PATH=$LOCAL/bin:/usr/sbin:/usr/bin:/sbin:/bin
 	    export MANPATH=$LOCAL/share/man:/usr/share/man
-	    if [[ -d $/usr/local/opt/coreutils/libexec/gnubin ]]; then
+	    if [[ -d /usr/local/opt/coreutils/libexec/gnubin ]]; then
 		export LOCAL2=/usr/local/opt/coreutils/libexec
 		PATH=$LOCAL2/gnubin:$PATH
 		MANPATH=$LOCAL2/gnuman:$MANPATH
