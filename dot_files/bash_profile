@@ -11,6 +11,11 @@ case $(uname -s) in
 		PATH=$LOCAL2/gnubin:$PATH
 		MANPATH=$LOCAL2/gnuman:$MANPATH
 	    fi
+	    if [[ -d /usr/local/opt/findutils/libexec/gnubin ]]; then
+		export LOCAL3=/usr/local/opt/findutils/libexec
+		PATH=$LOCAL3/gnubin:$PATH
+		MANPATH=$LOCAL3/gnuman:$MANPATH
+	    fi
 	;;
     Linux)
 	    PATH=~/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
