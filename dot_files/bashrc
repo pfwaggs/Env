@@ -10,10 +10,10 @@ HISTFILE=~/.bh-$(date "+%F").$$
 unalias -a
 unset -f $(compgen -A function)
 complete -r
-
 for dir in ~/ENV/{misc,functions}; do
     pushd $dir >/dev/null
-    for n in $(ls -I#*); do
+    for n in $(ls); do
+	[[ -r $n ]] || continue
 	[[ $VERBOSE ]] && echo $PWD/$n || echo -n .
 	. ./$n
     done
@@ -21,7 +21,7 @@ for dir in ~/ENV/{misc,functions}; do
     ENV+=:$PWD
     popd >/dev/null
 done
-export ENV=${ENV/:}
+export ENV
 echo $STATE 
 ################################################################
 
