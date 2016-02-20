@@ -5,14 +5,15 @@ work_files = Makefile
 
 MISC_DIR = misc
 misc_files = $(notdir $(sort $(wildcard $(MISC_DIR)/*)))
-work_files += $(addsuffix $(MISC_DIR)/,$(misc_files))
+work_files += $(addprefix $(MISC_DIR)/,$(misc_files))
 
 DOTFILE_DIR = dot_files
 dot_files = $(notdir $(sort $(wildcard $(DOTFILE_DIR)/*)))
-work_files += $(addsuffix $(DOTFILE_DIR)/,$(dot_files))
+work_files += $(addprefix $(DOTFILE_DIR)/,$(dot_files))
 
 FUNCTION_DIR = functions
 function_files = $(filter-out \#%, $(notdir $(sort $(wildcard $(FUNCTION_DIR)/*))))
+work_files += $(addprefix $(FUNCTION_DIR)/,$(function_files))
 
 ifndef DEST
     DEST = $(HOME)
@@ -39,6 +40,6 @@ $(dot_files):
 work:
 	@echo making work copy
 	@for f in $(work_files); do \
-	    echo "#### $$f"; \
-	    cat $$n; \
-	done | enscript -2 -r -DDuplex:true -DTumble:false
+	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
+	    cat $$f; \
+	done | enscript -2 -r
