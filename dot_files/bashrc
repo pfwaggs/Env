@@ -27,6 +27,6 @@ echo $STATE
 
 PATH=$(vpurge $PATH)
 
-[[ $USER -ne root ]] || pc[prmt]=red
+[[ $USER != root ]] || pc[prmt]=red
 
 mkpc
