@@ -30,6 +30,7 @@ check:
 dots:
 	@echo copying $(dot_files)
 	@for d in $(dot_files); do \
+	    [[ ! -r $(DOTFILE_DIR)/$$d ]] || continue; \
 	    cp $(DOTFILE_DIR)/$$d $(DEST)/.$$d; \
 	done
 
