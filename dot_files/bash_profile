@@ -1,28 +1,31 @@
 
 # this stuff would go into profile
 #######################################################
+declare -a tmp_bin tmp_man
+
+[[ -d ~/bin ]] && tmp_bin+=(~/bin) || :
+[[ -d ~/man ]] && tmp_man+=(~/man) || :
+
+# special stuff just for apple  way to go apple!
+if [[ $(uname -s) = Darwin ]]; then
+    for x in /usr/local/opt/{coreutils,findutils}/libexec; do
+	[[ -d $x/gnubin ]] && tmp_bin+=($x/gnubin) || :
+	[[ -d $x/gnuman ]] && tmp_man+=($x/gnuman) || :
+    done
+fi
+
 export LOCAL=/usr/local
-case $(uname -s) in
-    Darwin)
-	    PATH=$LOCAL/bin:/usr/sbin:/usr/bin:/sbin:/bin
-	    export MANPATH=$LOCAL/share/man:/usr/share/man
-	    if [[ -d /usr/local/opt/coreutils/libexec/gnubin ]]; then
-		export LOCAL2=/usr/local/opt/coreutils/libexec
-		PATH=$LOCAL2/gnubin:$PATH
-		MANPATH=$LOCAL2/gnuman:$MANPATH
-	    fi
-	    if [[ -d /usr/local/opt/findutils/libexec/gnubin ]]; then
-		export LOCAL3=/usr/local/opt/findutils/libexec
-		PATH=$LOCAL3/gnubin:$PATH
-		MANPATH=$LOCAL3/gnuman:$MANPATH
-	    fi
-	;;
-    Linux)
-	    PATH=~/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-	    export MANPATH=/usr/local/share/man:/usr/share/man
-	;;
-esac
+[[ -d $LOCAL/bin ]] && tmp_bin+=($LOCAL/bin) || :
+[[ -d $LOCAL/share/man ]] && tmp_man+=($LOCAL/share/man) || :
+
 export TZ=America/New_York
+
+tmp_bin+=($PATH)
+tmp_man+=($MANPATH)
+PATH=$(printf "%s:" ${tmp_bin[@]})
+MANPATH=$(printf "%s:" ${tmp_man[@]})
+unset tmp_bin tmp_man
+
 LANG=C
 umask 0037
 #######################################################
@@ -47,3 +50,4 @@ tset
 #######################################################
 
 . ~/.bashrc
+
