@@ -19,24 +19,36 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
+ifeq ($(DIFF), 1)
+    DIFF = diff
+else
+    DIFF = diff -q
+endif
+
 .PHONY: dots work check $(dot_files)
 
-all: check
+all: list
+
+list:
+	@echo listing all work_files
+	@for f in $(work_files); do  echo $$f;  done
 
 check:
 	@echo checking dot files
-	@for f in $(dot_files); do diff -q ~/.$$f $(DOTFILE_DIR)/$$f; done
+	@for f in $(dot_files); do \
+	    [ -f ~/.$$f ] || continue; \
+	    $(DIFF) ~/.$$f $(DOTFILE_DIR)/$$f; \
+	done
 
 dots:
 	@echo copying $(dot_files)
 	@for d in $(dot_files); do \
-	    [[ ! -r $(DOTFILE_DIR)/$$d ]] || continue; \
 	    cp $(DOTFILE_DIR)/$$d $(DEST)/.$$d; \
 	done
 
 $(dot_files):
 	@echo copying $@
-	@cp $(DOTFILE_DIR)/$@ $(DEST)/.$@
+	@[[ -f $(DOTFILE_DIR)/$@ ]] && cp $(DOTFILE_DIR)/$@ $(DEST)/.$@;
 
 work:
 	@echo making work copy
