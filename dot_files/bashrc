@@ -7,9 +7,10 @@ set -C -b -o vi
 HISTFILE=~/.bh-$(date "+%F").$$
 
 ################################################################
+complete -r
 unalias -a
 unset -f $(compgen -A function)
-complete -r
+
 for dir in ~/ENV/{misc,functions}; do
     pushd $dir >/dev/null
     for n in $(ls); do
