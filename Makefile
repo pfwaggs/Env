@@ -21,8 +21,10 @@ endif
 
 ifeq ($(DIFF), 1)
     DIFF = diff
+    CHECK = check_noisy
 else
     DIFF = diff -q
+    CHECK = check_quiet
 endif
 
 .PHONY: dots work check $(dot_files)
@@ -33,10 +35,23 @@ list:
 	@echo listing all work_files
 	@for f in $(work_files); do  echo $$f;  done
 
-check:
+check: $(CHECK)
+
+check_noisy:
 	@echo checking dot files
 	@for f in $(dot_files); do \
-	    [ -f ~/.$$f ] || continue; \
+	    [[ -f ~/.$$f ]] || continue; \
+	    $$(diff -q ~/.$$f $(DOTFILE_DIR)/$$f) && continue; \
+	    clear; echo checking $$f; \
+	    $(DIFF) ~/.$$f $(DOTFILE_DIR)/$$f; \
+	    echo checked $$f; \
+	    read; \
+	done
+
+check_quiet:
+	@echo checking dot files
+	@for f in $(dot_files); do \
+	    [[ -f ~/.$$f ]] || continue; \
 	    $(DIFF) ~/.$$f $(DOTFILE_DIR)/$$f; \
 	done
 
