@@ -1,0 +1,10 @@
+
+#TAG:use
+
+_cd () {
+    declare list=$(compgen -d $2)
+    [[ $list ]] || list=$(compgen -d ../$2)
+    [[ $list ]] || list=$(compgen -d ~/$2)
+    echo $list | xargs -n 1
+
+}
