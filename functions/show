@@ -1,13 +1,22 @@
 
-
-__show () {
-    COMPREPLY=()
-    COMPREPLY=("${COMPREPLY[@]}" $(compgen -v -X '!&*' $2))
-    COMPREPLY=("${COMPREPLY[@]}" $(compgen -v -X '!&*' ${2^^}))
-}
+_show () { compgen -v | grep -i ^$2; }
 
 show () {
-    set | perl -nlE "/^$1=/i && say"
+  declare ERROR
+  [[ ${!1} ]] || echo ${ERROR:?"no valid variable for $1"}
+  set | grep ^$1= | sed -n -e 's/=/ = /p'
 }
 
-complete -F __show show
+complete -C '_show' show
+
+#__show () {
+#    COMPREPLY=()
+#    COMPREPLY=("${COMPREPLY[@]}" $(compgen -v -X '!&*' $2))
+#    COMPREPLY=("${COMPREPLY[@]}" $(compgen -v -X '!&*' ${2^^}))
+#}
+#
+#show () {
+#    set | perl -nlE "/^$1=/i && say"
+#}
+#
+#complete -F __show show
