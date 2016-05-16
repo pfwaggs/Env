@@ -1,13 +1,16 @@
 
+#TAG:use
+
 prep () {
-    declare name type DIR=${ENV%%:*}/prep_files
+    declare name type DIR=${ENV%%:*}/../prep_files
     source $DIR/map
     for name in $@; do
-	read name type <<< ${name/:/ }
-	[[ -s $name ]] && echo "$name exists: skipping" && continue
+	read name type <<< ${name/./ }
+	declare list=$(compgen -d -f $name)
+	[[ -z $list ]] || eval "echo $name exists: skipping; continue"
 	cp $DIR/${map[$type]} $name
-	[[ 0 -ne $? ]] && echo "copy failed" && continue
-	[[ $type =~ (fnc|pm) ]] && sed -i -e "s/zZz/$name/" $name
+	[[ 0 -eq $? ]] || eval "echo copy failed; continue"
+	[[ $type =~ (fn|pm) ]] && sed -i -e "s/zZz/$name/" $name
 	[[ $type =~ (sh|pl) ]] && chmod 755 $name
 	[[ $type =~ (pl|pm) ]] && mv $name $name.$type && name+=.$type
 	echo prepped $name as ${map[$type]}

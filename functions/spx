@@ -1,4 +1,5 @@
 
+#TAG:use
 
 spx () { echo $@ | aspell -a; }
 

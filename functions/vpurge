@@ -1,4 +1,6 @@
 #START.vpurge AAA
+#TAG:use
+
 vpurge() {
     declare -a tmp
     declare x out

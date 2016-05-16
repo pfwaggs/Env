@@ -1,10 +1,8 @@
 
+#TAG:use
 
 for n in etc bin lib data tmp; do
     eval "$n () { declare here=\$PWD; until [[ -d $n || ( \$PWD = '/' ) ]]; do cd ..; done;
     if [[ -d $n ]]; then cd $n; else cd \$here; echo $n not found; fi; }"
 done
-
-#dev () { until [[ -d development ]]; do cd ..; done; cd development; }
-
 

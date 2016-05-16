@@ -1,4 +1,6 @@
 
+#TAG:use
+
 lsu () {
     declare np[0]=${1:-$PWD}
     while [[ ${np[0]%/*} =~ / ]]; do

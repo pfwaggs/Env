@@ -1,5 +1,3 @@
 
-
-#L () { [[ $1 ]] && cd "$1"; ls -ld . .. .??* 2>/dev/null; }
-
+#TAG:use
 L () { ls -lad "${1:-.}"/.* 2>/dev/null; }

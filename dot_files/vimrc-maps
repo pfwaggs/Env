@@ -13,7 +13,7 @@
 :cmap <F8> ><CR>
 :cmap <F9> t'n<CR>
 :cmap <F10> m'n<CR>
-:cmap <F11> w! /tmp/wapembe.vi<CR>
+:cmap <F11> w! /tmp/pfwaggs.vi<CR>
 :map <F12> :let is_bash=1<CR>:set filetype=sh<CR>
 :map ,<F1> :set foldcolumn=0<CR>
 :map ,<F2> :set foldcolumn=4<CR>

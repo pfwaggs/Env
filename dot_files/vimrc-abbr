@@ -1,1 +1,5 @@
 :abbr teh the
+:abbr zvb '# vim: ai si sw=4 sts=4 et ft=sh'
+:abbr zvp '# vim: ai si sw=4 sts=4 et ft=pl'
+:abbr zvm '# vim: fdc=4 fmr=AAA,ZZZ fdm=marker'
+

@@ -1,5 +1,6 @@
 
-# vim: ai si sw=4 sts=4 et ft=sh fdc=4 fmr=AAA,ZZZ fdm=marker
+# vim: ai si sw=4 sts=4 et ft=sh
+#TAG:use
 
 tll () {
     declare n

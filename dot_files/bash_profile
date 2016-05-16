@@ -27,7 +27,7 @@ MANPATH=$(printf "%s:" ${tmp_man[@]})
 unset tmp_bin tmp_man
 
 LANG=C
-umask 0037
+umask 0133
 #######################################################
 
 # more bash stuff here

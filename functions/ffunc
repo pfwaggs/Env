@@ -1,4 +1,5 @@
 
+#TAG:use
 
 ffunc () {
     declare -a list=(${1:-$(compgen -A function)})

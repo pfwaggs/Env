@@ -1,5 +1,5 @@
 
-
+#TAG:use
 host=${HOSTNAME%%.*}
 host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
 if [[ $MACHTYPE =~ apple ]]; then

@@ -1,3 +1,5 @@
+
+#TAG:use
 mytab () { 
     case $1 in
 	str) PROMPT_COMMAND='echo -ne $ps_s$str$ps_e';;
