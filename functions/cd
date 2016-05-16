@@ -8,3 +8,5 @@ _cd () {
     echo $list | xargs -n 1
 
 }
+
+complete -C '_cd' cd
