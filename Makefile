@@ -70,4 +70,4 @@ work:
 	@for f in $(work_files); do \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \
-	done | enscript -2 -r
+	    done | enscript -2 -r -DDuplex:true -DTumble:true -o printme.ps
