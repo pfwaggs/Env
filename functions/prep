@@ -2,7 +2,7 @@
 #TAG:use
 
 prep () {
-    declare name type DIR=${ENV%%:*}/prep_files
+    declare name type DIR=${ENV%%:*}/../prep_files
     source $DIR/map
     for name in $@; do
 	read name type <<< ${name/./ }
