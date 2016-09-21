@@ -15,6 +15,7 @@
 :filetype plugin indent on
 :set iskeyword+=:
 :hi MatchParen cterm=none ctermbg=none ctermfg=none
+
 " this turns off the matchparen annoyance
 :let g:loaded_matchparen=1
 ":let g:is_bash=1 "should not be needed with filetype plugin 
@@ -40,9 +41,9 @@ set undodir=~/.vim/undos//
 set undofile
 
 " yes, folding is good
-set foldcolumn=4
-set foldmethod=marker
-set foldmarker=AAA,ZZZ
+"set foldcolumn=4
+"set foldmethod=marker
+"set foldmarker=AAA,ZZZ
 
 "abbreviations
 :source ~/.vimrc-abbr
