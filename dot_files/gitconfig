@@ -1,0 +1,16 @@
+[filter "lfs"]
+	clean = git lfs clean %f
+	smudge = git lfs smudge %f
+	required = true
+[user]
+	name = Pnomohr Waggs
+	email = pfwaggs@townm.org
+[core]
+	autocrlf = input
+[alias]
+	s = "status -s "
+	lg = log --oneline --all --graph --decorate
+[push]
+	default = simple
+[credential]
+	helper = cache --timeout=3600
