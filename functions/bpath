@@ -3,25 +3,6 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 # vim: set : fdc=4 fmr=AAA,ZZZ fdm=marker
 
-#declare -A _path=(
-#    [normal]=/usr/sbin:/usr/bin:/sbin:/bin
-#    [home]=~/bin
-#    [home_perl]=~/perl/bin
-#    [local]=$LOCAL/bin
-#    [self]=PWD/bin
-#)
-#
-#declare -A _perl5lib=(
-#    [home]=~/perl/lib
-#    [self]=PWD/lib
-#)
-#
-#declare -A _manpath=(
-#    [normal]=/usr/share/man
-#    [local]=$LOCAL/share/man
-#    [self]=PWD/share/man
-#)
-
 declare -A home=(
     [path]=~/bin
 )
@@ -44,7 +25,6 @@ declare -A base=(
 
 _bpath () {
     declare tmp family block str
-    declare path perl5lib manpath
     if [[ $@ ]]; then
         for family in $*; do
             echo $family >&2
@@ -73,29 +53,9 @@ _bpath () {
     fi
 }
 
-#        for family in _path _perl5lib _manpath; do
-#            tmp=${family/_}
-#            for block in $@; do
-#                str=$(eval "echo \${$family[\$block]}")
-#                [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
-#                eval "$tmp+=:$str"
-#                eval "$tmp=\${$tmp%:}"
-#            done
-#            echo ${tmp^^}=${!tmp}
-#        done
-#    else
-#        for block in normal local home home_perl self; do
-#            echo $block
-#            for family in _path _perl5lib _manpath; do
-#                eval "echo ${family/_} = \${$family[\$block]}"
-#            done
-#            echo ''
-#        done
-#    fi
-
 
 bpath () {
-    declare x tpath tmanpath tperl5lib
+    declare x
     if [[ $# -eq 0 ]]; then
         echo help invoked
         echo current configuration:
