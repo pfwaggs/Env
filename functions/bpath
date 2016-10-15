@@ -3,48 +3,95 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 # vim: set : fdc=4 fmr=AAA,ZZZ fdm=marker
 
-declare -A _path=(
-    [normal]=/usr/sbin:/usr/bin:/sbin:/bin
-    [home]=~/bin
-    [home_perl]=~/perl/bin
-    [local]=$LOCAL/bin
-    [self]=./bin
-)
+#declare -A _path=(
+#    [normal]=/usr/sbin:/usr/bin:/sbin:/bin
+#    [home]=~/bin
+#    [home_perl]=~/perl/bin
+#    [local]=$LOCAL/bin
+#    [self]=PWD/bin
+#)
+#
+#declare -A _perl5lib=(
+#    [home]=~/perl/lib
+#    [self]=PWD/lib
+#)
+#
+#declare -A _manpath=(
+#    [normal]=/usr/share/man
+#    [local]=$LOCAL/share/man
+#    [self]=PWD/share/man
+#)
 
-declare -A _perl5lib=(
-    [home_perl]=~/perl/lib
-    [self]=./lib
+declare -A home=(
+    [path]=~/bin
 )
-
-declare -A _manpath=(
-    [normal]=/usr/share/man
-    [local]=$LOCAL/share/man
-    [self]=./share/man
+declare -A home_perl=(
+    [path]=~/perl/bin
+    [perl5lib]=~/perl/lib
 )
-
+declare -A self=(
+    [path]=PWD/bin
+    [perl5lib]=PWD/lib
+)
+declare -A local=(
+    [path]=$LOCAL/bin
+    [manpath]=$LOCAL/share/man
+)
+declare -A base=(
+    [path]=/usr/sbin:/usr/bin:/sbin:/bin
+    [manpath]=/usr/share/man
+)
 
 _bpath () {
-    declare tmp family block
+    declare tmp family block str
     declare path perl5lib manpath
     if [[ $@ ]]; then
-        for family in _path _perl5lib _manpath; do
-            tmp=${family/_}
-            for block in $@; do
-                eval "$tmp+=:\${$family[\$block]}"
-                eval "$tmp=\${$tmp%:}"
+        for family in $*; do
+            echo $family >&2
+            for key in $(eval "echo \${!$family[*]}"); do
+                eval "str=\${$family[$key]}"
+                [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
+                echo "$key => $str" >&2
+                str=$(vpurge $str)
+                [[ $str ]] || continue
+                eval "$key+=:$str"
             done
-            echo ${tmp^^}=${!tmp}
+        done
+        for key in path perl5lib manpath; do
+            eval "$key=\${$key/:}"
+            echo ${key^^}=${!key}
         done
     else
-        for block in normal local home home_perl self; do
-            echo $block
-            for family in _path _perl5lib _manpath; do
-                eval "echo ${family/_} = \${$family[\$block]}"
+        for family in self home home_perl local base; do
+            echo $family >&2
+            for key in $(eval "echo \${!$family[*]} | sort"); do
+                eval "str=\${$family[$key]}"
+                [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
+                printf "\t%8s = %s\n" ${key} $str >&2
             done
-            echo ''
         done
     fi
 }
+
+#        for family in _path _perl5lib _manpath; do
+#            tmp=${family/_}
+#            for block in $@; do
+#                str=$(eval "echo \${$family[\$block]}")
+#                [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
+#                eval "$tmp+=:$str"
+#                eval "$tmp=\${$tmp%:}"
+#            done
+#            echo ${tmp^^}=${!tmp}
+#        done
+#    else
+#        for block in normal local home home_perl self; do
+#            echo $block
+#            for family in _path _perl5lib _manpath; do
+#                eval "echo ${family/_} = \${$family[\$block]}"
+#            done
+#            echo ''
+#        done
+#    fi
 
 
 bpath () {
@@ -55,6 +102,7 @@ bpath () {
         for x in PATH PERL5LIB MANPATH; do
             echo ${x}=${!x}
         done
+        _bpath
     else
         for x in $(_bpath $@); do
             eval ${x/:}

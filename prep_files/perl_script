@@ -5,7 +5,8 @@
 # normal junk #AAA
 use warnings;
 use strict;
-use v5.18;
+use v5.22;
+use experimental qw(postderef signatures smartmatch);
 
 #use Getopt::Long qw( :config no_ignore_case auto_help );
 #my %opts;
@@ -17,7 +18,7 @@ use v5.18;
 #use Cwd;
 
 use Path::Tiny;
-use JSON::PP;
+use JSON;
 use Data::Printer;
 
 BEGIN {
