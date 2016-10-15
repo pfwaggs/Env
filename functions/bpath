@@ -15,30 +15,31 @@ declare -A self=(
     [perl5lib]=PWD/lib
 )
 declare -A local=(
-    [path]=$LOCAL/bin
+    [path]=$LOCAL/sbin:$LOCAL/bin
     [manpath]=$LOCAL/share/man
 )
 declare -A base=(
     [path]=/usr/sbin:/usr/bin:/sbin:/bin
     [manpath]=/usr/share/man
 )
+declare -A games=(
+    [path]=/usr/local/games:/usr/games
+)
 
 _bpath () {
     declare tmp family block str
     if [[ $@ ]]; then
-        for family in $*; do
-            echo $family >&2
+        for family in $* ; do
             for key in $(eval "echo \${!$family[*]}"); do
                 eval "str=\${$family[$key]}"
                 [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
-                echo "$key => $str" >&2
                 str=$(vpurge $str)
                 [[ $str ]] || continue
                 eval "$key+=:$str"
             done
         done
         for key in path perl5lib manpath; do
-            eval "$key=\${$key/:}"
+            eval "$key=\${$key#:}"
             echo ${key^^}=${!key}
         done
     else
@@ -47,6 +48,8 @@ _bpath () {
             for key in $(eval "echo \${!$family[*]} | sort"); do
                 eval "str=\${$family[$key]}"
                 [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
+                str=$(vpurge $str)
+                [[ $str ]] || continue
                 printf "\t%8s = %s\n" ${key} $str >&2
             done
         done
@@ -56,17 +59,20 @@ _bpath () {
 
 bpath () {
     declare x
-    if [[ $# -eq 0 ]]; then
+    if [[ $@ ]]; then
+        [[ $@ =~ home ]] || set -- $@ home
+        [[ $@ =~ local ]] || set -- $@ local
+        [[ $@ =~ base ]] || set -- $@ base
+        for x in $(_bpath $@); do
+            eval $x
+        done
+    else
         echo help invoked
         echo current configuration:
         for x in PATH PERL5LIB MANPATH; do
             echo ${x}=${!x}
         done
         _bpath
-    else
-        for x in $(_bpath $@); do
-            eval ${x/:}
-        done
     fi
 }
 
