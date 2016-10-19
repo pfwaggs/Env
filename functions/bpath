@@ -80,13 +80,18 @@ bpath () {
 addpath () {
     declare x
     declare -A update
-    [[ $# -gt 0 ]] || set -- $PWD
+    [[ $1 ]] || set -- $PWD
     for x in $*; do
-        [ $x = '.' ] && x=$PWD
-        [ -d $x/bin ] && update[PATH]=$x/bin${PATH:+:$PATH}
-        [ -d $x/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB}
-        [ -d $x/man ] && update[MANPATH]=$x/man${MANPATH:+:$MANPATH}
-        [ -d $x/share/man ] && update[MANPATH]=$x/share/man${MANPATH:+:$MANPATH}
+        if [ $x =~ ':' ]; then 
+            [ $x =~ bin: ] && update[PATH]=${x#*:}${PATH:+:$PATH}
+            [ $x =~ lib: ] && update[PERL5LIB]=${x#*:}{PERL5LIB:+:$PERL5LIB}
+            [ $x =~ man: ] && update[MANPATH]=${x#*:}${MANPATH:+:$MANPATH}
+        else
+            [ -d $x/bin ] && update[PATH]=$x/bin${PATH:+:$PATH}
+            [ -d $x/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB}
+            [ -d $x/man ] && update[MANPATH]=$x/man${MANPATH:+:$MANPATH}
+            [ -d $x/share/man ] && update[MANPATH]=$x/share/man${MANPATH:+:$MANPATH}
+        fi
     done
     for x in ${!update[@]}; do
         eval "$x=${update[$x]}"
