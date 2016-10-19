@@ -15,10 +15,13 @@
 :filetype plugin indent on
 :set iskeyword+=:
 :hi MatchParen cterm=none ctermbg=none ctermfg=none
-
 " this turns off the matchparen annoyance
 :let g:loaded_matchparen=1
 ":let g:is_bash=1 "should not be needed with filetype plugin 
+
+":source ~/.vim-cursor
+
+":source ~/.vim-tmux
 
 "put all swap files together in one place
 if isdirectory($HOME . '.vim/swaps') == 0
