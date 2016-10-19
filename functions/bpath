@@ -82,10 +82,10 @@ addpath () {
     declare -A update
     [[ $1 ]] || set -- $PWD
     for x in $*; do
-        if [ $x =~ ':' ]; then 
-            [ $x =~ bin: ] && update[PATH]=${x#*:}${PATH:+:$PATH}
-            [ $x =~ lib: ] && update[PERL5LIB]=${x#*:}{PERL5LIB:+:$PERL5LIB}
-            [ $x =~ man: ] && update[MANPATH]=${x#*:}${MANPATH:+:$MANPATH}
+        if [[ $x =~ : ]]; then 
+            [[ $x =~ :bin ]] && update[PATH]=${x/:bin}${PATH:+:$PATH}
+            [[ $x =~ :lib ]] && update[PERL5LIB]=${x/:lib}${PERL5LIB:+:$PERL5LIB}
+            [[ $x =~ :man ]] && update[MANPATH]=${x/:man}${MANPATH:+:$MANPATH}
         else
             [ -d $x/bin ] && update[PATH]=$x/bin${PATH:+:$PATH}
             [ -d $x/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB}
