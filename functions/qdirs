@@ -1,8 +1,8 @@
 
 #TAG:use
 
-for n in etc bin lib data tmp; do
-    eval "$n () { declare here=\$PWD; until [[ -d $n || ( \$PWD = '/' ) ]]; do cd ..; done;
+for n in etc bin lib data tmp exp; do
+    eval "$n () { declare here=\$PWD; until [[ -d $n || ( ! \$PWD =~ \$USER ) ]]; do cd ..; done;
     if [[ -d $n ]]; then cd $n; else cd \$here; echo $n not found; fi; }"
 done
 
