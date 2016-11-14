@@ -21,11 +21,5 @@ use Path::Tiny;
 use JSON;
 use Data::Printer;
 
-BEGIN {
-    use experimental qw(smartmatch);
-    unshift @INC, grep {! ($_ ~~ @INC)} map {"$_"} grep {path($_)->is_dir} map {path("$_/lib")->realpath} '.', '..';
-}
-use Menu;
-
 #ZZZ
 
