@@ -81,6 +81,7 @@ addpath () {
     declare x
     declare -A update
     [[ $1 ]] || set -- $PWD
+    [[ $1 =~ ^\. ]] && set -- $(sed -e "s:^.:$PWD:" <<< $1)
     for x in $*; do
         if [[ $x =~ : ]]; then 
             [[ $x =~ :bin ]] && update[PATH]=${x/:bin}${PATH:+:$PATH}
