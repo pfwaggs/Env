@@ -3,7 +3,7 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 # vim: set : fdc=4 fmr=AAA,ZZZ fdm=marker
 
-declare -A home=(
+declare -A home_h=(
     [path]=~/bin
 )
 declare -A home_perl=(
@@ -28,30 +28,25 @@ declare -A games=(
 
 _bpath () {
     declare tmp family block str
-    if [[ $@ ]]; then
-        for family in $* ; do
-            for key in $(eval "echo \${!$family[*]}"); do
-                eval "str=\${$family[$key]}"
-                [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
-                str=$(vpurge $str)
-                [[ $str ]] || continue
+    for family in ${*:-home_h home_perl local base}; do
+        [[ $@ ]] || echo $family >&2
+        for key in $(eval "echo \${!$family[*]}"); do
+            eval "str=\${$family[$key]}"
+            echo "str is $str"
+            str=$(vpurge $str)
+            echo "str is $str"
+            [[ $str ]] || continue
+            if [[ $@ ]]; then
                 eval "$key+=:$str"
-            done
+            else
+                printf "\t%8s = %s\n" ${key} $str >&2
+            fi
         done
+    done
+    if [[ $@ ]]; then
         for key in path perl5lib manpath; do
             eval "$key=\${$key#:}"
             echo ${key^^}=${!key}
-        done
-    else
-        for family in self home home_perl local base; do
-            echo $family >&2
-            for key in $(eval "echo \${!$family[*]} | sort"); do
-                eval "str=\${$family[$key]}"
-                [[ $str =~ PWD ]] && str=$(eval "echo \$$str")
-                str=$(vpurge $str)
-                [[ $str ]] || continue
-                printf "\t%8s = %s\n" ${key} $str >&2
-            done
         done
     fi
 }
@@ -61,7 +56,7 @@ bpath () {
     declare x
     if [[ $@ ]]; then
         [ $1 = reset ] && shift
-        [[ $@ =~ home ]] || set -- $@ home
+        [[ $@ =~ home ]] || set -- $@ home_h
         [[ $@ =~ local ]] || set -- $@ local
         [[ $@ =~ base ]] || set -- $@ base
         for x in $(_bpath $@); do
