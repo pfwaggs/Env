@@ -32,9 +32,7 @@ _bpath () {
         [[ $@ ]] || echo $family >&2
         for key in $(eval "echo \${!$family[*]}"); do
             eval "str=\${$family[$key]}"
-            echo "str is $str"
             str=$(vpurge $str)
-            echo "str is $str"
             [[ $str ]] || continue
             if [[ $@ ]]; then
                 eval "$key+=:$str"
