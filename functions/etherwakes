@@ -6,6 +6,7 @@
 ew () {
     declare -A macs=(
         [dirtnap]=08:62:66:c7:a8:cb
+        [macmini]=ac:87:a3:2f:0f:2a
     )
     [[ ${macs[$1]} ]] || echo $1 is not a valid machine
     if [[ ${macs[$1]} ]]; then
