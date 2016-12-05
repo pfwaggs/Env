@@ -3,32 +3,13 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 # vim: set : fdc=4 fmr=AAA,ZZZ fdm=marker
 
-declare -A home_h=(
-    [path]=~/bin
-)
-declare -A home_perl=(
-    [path]=~/perl/bin
-    [perl5lib]=~/perl/lib
-)
-declare -A self=(
-    [path]=PWD/bin
-    [perl5lib]=PWD/lib
-)
-declare -A local=(
-    [path]=$LOCAL/sbin:$LOCAL/bin
-    [manpath]=$LOCAL/share/man
-)
-declare -A base=(
-    [path]=/usr/sbin:/usr/bin:/sbin:/bin
-    [manpath]=/usr/share/man
-)
-declare -A games=(
-    [path]=/usr/local/games:/usr/games
-)
+declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin [manpath]=$LOCAL/share/man )
+declare -A base=( [path]=/usr/sbin:/usr/bin:/sbin:/bin [manpath]=/usr/share/man )
+declare -A games=( [path]=/usr/local/games:/usr/games )
 
 _bpath () {
     declare tmp family block str
-    for family in ${*:-home_h home_perl local base}; do
+    for family in ${*:-local base}; do
         [[ $@ ]] || echo $family >&2
         for key in $(eval "echo \${!$family[*]}"); do
             eval "str=\${$family[$key]}"
@@ -54,10 +35,7 @@ bpath () {
     declare x
     if [[ $@ ]]; then
         [ $1 = reset ] && shift
-        [[ $@ =~ home ]] || set -- $@ home_h
-        [[ $@ =~ local ]] || set -- $@ local
-        [[ $@ =~ base ]] || set -- $@ base
-        for x in $(_bpath $@); do
+        for x in $(_bpath ${@:-local base}); do
             eval $x
         done
     else
@@ -76,16 +54,10 @@ addpath () {
     [[ $1 ]] || set -- $PWD
     [[ $1 =~ ^\. ]] && set -- $(sed -e "s:^.:$PWD:" <<< $1)
     for x in $*; do
-        if [[ $x =~ : ]]; then 
-            [[ $x =~ :bin ]] && update[PATH]=${x/:bin}${PATH:+:$PATH}
-            [[ $x =~ :lib ]] && update[PERL5LIB]=${x/:lib}${PERL5LIB:+:$PERL5LIB}
-            [[ $x =~ :man ]] && update[MANPATH]=${x/:man}${MANPATH:+:$MANPATH}
-        else
-            [ -d $x/bin ] && update[PATH]=$x/bin${PATH:+:$PATH}
-            [ -d $x/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB}
-            [ -d $x/man ] && update[MANPATH]=$x/man${MANPATH:+:$MANPATH}
-            [ -d $x/share/man ] && update[MANPATH]=$x/share/man${MANPATH:+:$MANPATH}
-        fi
+        [ -d "$x"/bin ] && update[PATH]=$x/bin${PATH:+:$PATH}
+        [ -d "$x"/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB}
+        [ -d "$x"/man ] && update[MANPATH]=$x/man${MANPATH:+:$MANPATH}
+        [ -d "$x"/share/man ] && update[MANPATH]=$x/share/man${MANPATH:+:$MANPATH}
     done
     for x in ${!update[@]}; do
         eval "$x=${update[$x]}"
