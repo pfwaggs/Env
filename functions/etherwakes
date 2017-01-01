@@ -3,22 +3,8 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 # vim: fdc=4 fmr=AAA,ZZZ fdm=marker
 
-#ew () {
-#    declare -A macs=(
-#        [dirtnap]=08:62:66:c7:a8:cb
-#        [macmini]=ac:87:a3:2f:0f:2a
-#    )
-#    [[ ${macs[$1]} ]] || echo $1 is not a valid machine
-#    if [[ ${macs[$1]} ]]; then
-#        sudo etherwake ${macs[$1]}
-#    else
-#        echo $1 is not a valid machine
-#    fi
-#}
-
 ew () {
     declare name mac
-#   read name mac <<< $(grep $1 ~/wakeups)
     read name mac <<< $(ssh pi@colt /usr/sbin/arp | grep -i $1 | perl -F'/\s+/' -anlE 'printf "%s\t%s", @F[0,2]')
     if [[ $name ]]; then
         sudo etherwake $mac || echo $mac not found
