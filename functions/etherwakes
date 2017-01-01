@@ -18,7 +18,8 @@
 
 ew () {
     declare name mac
-    read name mac <<< $(grep $1 ~/wakeups)
+#   read name mac <<< $(grep $1 ~/wakeups)
+    read name mac <<< $(ssh pi@colt /usr/sbin/arp | grep -i $1 | perl -F'/\s+/' -anlE 'printf "%s\t%s", @F[0,2]')
     if [[ $name ]]; then
         sudo etherwake $mac || echo $mac not found
     else
