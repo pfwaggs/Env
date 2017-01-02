@@ -37,11 +37,6 @@ shopt -s extglob
 PS1='\h:\w \u\$ '
 
 export CDPATH=".:..:../..:~"
-export PAGER=$(type -p less || type -p more)
-[[ ${PAGER##*/} =~ "less" ]] && export LESS='-RCMqsu~'
-
-export EDITOR=$(type -p vim || type -p vi)
-export VISUAL=$EDITOR
 
 [[ $(compgen -e) =~ SSH ]] || eval "$(ssh-agent)"
 

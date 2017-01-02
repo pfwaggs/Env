@@ -39,6 +39,12 @@ echo $STATE
 PATH=$(vpurge $PATH)
 ENV=$(vpurge $ENV)
 
+# had to move these here because of path and function issues.
+export PAGER=$(type -p less || type -p more)
+[[ ${PAGER##*/} =~ "less" ]] && export LESS='-RCMqsu~'
+export EDITOR=$(type -p vim || type -p vi)
+export VISUAL=$EDITOR
+
 [[ $UID -gt 0 ]] || pc[prmt]=red
 
 mkpc
