@@ -1,6 +1,7 @@
 
+#TAG:use
 # vim: ai si sw=4 sts=4 et ft=sh fdc=4 fmr=AAA,ZZZ fdm=marker
 
-spnd.fn () {
+spnd () {
 dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend & exit
 }
