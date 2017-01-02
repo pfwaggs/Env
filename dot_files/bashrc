@@ -39,6 +39,9 @@ echo $STATE
 PATH=$(vpurge $PATH)
 ENV=$(vpurge $ENV)
 
+# now we add /local to env
+addpath /local
+
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less || type -p more)
 [[ ${PAGER##*/} =~ "less" ]] && export LESS='-RCMqsu~'

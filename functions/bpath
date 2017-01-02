@@ -49,12 +49,15 @@ bpath () {
 }
 
 addpath () {
-    declare x
+    declare x nbin
     declare -A update
     [[ $1 ]] || set -- $PWD
     [[ $1 =~ ^\. ]] && set -- $(sed -e "s:^.:$PWD:" <<< $1)
     for x in $*; do
-        [ -d "$x"/bin ] && update[PATH]=$x/bin${PATH:+:$PATH}
+        nbin=
+        [ -d "$x"/sbin ] && nbin=$x/sbin #update[PATH]=$x/sbin${PATH:+:$PATH}
+        [ -d "$x"/bin ] && nbin=${nbin:+$nbin:}$x/bin #update[PATH]=$x/bin${PATH:+:$PATH}
+        [[ $nbin ]] && update[PATH]=$nbin${PATH:+:$PATH}
         [ -d "$x"/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB}
         [ -d "$x"/man ] && update[MANPATH]=$x/man${MANPATH:+:$MANPATH}
         [ -d "$x"/share/man ] && update[MANPATH]=$x/share/man${MANPATH:+:$MANPATH}
