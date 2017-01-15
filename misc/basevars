@@ -1,15 +1,13 @@
 
+# vim: ai si sw=4 sts=4 et ft=sh 
 #TAG:use
 host=${HOSTNAME%%.*}
 host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
-if [[ $MACHTYPE =~ apple ]]; then
-    pc_s=$'\e]0;'
-    pc_e=$'\a'
-    [[ $TERM =~ xterm ]] && PROMPT_COMMAND='echo -ne $pc_s${PWD#${PWD%/*/*}/}$pc_e'
-else
-    pc_linux=$'\e]0;\w\a'
-    [[ $TERM =~ xterm ]] && PROMPT_COMMAND='echo -ne $pc_linux'
-fi
+pc_s=$'\e]0;'
+pc_e=$'\a'
+case $TERM in
+    xterm) PROMPT_COMMAND='echo -ne $pc_s${PWD#${PWD%/*/*}/}$pc_e' ;;
+esac
 STATE=normal
 
 #

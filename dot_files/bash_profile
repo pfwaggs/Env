@@ -18,16 +18,12 @@ export LOCAL=/usr/local
 [[ -d $LOCAL/bin ]] && tmp_bin+=($LOCAL/bin) || :
 [[ -d $LOCAL/share/man ]] && tmp_man+=($LOCAL/share/man) || :
 
-export TZ=America/New_York
-
 tmp_bin+=($PATH)
 tmp_man+=($MANPATH)
 PATH=$(printf "%s:" ${tmp_bin[@]})
 MANPATH=$(printf "%s:" ${tmp_man[@]})
 unset tmp_bin tmp_man
 
-LANG=C
-umask 0022
 #######################################################
 
 # more bash stuff here

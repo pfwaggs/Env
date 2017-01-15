@@ -11,17 +11,6 @@ complete -r
 unalias -a
 unset -f $(compgen -A function)
 
-#for dir in ~/ENV/{misc,functions}; do
-#    pushd $dir >/dev/null
-#    for n in $(grep TAG:use *); do
-#	[[ $VERBOSE ]] && echo $PWD/$n || echo -n .
-#	. ./$n
-#    done
-#    echo finished $PWD
-#    ENV+=:$PWD
-#    popd >/dev/null
-#done
-
 #[[ $VERBOSE ]] || ECHO='-n'
 for dir in ~/ENV/{misc,functions}; do
     for n in $(grep -l TAG:use $dir/*); do
@@ -40,7 +29,7 @@ PATH=$(vpurge $PATH)
 ENV=$(vpurge $ENV)
 
 # now we add /local to env
-addpath /local
+[[ $UID -eq 0 ]] || addpath /local
 
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less || type -p more)

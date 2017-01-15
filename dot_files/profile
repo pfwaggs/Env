@@ -2,6 +2,5 @@
 PATH=~/bin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export MANPATH=/usr/local/share/man:/usr/share/man
 export TZ=America/New_York
-LANG=C
-umask 0037
-
+LANG=en_US.UTF-8
+umask 0022
