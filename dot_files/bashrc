@@ -6,15 +6,10 @@ set -C -b -o vi
 
 HISTFILE=~/.bh-$(date "+%F").$$
 
-################################################################
-complete -r
-unalias -a
-unset -f $(compgen -A function)
-
-#[[ $VERBOSE ]] || ECHO='-n'
+VERBOSE=1
 for dir in ~/ENV/{misc,functions}; do
     for n in $(grep -l TAG:use $dir/*); do
-	[[ ${VERBOSE+$(echo $n)} ]] || echo -n .
+	[[ -v VERBOSE ]] && echo $n || echo -n .
 	. $n
     done
     echo finished $dir
@@ -23,13 +18,13 @@ done
 
 export ENV
 echo $STATE 
-################################################################
 
+# less filling, tastes great!
 PATH=$(vpurge $PATH)
 ENV=$(vpurge $ENV)
 
-# now we add /local to env
-[[ $UID -eq 0 ]] || addpath /local
+# now we add /local to env for non-root account
+[[ -d /local && $UID -eq 0 ]] || addpath /local
 
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less || type -p more)
@@ -37,6 +32,6 @@ export PAGER=$(type -p less || type -p more)
 export EDITOR=$(type -p vim || type -p vi)
 export VISUAL=$EDITOR
 
-[[ $UID -gt 0 ]] || pc[prmt]=red
+[[ $UID -eq 0 ]] && pc[prmt]=red || :
 
 mkpc

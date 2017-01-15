@@ -1,44 +1,28 @@
 
-# this stuff would go into profile
-#######################################################
-declare -a tmp_bin tmp_man
+# vim: ai si sw=4 sts=4 et ft=sh
 
-[[ -d ~/bin ]] && tmp_bin+=(~/bin) || :
-[[ -d ~/man ]] && tmp_man+=(~/man) || :
+# first we need to clear up the crap from the system
 
-# special stuff just for apple  way to go apple!
-if [[ $(uname -s) = Darwin ]]; then
-    for x in /usr/local/opt/{coreutils,findutils}/libexec; do
-	[[ -d $x/gnubin ]] && tmp_bin+=($x/gnubin) || :
-	[[ -d $x/gnuman ]] && tmp_man+=($x/gnuman) || :
-    done
-fi
+complete -r
+unalias -a
+unset -f $(compgen -A function)
+unset ${!LC_*}
 
-export LOCAL=/usr/local
-[[ -d $LOCAL/bin ]] && tmp_bin+=($LOCAL/bin) || :
-[[ -d $LOCAL/share/man ]] && tmp_man+=($LOCAL/share/man) || :
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export MANPATH=/usr/share/man
+export TZ=America/New_York
+LANG=en_US.UTF-8
+umask 0022
 
-tmp_bin+=($PATH)
-tmp_man+=($MANPATH)
-PATH=$(printf "%s:" ${tmp_bin[@]})
-MANPATH=$(printf "%s:" ${tmp_man[@]})
-unset tmp_bin tmp_man
-
-#######################################################
-
-# more bash stuff here
-#######################################################
 shopt -s extglob
 
 PS1='\h:\w \u\$ '
 
 export CDPATH=".:..:../..:~"
 
-[[ $(compgen -e) =~ SSH ]] || eval "$(ssh-agent)"
+[[ $(compgen -e | grep -c SSH) -gt 0 ]] || eval "$(ssh-agent)"
 
 export TERM=xterm-256color
 tset
-#######################################################
 
 . ~/.bashrc
-
