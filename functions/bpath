@@ -63,7 +63,7 @@ addpath () {
         [ -d "$x"/share/man ] && update[MANPATH]=$x/share/man${MANPATH:+:$MANPATH}
     done
     for x in ${!update[@]}; do
-        eval "$x=${update[$x]}"
+        eval "$x=$(vpurge ${update[$x]})"
     done
 
 }

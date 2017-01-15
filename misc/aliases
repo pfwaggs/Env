@@ -1,6 +1,5 @@
 
 #TAG:use
-unalias -a
 alias ..='cd ..'
 alias ...='cd ../..'
 alias c='clear'
