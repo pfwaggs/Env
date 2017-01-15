@@ -33,5 +33,5 @@ export EDITOR=$(type -p vim || type -p vi)
 export VISUAL=$EDITOR
 
 [[ $UID -eq 0 ]] && pc[prmt]=red || :
-
+PROMPT_COMMAND=${PROMPT_COMMAND#* } # because LXDE has vte?
 mkpc
