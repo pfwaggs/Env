@@ -6,7 +6,7 @@ set -C -b -o vi
 
 HISTFILE=~/.bh-$(date "+%F").$$
 
-VERBOSE=1
+#VERBOSE=1
 for dir in ~/ENV/{misc,functions}; do
     for n in $(grep -l TAG:use $dir/*); do
 	[[ -v VERBOSE ]] && echo $n || echo -n .
