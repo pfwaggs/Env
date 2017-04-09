@@ -1,5 +1,7 @@
 clear
-[[ -x /usr/games/fortune ]] && /usr/games/fortune
+FORTUNE=/usr/games/fortune
+[[ -x $FORTUNE ]] || FORTUNE=/usr/bin/fortune
+$FORTUNE
 printf "\n"
 sleep 5
 (( $SHLVL - 1 )) && return 0
