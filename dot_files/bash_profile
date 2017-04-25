@@ -8,7 +8,7 @@ unalias -a
 unset -f $(compgen -A function)
 unset ${!LC_*}
 
-export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export PATH=/usr/bin:/usr/bin/core_perl
 export MANPATH=/usr/share/man
 export TZ=America/New_York
 LANG=en_US.UTF-8
