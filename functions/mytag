@@ -1,0 +1,5 @@
+
+#TAG:use
+mytag () {
+    ifconfig eth0 | grep eth0 | perl -alE '@a=split/:/,$F[-1];say @a[-3..-1]';
+}

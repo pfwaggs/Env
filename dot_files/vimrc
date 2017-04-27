@@ -44,9 +44,9 @@ set undodir=~/.vim/undos//
 set undofile
 
 " yes, folding is good
-"set foldcolumn=4
-"set foldmethod=marker
-"set foldmarker=AAA,ZZZ
+set foldcolumn=4
+set foldmethod=marker
+set foldmarker=AAA,ZZZ
 
 "abbreviations
 :source ~/.vimrc-abbr
