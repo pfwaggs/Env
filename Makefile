@@ -9,6 +9,7 @@ work_files += $(addprefix $(MISC_DIR)/,$(misc_files))
 
 DOTFILE_DIR = dot_files
 dot_files = $(notdir $(sort $(wildcard $(DOTFILE_DIR)/*)))
+dot_files := $(filter-out mac_%, $(dot_files))
 work_files += $(addprefix $(DOTFILE_DIR)/,$(dot_files))
 
 FUNCTION_DIR = functions
@@ -19,15 +20,7 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-ifeq ($(DIFF), 1)
-    DIFF = diff
-    CHECK = check_noisy
-else
-    DIFF = diff -q
-    CHECK = check_quiet
-endif
-
-.PHONY: dots work check $(dot_files)
+.PHONY: dots work check lpr dcheck $(dot_files)
 
 all: list
 
@@ -35,24 +28,32 @@ list:
 	@echo listing all work_files
 	@for f in $(work_files); do  echo $$f;  done
 
-check: $(CHECK)
+archive:
+	@for f in $(dot_files); do \
+	    [[ -f ~/.$$f ]] && cp ~/.$$f ~/.$$f~ || : ; \
+	done
 
-check_noisy:
+revert:
+	@for f in $(dot_files); do \
+	    [[ -f ~/.$$f~ ]] && cp ~/.$$f~ /.$$f || : ; \
+	done
+
+dcheck:
 	@echo checking dot files
 	@for f in $(dot_files); do \
 	    [[ -f ~/.$$f ]] || continue; \
 	    $$(diff -q ~/.$$f $(DOTFILE_DIR)/$$f) && continue; \
 	    clear; echo checking $$f; \
-	    $(DIFF) ~/.$$f $(DOTFILE_DIR)/$$f; \
+	    diff ~/.$$f $(DOTFILE_DIR)/$$f; \
 	    echo checked $$f; \
 	    read; \
 	done
 
-check_quiet:
+check:
 	@echo checking dot files
 	@for f in $(dot_files); do \
 	    [[ -f ~/.$$f ]] || continue; \
-	    $(DIFF) ~/.$$f $(DOTFILE_DIR)/$$f; \
+	    diff -q ~/.$$f $(DOTFILE_DIR)/$$f; \
 	done
 
 dots:
@@ -65,9 +66,14 @@ $(dot_files):
 	@echo copying $@
 	@[[ -f $(DOTFILE_DIR)/$@ ]] && cp $(DOTFILE_DIR)/$@ $(DEST)/.$@;
 
+printme.txt: work
+
 work:
 	@echo making work copy
 	@for f in $(work_files); do \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \
-	    done | enscript -2 -r -DDuplex:true -DTumble:true -o printme.ps
+	done > printme.txt
+
+lpr: printme.txt
+	enscript -2 -r -DDuplex:true -DTumble:true -o printme.ps printme.txt

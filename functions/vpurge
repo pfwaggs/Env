@@ -1,5 +1,6 @@
 
 # vim: ai si sw=4 sts=4 et ft=sh
+
 #START.vpurge AAA
 #TAG:use
 
@@ -8,7 +9,7 @@ vpurge() {
     declare x out
     for x in $(find ${2//$1/ } -maxdepth 0 ! -empty); do
 	[[ -d $x ]] || continue
-	[[ $out =~ :$x ]] || out+=:$x
+	[[ $out =~ :$x: ]] || out+=:$x
     done
     echo ${out:1} #skip the first :
 }

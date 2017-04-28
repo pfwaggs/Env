@@ -3,8 +3,8 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 # vim: set : fdc=4 fmr=AAA,ZZZ fdm=marker
 
-declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin [manpath]=$LOCAL/share/man )
-declare -A base=( [path]=/usr/sbin:/usr/bin:/sbin:/bin [manpath]=/usr/share/man )
+declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin )
+declare -A base=( [path]=/usr/sbin:/usr/bin:/sbin:/bin )
 declare -A games=( [path]=/usr/local/games:/usr/games )
 
 _bpath () {
@@ -23,7 +23,7 @@ _bpath () {
         done
     done
     if [[ $@ ]]; then
-        for key in path perl5lib manpath; do
+        for key in path perl5lib; do
             eval "$key=\${$key#:}"
             echo ${key^^}=${!key}
         done
@@ -41,7 +41,7 @@ bpath () {
     else
         echo help invoked
         echo current configuration:
-        for x in PATH PERL5LIB MANPATH; do
+        for x in PATH PERL5LIB; do
             echo ${x}=${!x}
         done
         _bpath
@@ -55,12 +55,10 @@ addpath () {
     [[ $1 =~ ^\. ]] && set -- $(sed -e "s:^.:$PWD:" <<< $1)
     for x in $*; do
         nbin=
-        [ -d "$x"/sbin ] && nbin=$x/sbin #update[PATH]=$x/sbin${PATH:+:$PATH}
-        [ -d "$x"/bin ] && nbin=${nbin:+$nbin:}$x/bin #update[PATH]=$x/bin${PATH:+:$PATH}
+        [ -d "$x"/sbin ] && nbin=$x/sbin || :
+        [ -d "$x"/bin ] && nbin=${nbin:+$nbin:}$x/bin || :
         [[ $nbin ]] && update[PATH]=$nbin${PATH:+:$PATH}
-        [ -d "$x"/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB}
-        [ -d "$x"/man ] && update[MANPATH]=$x/man${MANPATH:+:$MANPATH}
-        [ -d "$x"/share/man ] && update[MANPATH]=$x/share/man${MANPATH:+:$MANPATH}
+        [ -d "$x"/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB} || :
     done
     for x in ${!update[@]}; do
         eval "$x=$(vpurge ${update[$x]})"

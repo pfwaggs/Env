@@ -2,16 +2,15 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 
 # first we need to clear up the crap from the system
-
 complete -r
 unalias -a
 unset -f $(compgen -A function)
 unset ${!LC_*}
 
-export PATH=/usr/bin:/usr/bin/core_perl
-export MANPATH=/usr/share/man
+# set some basic items
+. ~/.mkpaths
 export TZ=America/New_York
-LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
 umask 0022
 
 shopt -s extglob

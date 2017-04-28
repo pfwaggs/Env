@@ -1,0 +1,39 @@
+
+# vim: ai si sw=4 sts=4 et ft=sh 
+declare add_extras=0
+
+case $(uname -s -r) in
+    *v7+)
+        PATH=/usr/sbin:/usr/bin:/sbin:/bin
+	add_extras=1
+        ;;
+    *ARCH)
+        PATH=/usr/bin/core_perl:/usr/bin
+	add_extras=1
+        ;;
+    Darwin*)
+        echo 'not changing your paths on this machine for now'
+	#PATH=/usr/sbin:/usr/bin:/sbin:/bin
+	#MANPATH=/usr/share/man
+	#if [[ -d /usr/local ]]; then
+	#fi
+	#for x in /usr/local/opt/{coreutils,findutils}/libexec; do
+	#    [[ ! -d $x/gnubin ]] || PATH=$x/gnubin:$PATH
+	#    [[ ! -d $x/gnuman/share ]] || MANPATH=$x/gnuman/share:$MANPATH
+	#done
+	#for x in /usr/X11 /usr/local/MacGPG2; do
+	#    [[ ! -d $x/bin ]] || PATH+=:$x/bin
+	#    [[ ! -d $x/share/man ]] || MANPATH+=:$x/share/man
+	#done
+	;;
+esac
+
+
+if [[ $add_extras -eq 1 ]]; then
+    if [[ -d /usr/local ]]; then
+        export LOCAL=/usr/local
+        [[ -d $LOCAL/bin ]] && PATH=$LOCAL/bin:$PATH || :
+    fi
+    [[ -d ~/bin ]] && PATH=~/bin:$PATH || :
+fi
+unset add_extras
