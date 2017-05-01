@@ -2,14 +2,20 @@
 #TAG:use
 # vim: ai si sw=4 sts=4 et ft=sh
 
+#_mytail () {
+#    declare IFS=$'\n' x
+#    for x in $(/usr/bin/ip -o link show | perl -anlE 'next if /\slo:/; say "@F[1,-3]"'); do
+#        [[ $x =~ ${1:-.} ]] && echo $x || :
+#    done
+#}
+
 mytail () {
-   declare dev ans cmd=$(type -p ip ifconfig | head -n 1)
-   case $cmd in
-	*/ip)
-	    dev=$(ls -d /sys/class/net/e*)
-	    ip link show ${dev##*/} | grep link/ether
-	;;
-	*/ifconfig)
-	    ifconfig eth0 | grep eth0
-   esac | perl -nE '($m)=/([[:xdigit:]:]{8})\s/;say $m=~s/://gr'
-}
+    mytailf |
+    while read iface mac; do
+        echo $iface ${mac:(-8)};
+    done | sed -n 's/:/ /gp'
+} 
+
+mytailf () {
+    /usr/bin/ip -o link show | perl -anlE 'next if /\slo:/; say "@F[1,-3]"'
+} 
