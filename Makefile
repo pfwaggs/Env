@@ -20,7 +20,7 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-.PHONY: dots work check lpr dcheck $(dot_files)
+.PHONY: dots check dcheck work txt ps print $(dot_files)
 
 all: list
 
@@ -66,7 +66,7 @@ $(dot_files):
 	@echo copying $@
 	@[[ -f $(DOTFILE_DIR)/$@ ]] && cp $(DOTFILE_DIR)/$@ $(DEST)/.$@;
 
-printme.txt: work
+txt: work
 
 work:
 	@echo making work copy
@@ -75,5 +75,9 @@ work:
 	    cat $$f; \
 	done > printme.txt
 
-lpr: printme.txt
+ps: txt
 	enscript -2 -r -DDuplex:true -DTumble:true -o printme.ps printme.txt
+
+print: ps
+	enscript -Z -P local printme.ps
+	rm printme.ps printme.txt
