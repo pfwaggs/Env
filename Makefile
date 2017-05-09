@@ -20,7 +20,7 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-.PHONY: dots check dcheck txt ps print $(dot_files)
+.PHONY: dots check dcheck txt ps print tar $(dot_files)
 
 all: list
 
@@ -80,3 +80,6 @@ ps: txt
 print: ps
 	enscript -Z -P local printme.ps
 	rm printme.ps printme.txt
+
+tar:
+	tar -cvf env.tar --exclude='./.git/*' --exclude='printme.*' *;
