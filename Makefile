@@ -69,6 +69,7 @@ $(dot_files):
 txt:
 	@echo making work copy
 	@for f in $(work_files); do \
+	    grep -q '#TAG:use' "$$f" || continue; \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \
 	done > printme.txt
