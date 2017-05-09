@@ -20,7 +20,7 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-.PHONY: dots check dcheck work txt ps print $(dot_files)
+.PHONY: dots check dcheck txt ps print $(dot_files)
 
 all: list
 
@@ -66,9 +66,7 @@ $(dot_files):
 	@echo copying $@
 	@[[ -f $(DOTFILE_DIR)/$@ ]] && cp $(DOTFILE_DIR)/$@ $(DEST)/.$@;
 
-txt: work
-
-work:
+txt:
 	@echo making work copy
 	@for f in $(work_files); do \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
