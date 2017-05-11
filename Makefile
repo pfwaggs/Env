@@ -20,7 +20,7 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-.PHONY: dots check dcheck work txt ps print $(dot_files)
+.PHONY: dots check dcheck txt ps print tar $(dot_files)
 
 all: list
 
@@ -66,11 +66,10 @@ $(dot_files):
 	@echo copying $@
 	@[[ -f $(DOTFILE_DIR)/$@ ]] && cp $(DOTFILE_DIR)/$@ $(DEST)/.$@;
 
-txt: work
-
-work:
+txt:
 	@echo making work copy
 	@for f in $(work_files); do \
+	    grep -q '#TAG:use' "$$f" || continue; \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \
 	done > printme.txt
@@ -81,3 +80,6 @@ ps: txt
 print: ps
 	enscript -Z -P local printme.ps
 	rm printme.ps printme.txt
+
+tar:
+	tar -cvf env.tar --exclude='./.git/*' --exclude='printme.*' *;
