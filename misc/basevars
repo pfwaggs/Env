@@ -12,13 +12,3 @@ PROMPT_COMMAND='echo -ne ${pc_s}${pc_m}${pc_e}'
 STATE=normal
 export LOCAL=/usr/local
 
-#
-#declare -A ct pc
-#ct=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
-#pc=([user]=blue [host]=cyan [spath]=green [lpath]=green [prmt]=green [xtra]=red)
-#
-#declare -a base_prompt po
-#base_prompt=(xtra host user spath lpath prmt)
-#po=(host prmt)
-#
-

@@ -11,6 +11,7 @@ unset ${!LC_*}
 . ~/.mkpaths
 export TZ=America/New_York
 export LANG=en_US.UTF-8
+export PRINTER=local #this is a printer class
 umask 0022
 
 shopt -s extglob
