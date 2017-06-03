@@ -8,7 +8,6 @@ unset -f $(compgen -A function)
 unset ${!LC_*}
 
 # set some basic items
-. ~/.mkpaths
 export TZ=America/New_York
 export LANG=en_US.UTF-8
 export PRINTER=local #this is a printer class

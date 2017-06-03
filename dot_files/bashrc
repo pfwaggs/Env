@@ -16,16 +16,13 @@ for dir in ~/ENV/{misc,functions}; do
     ENV+=:$dir
 done
 
-export ENV
 echo $STATE 
 
 # less filling, tastes great!
-PATH=$(vpurge $PATH)
-ENV=$(vpurge $ENV)
+export ENV=$(vpurge $ENV)
 
-# now we add /local to env for non-root account
-[[ $UID -gt 0 && -d /local ]] && addpath /local || :
-[[ $PERL5LIB ]] && export PERL5LIB || unset PERL5LIB
+. ~/.mkpaths
+PATH=$(vpurge $PATH)
 
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
@@ -36,6 +33,6 @@ export VISUAL=$EDITOR
 [[ $UID -eq 0 ]] && pc[prmt]=red || :
 
 # because LXDE has vte?
-[[ ! $PROMPT_COMMAND =~ __vte ]] || PROMPT_COMMAND=${PROMPT_COMMAND#* }
+[[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
 mkpc

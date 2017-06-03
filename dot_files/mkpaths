@@ -1,15 +1,14 @@
 
 # vim: ai si sw=4 sts=4 et ft=sh 
-declare add_extras=0
-
+declare add_extras env path
 case $(uname -s -r) in
     *v7+)
         PATH=/usr/sbin:/usr/bin:/sbin:/bin
-	add_extras=1
+        [[ $UID -eq 0 ]] || add_extras="LOCAL=/usr/local $HOME"
         ;;
     *ARCH)
         PATH=/usr/bin/core_perl:/usr/bin
-	add_extras=1
+        [[ $UID -eq 0 ]] || add_extras="$HOME"
         ;;
     Darwin*)
         echo 'not changing your paths on this machine for now'
@@ -28,12 +27,11 @@ case $(uname -s -r) in
 	;;
 esac
 
+for x in $add_extras; do
+    read env path <<< ${x/=/ }
+    [[ $path ]] && eval "export $x" || :
+    addpath ${path:-$env}
+done
+[[ -z $PERL5LIB ]] || export PERL5LIB
 
-if [[ $add_extras -eq 1 ]]; then
-    if [[ -d /usr/local ]]; then
-        export LOCAL=/usr/local
-        [[ -d $LOCAL/bin ]] && PATH=$LOCAL/bin:$PATH || :
-    fi
-    [[ -d ~/bin ]] && PATH=~/bin:$PATH || :
-fi
-unset add_extras
+unset add_extras env path
