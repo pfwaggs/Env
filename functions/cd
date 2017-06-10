@@ -5,9 +5,11 @@ _cd () {
     declare x list=$(compgen -d $2)
     [[ $list ]] || list=$(compgen -d ../$2)
     [[ $list ]] || list=$(compgen -d ~/$2)
-    for x in $(echo -e "$list"); do
-	COMPREPLY+=("$x");
+    IFS=$'\n'
+    for x in $list; do
+	COMPREPLY+=($x);
     done
+    IFS=$' \t\n'
 }
 
 complete -o filenames -F '_cd' cd
