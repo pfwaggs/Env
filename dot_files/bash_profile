@@ -13,6 +13,9 @@ export LANG=en_US.UTF-8
 export LC_COLLATE=C
 export PRINTER=local #this is a printer class
 umask 0022
+setterm -blength 0 #this turns off the speaker.
+# for more permanent solution...
+# echo "blacklist pcspkr" >> /etc/modprobe.d/nobeep.conf
 
 shopt -s extglob
 
