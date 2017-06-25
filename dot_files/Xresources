@@ -1,12 +1,2 @@
 
-! comments lines
-XTerm.termName: xterm-256color
-XTerm.vt100.locale: true
-XTerm.vt100.metaSendsEscape: true
-XTerm.vt100.backarrowKey: false
-XTerm.ttyModes: erase 
-XTerm.vt100.classMode: true
-XTerm.vt100.foreground: grey75
-XTerm.vt100.background: black
-XTerm.vt100.keyboardType: tcapFunctionKeys
-
+# include ".Xresources_xterm"
