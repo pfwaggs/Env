@@ -36,14 +36,18 @@ export VISUAL=$EDITOR
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
 if [[ $SHLVL -gt 1 -a ! -v SSH_TTY ]]; then
-    declare LA=~/.ssh/loadagent-$(hostname -s)
-    if [[ -s $LA ]]; then
-	. $LA
+    declare la=~/.ssh/loadagent-$(hostname -s)
+    if [[ -s $la ]]; then
+	. $la
     else
-	eval "$(ssh-agent -a ~/.ssh/ssh_auth_sock | tee $LA; chmod 600 $LA)"
-	ssh-add
+	declare sock=~/.ssh/socket-$(hostname -s)
+	if [[ -s ~/.ssh/id_rsa.pub ]]; then
+	    eval "$(ssh-agent -a $sock | tee $la; chmod 600 $la)"
+	    ssh-add
+	fi
+	unset sock
     fi
-    unset LA
+    unset la
 fi
 
 mkpc
