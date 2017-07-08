@@ -35,4 +35,9 @@ export VISUAL=$EDITOR
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
+[[ -v SSH_AGENT_PID ]] || eval "$(ssh-agent)"
+
+read -t 5 -p 'ssh-add ? '
+[[ ${REPLY:-y} =~ ^[nN] ]] || ssh-add
+
 mkpc

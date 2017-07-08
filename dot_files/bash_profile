@@ -20,6 +20,4 @@ PS1='\h:\w \u\$ '
 
 export CDPATH=".:..:../..:~"
 
-[[ $(compgen -e | grep -c SSH) -gt 0 ]] || eval "$(ssh-agent)"
-
 . ~/.bashrc
