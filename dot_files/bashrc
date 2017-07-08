@@ -35,9 +35,16 @@ export VISUAL=$EDITOR
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
-[[ -v SSH_AGENT_PID ]] || eval "$(ssh-agent)"
-
-read -t 5 -p 'ssh-add ? '
-[[ ${REPLY:-y} =~ ^[nN] ]] || ssh-add
+if [[ $SHLVL -gt 1 -a ! -v SSH_TTY ]]; then
+    declare LA=~/.ssh/loadagent-$(hostname -s)
+    if [[ -s $LA ]]; then
+	. $LA
+    else
+	eval "$(ssh-agent -a ~/.ssh/ssh_auth_sock | tee $LA; chmod 600 $LA)"
+	ssh-add
+    fi
+    unset LA
+fi
 
 mkpc
+
