@@ -35,7 +35,7 @@ export VISUAL=$EDITOR
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
-if [[ $SHLVL -gt 1 -a ! -v SSH_TTY ]]; then
+if [[ $SHLVL -gt 1 && ! -v SSH_TTY ]]; then
     declare la=~/.ssh/loadagent-$(hostname -s)
     if [[ -s $la ]]; then
 	. $la
