@@ -20,4 +20,9 @@ PS1='\h:\w \u\$ '
 
 export CDPATH=".:..:../..:~"
 
+declare -x la=~/.ssh/loadagent-$HOSTNAME sa=~/.ssh/socket-$HOSTNAME
+[[ -S $sa ]] || eval "$(ssh-agent -a $sa | tee $la)"
+[[ -s $la ]] && chmod 600 $la
+[[ -S $sa ]] && chmod 600 $sa
+
 . ~/.bashrc

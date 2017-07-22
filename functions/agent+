@@ -1,0 +1,10 @@
+
+# vim: ai si sw=4 sts=4 et ft=sh
+#TAG:use
+
+agent+ () {
+    [[ -S $sa ]] || eval "$(ssh-agent -a $sa | tee $la)"
+    chmod 600 $sa $la
+    ssh-add -l -E md5 || { . $la; ssh-add $(ls ~/.ssh/*_rsa); }
+}
+
