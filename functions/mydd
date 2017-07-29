@@ -1,0 +1,9 @@
+
+#TAG:use
+# vim: ai si sw=4 sts=4 et ft=sh
+
+mydd () {
+    declare if="$1"
+    shift
+    dd if="$if" "$@"
+}
