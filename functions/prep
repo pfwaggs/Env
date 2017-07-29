@@ -2,7 +2,7 @@
 #TAG:use
 
 prep () {
-    declare name type dir=~/ENV/prep_files
+    declare name type dir=${ENVDIR}/prep_files
     [[ -s $dir/map ]] || continue
     source $dir/map
     for name in $@; do

@@ -3,7 +3,8 @@
 clear
 [[ $SHLVL -eq 1 ]] || return 0
 [[ -v SSH_AGENT_PID ]] && ssh-agent -k
-[[ -s ~/.ssh/loadagent-${HOSTNAME} ]] && rm ~/.ssh/loadagent-${HOSTNAME}
+[[ -f $sa ]] && rm $sa
+[[ -s $la ]] && rm $la
 printf "%s closing subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
 read -t 5 -p 'fortune? '
 [[ ${REPLY:-n} =~ ^[yY] ]] || exit 0

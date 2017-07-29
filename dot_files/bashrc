@@ -5,9 +5,9 @@ trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 set -C -b -o vi
 
 HISTFILE=~/.history
-
+export ENVDIR=~/Git/ENV
 #VERBOSE=1
-for dir in ~/ENV/{misc,functions}; do
+for dir in ${ENVDIR}/{misc,functions}; do
     for n in $(grep -l TAG:use $dir/*); do
 	[[ -v VERBOSE ]] && echo $n || echo -n .
 	. $n
