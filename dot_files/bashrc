@@ -37,9 +37,11 @@ export VISUAL=$EDITOR
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
-declare la=~/.ssh/loadagent-$HOSTNAME
-declare sa=~/.ssh/socket-$HOSTNAME
-export la sa
-agent+
+
+declare -xr LA=~/.ssh/smap/$host.load
+declare -xr SA=~/.ssh/smap/$host.socket
+declare -xr SECS=$(date +%s)
+declare -xr SMAP=~/.ssh/smap/$(echo -n $USER:$SECS:$HOSTNAME|md5sum|cut -c1-6)
+
 mkpc
 
