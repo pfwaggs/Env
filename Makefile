@@ -11,6 +11,8 @@ DOTFILE_DIR = dot_files
 dot_files = $(notdir $(sort $(wildcard $(DOTFILE_DIR)/*)))
 dot_files := $(filter-out mac_%, $(dot_files))
 work_files += $(addprefix $(DOTFILE_DIR)/,$(dot_files))
+checks = $(addprefix $(DOTFILE_DIR)/,$(dot_files)) $(addprefix $(HOME)/.,$(dot_files))
+updates = $(shell md5sum $(checks) | perl -a -E 'push @s,@F;END{%s=@s; say for values %s}' | grep -v home)
 
 FUNCTION_DIR = functions
 function_files = $(filter-out \#%, $(notdir $(sort $(wildcard $(FUNCTION_DIR)/*))))
@@ -55,6 +57,12 @@ check:
 	    [[ -f ~/.$$f ]] || continue; \
 	    diff -q ~/.$$f $(DOTFILE_DIR)/$$f; \
 	done
+
+updates:
+	@for x in $(updates); do echo update $$x; done
+
+fix:
+	@for x in $(updates); do echo fixing $$x; cp $$x ~/.$${x##*/}; done
 
 dots:
 	@echo copying $(dot_files)

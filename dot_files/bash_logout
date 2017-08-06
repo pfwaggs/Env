@@ -1,14 +1,14 @@
 
 
 clear
-[[ ! -L $SMAP ]] || rm $SMAP
+rm $SMAP
 [[ $SHLVL -eq 1 ]] || return 0
-[[ -L $LA ]] || { ssh-agent -k; rm $LA; }
+[[ -L $LA ]] || { ssh-agent -k; rm $LA $SA; }
 printf "%s closing subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
+fortune=$(type fortune)
+[[ $fortune ]] || return 0
 read -t 5 -p 'fortune? '
 [[ ${REPLY:-n} =~ ^[yY] ]] || exit 0
-FORTUNE=/usr/games/fortune
-[[ -x $FORTUNE ]] || FORTUNE=/usr/bin/fortune
-$FORTUNE
+$fortune
 printf "\n"
 read -p 'pause...'
