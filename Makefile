@@ -74,7 +74,7 @@ $(dot_files):
 	@echo copying $@
 	@[[ -f $(DOTFILE_DIR)/$@ ]] && cp $(DOTFILE_DIR)/$@ $(DEST)/.$@;
 
-txt:
+printme.txt:
 	@echo making work copy
 	@for f in $(work_files); do \
 	    grep -q '#TAG:use' "$$f" || continue; \
@@ -82,12 +82,13 @@ txt:
 	    cat $$f; \
 	done > printme.txt
 
-ps: txt
+printme.ps: printme.txt
 	enscript -2 -r -DDuplex:true -DTumble:true -o printme.ps printme.txt
+	rm printme.txt
 
-print: ps
+print: printme.ps
 	enscript -Z -P local printme.ps
-	rm printme.ps printme.txt
+	rm printme.ps
 
-tar:
+env.tar:
 	tar -cvf env.tar --exclude='./.git/*' --exclude='printme.*' *;
