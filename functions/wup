@@ -2,7 +2,7 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 #TAG:use
 wup () {
-    declare cmd=$(type -p etherwake wol)
+    declare cmd=$(type -p etherwake wol | sed -n 1p)
     declare ip=$(dig +search +short -t txt $1)
     eval $cmd $ip
 }
