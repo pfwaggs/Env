@@ -59,7 +59,7 @@ addpath () {
         [[ $nbin ]] && update[PATH]=$nbin${PATH:+:$PATH}
         [ -d "$x"/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB} || :
         for x in ${!update[@]}; do
-            eval "$x=$(vpurge ${update[$x]})"
+            eval "$x=${update[$x]}:${!x}"
         done
     done
 

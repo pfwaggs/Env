@@ -3,12 +3,13 @@
 trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 
 set -C -b -o vi
-
+echo $PATH
 HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
 export ENV=$ENVDIR/misc:$ENVDIR/functions
 . ~/Git/ENV/functions/load
 load ${ENV//:/ }
+echo $PATH
 
 #VERBOSE=1
 #for dir in ${ENVDIR}/{misc,functions}; do

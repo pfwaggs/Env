@@ -5,11 +5,6 @@
 . ~/Git/ENV/functions/load
 _envpurge
 
-#complete -r
-#unalias -a
-#unset -f $(compgen -A function)
-#unset ${!LC_*}
-
 # set some basic items
 export TZ=America/New_York
 export LANG=en_US.UTF-8
