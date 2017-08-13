@@ -46,7 +46,7 @@ set undofile
 " yes, folding is good
 set foldcolumn=4
 set foldmethod=marker
-set foldmarker=AAA,ZZZ
+set foldmarker=AzA,ZaZ
 
 "abbreviations
 :source ~/.vimrc-abbr

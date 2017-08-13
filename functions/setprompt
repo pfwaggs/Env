@@ -1,11 +1,12 @@
 
 #TAG:use
+# vim: ai si sw=4 sts=4 et ft=sh
 
-declare -A ct pc
+declare -g -A ct pc
 ct=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
 pc=([user]=blue [host]=cyan [spath]=green [lpath]=green [prmt]=green [xtra]=red)
 
-declare -a base_prompt po
+declare -g -a base_prompt po
 base_prompt=(xtra host user spath lpath prmt)
 po=(host prmt)
 
@@ -71,7 +72,7 @@ build_drop () {
 
 p% () {
     declare OPTARG OPTIND REPLY
-    delcare ndx val new color
+    declare ndx val new color
     declare -a colors
     declare -a drop
     while [ 1 ]; do

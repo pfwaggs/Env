@@ -5,32 +5,34 @@ trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 set -C -b -o vi
 
 HISTFILE=~/.history
-export ENV=
 export ENVDIR=~/Git/ENV
+export ENV=$ENVDIR/misc:$ENVDIR/functions
+. ~/Git/ENV/functions/load
+load ${ENV//:/ }
 
 #VERBOSE=1
-for dir in ${ENVDIR}/{misc,functions}; do
-    echo checking $dir
-    for n in $(grep -l TAG:use $dir/*); do
-	[[ -v VERBOSE ]] && echo $n || echo -n .
-	. $n
-    done
-    echo finished $dir
-    ENV+=:$dir
-done
+#for dir in ${ENVDIR}/{misc,functions}; do
+#    echo checking $dir
+#    for n in $(grep -l TAG:use $dir/*); do
+#	[[ -v VERBOSE ]] && echo $n || echo -n .
+#	. $n
+#    done
+#    echo finished $dir
+#    ENV+=:$dir
+#done
 
 echo $STATE 
 
 # less filling, tastes great!
-export ENV=$(vpurge $ENV)
+#export ENV=$(vpurge ENV)
 
 . ~/.mkpaths
-PATH=$(vpurge $PATH)
+PATH=$(vpurge PATH)
 
 # had to move these here because of path and function issues.
-export PAGER=$(type -p less more | head -n 1)
+export PAGER=$(type -p less more | sed -n 1p)
 [[ $PAGER =~ less ]] && export LESS='-RCMqsu~' || :
-export EDITOR=$(type -p vim vi | head -n 1)
+export EDITOR=$(type -p vim vi | sed -n 1p)
 export VISUAL=$EDITOR
 
 [[ $UID -eq 0 ]] && pc[prmt]=red || :

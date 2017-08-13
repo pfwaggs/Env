@@ -1,6 +1,6 @@
 
-#TAG:use
 # vim: ai si sw=4 sts=4 et ft=sh
+#TAG:use
 
 gigify () {
     declare u=BKMGT b=1024 v=$(echo ${@//[^0-9.+-]}) s=${v//[0-9.]}

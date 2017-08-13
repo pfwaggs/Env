@@ -1,78 +1,32 @@
 
 SHELL = /bin/bash
 
-work_files = Makefile
+BASE = ~/Git/ENV
 
-MISC_DIR = misc
-misc_files = $(notdir $(sort $(wildcard $(MISC_DIR)/*)))
-work_files += $(addprefix $(MISC_DIR)/,$(misc_files))
+DOTFILE_DIR = $(BASE)/dot_files
+DOTFILES = $(notdir $(wildcard $(DOTFILE_DIR)/*))
 
-DOTFILE_DIR = dot_files
-dot_files = $(notdir $(sort $(wildcard $(DOTFILE_DIR)/*)))
-dot_files := $(filter-out mac_%, $(dot_files))
-work_files += $(addprefix $(DOTFILE_DIR)/,$(dot_files))
-checks = $(addprefix $(DOTFILE_DIR)/,$(dot_files)) $(addprefix $(HOME)/.,$(dot_files))
-updates = $(shell md5sum $(checks) | perl -a -E 'push @s,@F;END{%s=@s; say for values %s}' | grep -v home)
+work_dirs = dot_files functions misc prep_files
+work_files = $(shell find $(work_dirs) -name \.git -prune -o -type f | sort)
 
-FUNCTION_DIR = functions
-function_files = $(filter-out \#%, $(notdir $(sort $(wildcard $(FUNCTION_DIR)/*))))
-work_files += $(addprefix $(FUNCTION_DIR)/,$(function_files))
+all: info
 
-ifndef DEST
-    DEST = $(HOME)
-endif
+info:
+	@for x in $(DOTFILES); do echo $$x; done
+	@echo $(USER)
 
-.PHONY: dots check dcheck txt ps print tar $(dot_files)
+link:
+	@for x in $(DOTFILES); do ln $(DOTFILE_DIR)/$$x ~/.$$x; done
 
-all: list
+unlink:
+	@for x in $(DOTFILES); do [[ -f ~/.$$x ]] && rm ~/.$$x || continue; done
 
-list:
-	@echo listing all work_files
-	@for f in $(work_files); do  echo $$f;  done
+update:
+	@git add .
+	@git commit
 
 archive:
-	@for f in $(dot_files); do \
-	    [[ -f ~/.$$f ]] && cp ~/.$$f ~/.$$f~ || : ; \
-	done
-
-revert:
-	@for f in $(dot_files); do \
-	    [[ -f ~/.$$f~ ]] && cp ~/.$$f~ /.$$f || : ; \
-	done
-
-dcheck:
-	@echo checking dot files
-	@for f in $(dot_files); do \
-	    [[ -f ~/.$$f ]] || continue; \
-	    $$(diff -q ~/.$$f $(DOTFILE_DIR)/$$f) && continue; \
-	    clear; echo checking $$f; \
-	    diff ~/.$$f $(DOTFILE_DIR)/$$f; \
-	    echo checked $$f; \
-	    read; \
-	done
-
-check:
-	@echo checking dot files
-	@for f in $(dot_files); do \
-	    [[ -f ~/.$$f ]] || continue; \
-	    diff -q ~/.$$f $(DOTFILE_DIR)/$$f; \
-	done
-
-updates:
-	@for x in $(updates); do echo update $$x; done
-
-fix:
-	@for x in $(updates); do echo fixing $$x; cp $$x ~/.$${x##*/}; done
-
-dots:
-	@echo copying $(dot_files)
-	@for d in $(dot_files); do \
-	    cp $(DOTFILE_DIR)/$$d $(DEST)/.$$d; \
-	done
-
-$(dot_files):
-	@echo copying $@
-	@[[ -f $(DOTFILE_DIR)/$@ ]] && cp $(DOTFILE_DIR)/$@ $(DEST)/.$@;
+	@git archive --format tar.gz -o /tmp/$(USER).tar.gz HEAD
 
 printme.txt:
 	@echo making work copy
@@ -83,12 +37,10 @@ printme.txt:
 	done > printme.txt
 
 printme.ps: printme.txt
-	enscript -2 -r -DDuplex:true -DTumble:true -o printme.ps printme.txt
-	rm printme.txt
+	@enscript -2 -r -DDuplex:tru -DTumble:true -o printme.ps printme.txt
+	@rm printme.txt
 
 print: printme.ps
-	enscript -Z -P local printme.ps
-	rm printme.ps
+	@enscript -Z -P local printme.ps
+	@rm printme.ps
 
-env.tar:
-	tar -cvf env.tar --exclude='./.git/*' --exclude='printme.*' *;

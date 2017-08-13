@@ -2,10 +2,13 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 
 # first we need to clear up the crap from the system
-complete -r
-unalias -a
-unset -f $(compgen -A function)
-unset ${!LC_*}
+. ~/Git/ENV/functions/load
+_envpurge
+
+#complete -r
+#unalias -a
+#unset -f $(compgen -A function)
+#unset ${!LC_*}
 
 # set some basic items
 export TZ=America/New_York
@@ -19,5 +22,5 @@ shopt -s extglob
 PS1='\h:\w \u\$ '
 
 export CDPATH=".:..:../..:~"
-
+cd ~
 . ~/.bashrc

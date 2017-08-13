@@ -1,13 +1,25 @@
 
-#TAG:use
 # vim: ai si sw=4 sts=4 et ft=sh
+#TAG:use
 
-vpurge() {
+_varsplit () {
     [[ ${#1} -eq 1 ]] || set -- ':' "$1"
-    declare x out
-    for x in $(find ${2//$1/ } -maxdepth 0 ! -empty); do
-	[[ -d $x ]] || continue
-	[[ $out =~ :$x: ]] || out+=:$x
+    echo ${!2} | sed -n "s/$1/\n/gp"
+}
+
+_dedupe () {
+    declare x
+    declare -a out
+    while read x; do
+        for k in "${out[@]}"; do
+            [[ ":$x:" == ":$k:" ]] && break 2
+        done
+        out+=($x)
     done
-    echo ${out:1} #skip the first :
+    declare IFS=$':'
+    echo "${out[*]}"
+}
+
+vpurge () {
+    _varsplit $1 | _dedupe
 }

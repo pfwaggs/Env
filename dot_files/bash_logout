@@ -1,9 +1,9 @@
 
 
 clear
-rm $SMAP
 [[ $SHLVL -eq 1 ]] || return 0
-[[ -L $LA ]] || { ssh-agent -k; rm $LA $SA; }
+[[ -f $LA ]] && { ssh-agent -k; rm $LA $SA; }
+[[ -f $SMAP ]] && rm $SMAP
 printf "%s closing subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
 fortune=$(type fortune)
 [[ $fortune ]] || return 0

@@ -1,5 +1,5 @@
 
-#TAG:use
 # vim: ai si sw=4 sts=4 et ft=sh
+#TAG:use
 
 parx () { [[ $PATH =~ '..:' ]] && PATH=${PATH/\.\.:} || PATH=..:$PATH; }

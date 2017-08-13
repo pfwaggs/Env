@@ -1,9 +1,9 @@
 
-#TAG:use
 # vim: ai si sw=4 sts=4 et ft=sh
+#TAG:use
 
 agent+ () {
     [[ -s $LA ]] && . $LA || eval "$(ssh-agent -a $SA | tee $LA)"
     ssh-add -l -E md5 || ssh-add $(ls ~/.ssh/*_rsa)
-    [[ $LA -ef $SMAP ]] || ln $LA $SMAP
+    [[ -L $SMAP ]] || ln $LA $SMAP
 }
