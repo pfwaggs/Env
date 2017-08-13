@@ -3,29 +3,14 @@
 trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 
 set -C -b -o vi
-echo $PATH
+
 HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
 export ENV=$ENVDIR/misc:$ENVDIR/functions
 . ~/Git/ENV/functions/load
 load ${ENV//:/ }
-echo $PATH
-
-#VERBOSE=1
-#for dir in ${ENVDIR}/{misc,functions}; do
-#    echo checking $dir
-#    for n in $(grep -l TAG:use $dir/*); do
-#	[[ -v VERBOSE ]] && echo $n || echo -n .
-#	. $n
-#    done
-#    echo finished $dir
-#    ENV+=:$dir
-#done
 
 echo $STATE 
-
-# less filling, tastes great!
-#export ENV=$(vpurge ENV)
 
 . ~/.mkpaths
 PATH=$(vpurge PATH)
