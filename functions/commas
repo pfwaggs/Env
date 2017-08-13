@@ -1,4 +1,3 @@
 
 #TAG:use
-commas () { perl -ne '1 while s/(\d)(\d{3})(?!\d)/$1,$2/g; print'; }
-
+commas () { rev | sed -n 's/.../&,/g;s/,$//;p' | rev; }
