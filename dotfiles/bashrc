@@ -11,7 +11,6 @@ export ENVDIR=~/Git/ENV
 
 echo $STATE 
 
-echo $PATH
 . ~/.aliases
 . ~/.basevars
 . ~/.fs_home
