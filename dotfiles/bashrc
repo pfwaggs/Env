@@ -11,6 +11,11 @@ export ENVDIR=~/Git/ENV
 
 echo $STATE 
 
+echo $PATH
+. ~/.aliases
+. ~/.basevars
+. ~/.fs_home
+
 . ~/.mkpaths
 PATH=$(vpurge PATH)
 
@@ -24,9 +29,6 @@ export VISUAL=$EDITOR
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
-. ~/.aliases
-. ~/.basevars
-. ~/.fs_home
 
 declare -xr LA=~/.ssh/smap/$host.load
 declare -xr SA=~/.ssh/smap/$host.socket
