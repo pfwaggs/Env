@@ -1,0 +1,14 @@
+
+# vim: ai si sw=4 sts=4 et ft=sh 
+#TAG:use
+host=${HOSTNAME%%.*}
+host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
+pc_s=$'\e]0;'
+pc_e=$'\a'
+case $TERM in
+    xterm) pc_m="${PWD#${PWD%/*/*}/}" ;;
+esac
+PROMPT_COMMAND='echo -ne ${pc_s}${pc_m}${pc_e}'
+STATE=normal
+export LOCAL=/usr/local
+

@@ -2,8 +2,7 @@
 # vim: ai si sw=4 sts=4 et ft=sh
 
 # first we need to clear up the crap from the system
-. ~/Git/ENV/functions/load
-_envpurge
+. ~/.envpurge
 
 # set some basic items
 export TZ=America/New_York

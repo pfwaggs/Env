@@ -6,9 +6,8 @@ set -C -b -o vi
 
 HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
-export ENV=$ENVDIR/misc:$ENVDIR/functions
-. ~/Git/ENV/functions/load
-load ${ENV//:/ }
+#export ENV=$ENVDIR/misc:$ENVDIR/functions
+. ~/.envpurge
 
 echo $STATE 
 
@@ -25,6 +24,9 @@ export VISUAL=$EDITOR
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
+. ~/.aliases
+. ~/.basevars
+. ~/.fs_home
 
 declare -xr LA=~/.ssh/smap/$host.load
 declare -xr SA=~/.ssh/smap/$host.socket

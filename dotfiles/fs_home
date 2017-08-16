@@ -1,0 +1,609 @@
+
+#>>> L
+L () { ls -lad "${1:-.}"/.* 2>/dev/null; }
+#<<< L
+
+#>>> agent+
+agent+ () {
+    [[ -s $LA ]] && . $LA || eval "$(ssh-agent -a $SA | tee $LA)"
+    ssh-add -l -E md5 || ssh-add $(ls ~/.ssh/*_rsa)
+    [[ -L $SMAP ]] || ln $LA $SMAP
+}
+#agent+
+#<<< agent+
+
+#>>> bpath
+declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin )
+declare -A base=( [path]=/usr/sbin:/usr/bin:/sbin:/bin )
+declare -A games=( [path]=/usr/local/games:/usr/games )
+
+_bpath () {
+    declare tmp family block str
+    for family in ${*:-local base}; do
+        [[ $@ ]] || echo $family >&2
+        for key in $(eval "echo \${!$family[*]}"); do
+            eval "str=\${$family[$key]}"
+            str=$(vpurge $str)
+            [[ $str ]] || continue
+            if [[ $@ ]]; then
+                eval "$key+=:$str"
+            else
+                printf "\t%8s = %s\n" ${key} $str >&2
+            fi
+        done
+    done
+    if [[ $@ ]]; then
+        for key in path perl5lib; do
+            eval "$key=\${$key#:}"
+            echo ${key^^}=${!key}
+        done
+    fi
+}
+#_bpath
+
+bpath () {
+    declare x
+    if [[ $@ ]]; then
+        [ $1 = reset ] && shift
+        for x in $(_bpath ${@:-local base}); do
+            eval $x
+        done
+    else
+        echo help invoked
+        echo current configuration:
+        for x in PATH PERL5LIB; do
+            echo ${x}=${!x}
+        done
+        _bpath
+    fi
+}
+#bpath
+
+addpath () {
+    declare x nbin
+    declare -A update
+    [[ $1 ]] || set -- $PWD
+    [[ $1 =~ ^\. ]] && set -- $(sed -e "s:^.:$PWD:" <<< $1)
+    for x in $*; do
+        nbin=
+        [ -d "$x"/sbin ] && nbin=$x/sbin || :
+        [ -d "$x"/bin ] && nbin=${nbin:+$nbin:}$x/bin || :
+        [[ $nbin ]] && update[PATH]=$nbin${PATH:+:$PATH}
+        [ -d "$x"/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB} || :
+        for x in ${!update[@]}; do
+            eval "$x=${update[$x]}:${!x}"
+        done
+    done
+
+}
+#addpath
+
+export PERL5LIB
+#<<< bpath
+
+#>>> cd
+_cd () {
+    declare x list=$(compgen -d $2)
+    [[ $list ]] || list=$(compgen -d ../$2)
+    [[ $list ]] || list=$(compgen -d ~/$2)
+    IFS=$'\n'
+    for x in $list; do
+	COMPREPLY+=($x);
+    done
+    IFS=$' \t\n'
+}
+#_cd
+
+complete -o filenames -F '_cd' cd
+
+#<<< cd
+
+#>>> commas
+commas () { rev | sed -n 's/.../&,/g;s/,$//;p' | rev; }
+#<<< commas
+
+#>>> dfx
+dfx () {
+    df -P | grep ${1:-.} | grep ${2:-.} | while read line; do
+	printf "%s " "$(echo $line | cut -f1 -d' ')";
+	printf "%s " "$(echo $line | cut -f2-4 -d' ' | commas)";
+	printf "%s\n" "$(echo $line | cut -f5- -d' ')";
+    done | column -t | awk '{print; printf"\n"}'
+}
+#dfx
+#<<< dfx
+
+#>>> ffunc
+ffunc () {
+    declare -a list=(${1:-$(compgen -A function)})
+    shopt -s extdebug
+    declare -F ${list[@]} | column -t
+    shopt -u extdebug
+}
+#ffunc
+#<<< ffunc
+
+#>>> gigify
+gigify () {
+    declare u=BKMGT b=1024 v=$(echo ${@//[^0-9.+-]}) s=${v//[0-9.]}
+    v=${v//[+-]}
+    [[ $@ =~ [bB] ]] || b=1000
+    declare m=$(dc -e "$v Z 1 - 3 / p")
+    v=$(dc -e "4 k $v $f $m ^ / p")
+    printf "%s%7.3f%s\n" "${s: }" $v ${u:$m:1}
+}
+#gigify
+#<<< gigify
+
+#>>> julian
+julian () {
+    if [[ $# -eq 0 ]]; then
+	date +%Y.%j
+    elif [[ $1 =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2} ]]; then
+	date -u -d $1 +%Y.%j	
+    elif [[ $1 =~ ^[0-9]{4}.[0-9]{3} ]]; then
+	declare y d
+	read y d <<< $(echo $1 | perl -nle 'print s/\D/ /r')
+	date -u -d "$y-01-01 $((d-1)) days" +%F
+    else
+	echo 'unknown request'
+    fi
+}
+#julian
+#<<< julian
+
+#>>> killdir
+killdir () {
+    [[ -f .wpr ]] && echo write protect ring found && return 0
+    read -p "remove \"${1:-${OLDPWD##*/}} ?\" ";
+    [[ ${REPLY:0:1} = @(y|Y) ]] && rm -rf "${1:-${OLDPWD##*/}}"
+}
+#killdir
+#<<< killdir
+
+#>>> lister
+lister () {
+    declare n
+    for n in $(~/helpers/bin/pickme.pl $@); do echo $n; done
+}
+#lister
+#<<< lister
+
+#>>> load
+_loaddir () {
+    echo checking $1
+    for n in $(grep -l '#TAG:use' $1/*); do
+        [[ -v VERBOSE ]] && echo $n || echo -n .
+        . $n
+    done
+    echo finished $1
+}
+#_loaddir
+
+_dircheck () {
+    for x in ${ENV//:/ }; do
+        [[ -f $x/$1 ]] || continue
+        echo $x/$1
+    done
+}
+#_dircheck
+
+_envpurge () { . ~/.envpurge; }
+#_envpurge
+
+load () {
+    if [[ $# -eq 0 ]]; then
+	_envpurge
+	set -- ${ENV//:/ }
+    fi
+    for x in $*; do
+        str=$(file -b $x)
+        case ${str%% *} in
+            cannot)
+                echo checking dirs to see if there
+                rtn=$(_dircheck $x)
+                [[ -z $rtn ]] || load $rtn
+                ;;
+            directory)
+                _loaddir $x
+                ;;
+            ASCII)
+                . $x
+                ;;
+        esac
+    done
+}
+#load
+
+#load () {
+#    declare path file dir n ans
+#    case $# in
+#	0)
+#	    echo reloading all
+#	    read -p 'are you sure? ' ans
+#	    [[ ! $ans =~ ^[yY] ]] && echo stopping now && return 1
+#
+#	    unalias -a
+#	    unset -f $(compgen -A function)
+#	    complete -r
+#
+#	    for dir in ${ENV//:/ }; do
+#		pushd $dir >/dev/null
+#		for n in $(ls -I#*); do
+#		    [[ $VERBOSE ]] && echo $PWD/$n || echo -n .
+#		    . ./$n
+#		done
+#		echo finished $PWD
+#		popd >/dev/null
+#	    done
+#	    ;;
+#	*)
+#	    for file in "$@"; do
+#		if [[ -s $file ]]; then
+#		    source "$file"
+#		    echo sourced $file
+#		elif [[ -d $file ]]; then
+#		    pushd $file >/dev/null
+#		    for n in $(ls -I#*); do
+#			[[ $VERBOSE ]] && echo $PWD/$n || echo -n .
+#			. ./$n
+#		    done
+#		    echo finished $PWD
+#		    popd >/dev/null
+#		else
+#		    for dir in ${ENV//:/ }; do
+#			[[  -s "$dir/$file" ]] && path=$dir/$file || break
+#			read -p "load $path ?" ans
+#			[[ $ans =~ ^[yY] ]] && source "$path" || echo skipping $path
+#		    done
+#		fi
+#	    done
+#	    ;;
+#    esac
+#}
+
+#<<< load
+
+#>>> lsu
+lsu () {
+    declare np[0]=${1:-$PWD}
+    while [[ ${np[0]%/*} =~ / ]]; do
+	np=("${np[0]%/*}" "${np[@]}")
+    done
+    ls -ld /"${np[@]}"
+}
+#lsu
+#<<< lsu
+
+#>>> mkwdir
+mkwdir () {
+    declare d="${1:-$(date +%F)}.";
+    declare x=$(ls -d $d* 2>/dev/null | wc -l);
+    printf -v d "$d%02d" $((1+x));
+    mkdir $d;
+}
+#mkwdir
+#<<< mkwdir
+
+#>>> mydd
+mydd () {
+    declare if="$1"
+    shift
+    dd if="$if" "$@"
+}
+#mydd
+#<<< mydd
+
+#>>> myenv
+myenv () {
+    declare -a retry
+    case $1 in
+	LIST)
+	    shift
+	    for x in $@; do echo $x = ${!x}; done
+	    ;;
+	list)
+	    shift
+	    for x in $@; do
+		[[ -n ${!x} ]] && retry+=($x) && continue
+		x=${x,,}
+		[[ -n ${!x} ]] && retry+=($x) && continue
+		x=${x^^}
+		[[ -n ${!x} ]] && retry+=($x) && continue
+		echo ${retry[@]}
+	    done
+	    myenv LIST ${retry[@]}
+	    ;;
+	*)
+	    myenv list $@
+	    ;;
+    esac
+}
+#myenv
+#<<< myenv
+
+#>>> mytab
+mytab () { 
+    case $1 in
+	str) PROMPT_COMMAND='echo -ne $ps_s$str$ps_e';;
+	reset)
+	    if [[ $MACHTYPE =~ apple ]]; then
+		PROMPT_COMMAND='echo -ne $ps_s${PWD#${PWD%/*/*}/}$ps_e'
+	    else
+		PROMPT_COMMAND='echo -ne $pc_linux'
+	    fi
+	    ;;
+    esac
+}
+#mytab
+#<<< mytab
+
+#>>> mytail
+mytail () {
+    mytailf |
+    while read iface mac; do
+        echo $iface ${mac:(-8)};
+    done | sed -n 's/:/ /gp'
+} 
+#mytail
+
+mytailf () {
+    [[ $(type -p ip) ]] || return 0;
+    ip -o link show | perl -anlE 'next if /\slo:/; say "@F[1,-3]"'
+} 
+#mytailf
+
+mytail2 () {
+    mytailf | sed -n 's/ //; s/:/ 0x/gp' |
+    perl -MData::Printer -an -lE '$n=shift @F; @F=map{0+$_}@F; $F[0]^=$F[3];$F[1]^=$F[4];$F[2]^=$F[5];p @F'; #printf "%s\t%x %x %x\n", @F[0..3]'
+#   while read iface mac; do
+#       echo $iface ${mac:(-8)};
+#   done |
+}
+#mytail2
+#<<< mytail
+
+#>>> parx
+parx () { [[ $PATH =~ '..:' ]] && PATH=${PATH/\.\.:} || PATH=..:$PATH; }
+#<<< parx
+
+#>>> pd
+pd () {
+    if [[ $1 =~ ^[-+[:digit:]][[:digit:]]*$ ]]; then
+	[[ $1 =~ ^[[:digit:]] ]] && pushd +$1 || pushd $1
+    else
+	[[ $1 ]] && pushd "$1" || pushd
+    fi > /dev/null
+    dirs -l -v
+}
+#pd
+#<<< pd
+
+#>>> prep
+prep () {
+    declare name type dir=${ENVDIR}/prep_files
+    [[ -s $dir/map ]] || continue
+    source $dir/map
+    for name in $@; do
+	type=${name#*.}
+	declare list=$(compgen -d -f $name)
+	[[ -z $list ]] || eval "echo $name exists: skipping; continue"
+	cp $dir/${map[$type]} $name
+	[[ 0 -eq $? ]] || eval "echo copy failed; continue"
+	[[ $type =~ fn|pm ]] && sed -i -e "s/zZz/$name/" $name
+	[[ $type =~ sh|pl|py ]] && chmod 755 $name
+	[[ $name =~ fn ]] && mv $name ${name%.$type}
+	echo prepped $name as ${map[$type]}
+    done
+}
+#prep
+#<<< prep
+
+#>>> psfu
+psfu () { ps -f -u ${1:-$(id -un)}; }
+#<<< psfu
+
+#>>> qdirs
+for n in etc bin lib data tmp exp; do
+    eval "$n () { declare here=\$PWD; until [[ -d $n || ( ! \$PWD =~ \$USER ) ]]; do cd ..; done;
+    if [[ -d $n ]]; then cd $n; else cd \$here; echo $n not found; fi; }"
+done
+#<<< qdirs
+
+#>>> setprompt
+declare -g -A ct pc
+ct=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
+pc=([user]=blue [host]=cyan [spath]=green [lpath]=green [prmt]=green [xtra]=red)
+
+declare -g -a base_prompt po
+base_prompt=(xtra host user spath lpath prmt)
+po=(host prmt)
+
+mkpc () {
+    declare tmp ndx us
+    PS1=''
+    for ndx in ${po[@]}; do
+	read tmp <<< $(cs ${pc[$ndx]})
+	case $ndx in
+	    xtra)  PS1+=$'\[\e['$tmp$'m\]$xtra' ;;
+	    host)  PS1+=$'\[\e['$tmp$'m\]\h' ;;
+	    user)  PS1+=$'\[\e['$tmp$'m\]($defuser)' ;;
+	    lpath) PS1+=$'\[\e['$tmp$'m\]{\w}' ;;
+	    spath) PS1+=$'\[\e['$tmp$'m\]{\W}' ;;
+	    prmt)  PS1+=$'\[\e['$tmp$'m\]\$' ;;
+	esac
+	[[ $tmp =~ ';' ]] && PS1+=$'\[\e[m\]'
+    done
+    PS1+=$'\[\e[m\] '
+}
+#mkpc
+
+cs () {
+    declare ncg=$(shopt -p nocaseglob) us=$1
+    [[ $ncg =~ -s ]] && shopt -u nocaseglob
+    [[ $us =~ B ]] && us=${us/B/1;}
+    [[ $us =~ _ ]] && us=${us/_/4;}
+    [[ $us =~ R ]] && us=${us/R/7;}
+    [[ $ncg =~ -s ]] && $ncg
+    [[ $us =~ ';' ]] && us="${us%;*};${ct[${us##*;}]}" || us=${ct[${us##*;}]}
+    echo $us
+}
+#cs
+
+show_colors () {
+    declare ndx
+    for ndx in black red green yellow blue magenta cyan white; do
+	echo -ne "\E[${ct[$ndx]}m $ndx \E[m "
+    done
+    echo ''
+}
+#show_colors
+
+build_select () {
+    declare ndx tmp
+    colors=()
+    for ndx in ${base_prompt[@]}; do
+	read tmp <<< $(cs ${pc[$ndx]})
+	colors=("${colors[@]}" $(eval "echo -e '\E[${tmp}m$ndx\E[m'"))
+    done
+    if [[ $1 == show ]]; then
+	for ndx in "${colors@]}"; do
+	    echo -e $ndx
+	done
+	unset colors
+    fi
+}
+#build_select
+
+build_drop () {
+    declare ndx
+    drop=()
+    for ndx in ${base_prompt[@]}; do
+	[[ ! ${po[@]} =~ $ndx ]] && drop=(${drop[@]} $ndx)
+    done
+}
+#build_drop
+
+p% () {
+    declare OPTARG OPTIND REPLY
+    declare ndx val new color
+    declare -a colors
+    declare -a drop
+    while [ 1 ]; do
+	show_colors
+	build_select
+	build_drop
+	PS3="${po[@]} <> ${drop[@]}: "
+	select val in "${colors[@]}" 'clear' quit; do
+	    case ${val:=$REPLY} in
+		quit) break 2 ;;
+		'clear')
+		    drop=(${po[@]} ${dorp[@]});
+		    po=()
+		    ;;
+		*)
+		    read val color <<< $REPLY
+		    if [[ -n $color ]]; then
+			pc[$val]=$color
+			mkpc
+			break
+		    else
+			if [[ ${po[@]} =~ $val ]]; then
+			    tmp=${po[@]}
+			    read -a po <<< ${tmp//$val}
+			    drop=(${drop[@]} $val)
+			else
+			    tmp=${drop[@]}
+			    read -a drop <<< ${tmp//$val}
+			    po=(${po[@]} $val)
+			fi
+		    fi
+		    ;;
+	    esac
+	    PS3="${po[@]} <> ${drop[@]}: "
+	done
+    done
+    mkpc
+}
+#p%
+#<<< setprompt
+
+#>>> show
+_show () { compgen -v | grep -i -E ^_?$2; }
+
+show () {
+    [[ ${!1} ]] || echo ${ERROR:?"no valid variable for $1"}
+    set | grep ^$1= | sed -n -e 's/=/ = /p'
+}
+complete -C '_show' show
+#<<< show
+
+#>>> spnd
+spnd () {
+    sudo at now + 5 minutes -f ~/suspend
+#dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend & exit
+}
+#<<< spnd
+
+#>>> spx
+spx () { echo $@ | aspell -a; }
+#<<< spx
+
+#>>> tll
+tll () {
+    declare n
+    for n in $@; do
+        [[ $(type -t $n) != file ]] && echo "skipping $n" && continue
+        for n in $(type -aP $n); do ls -l "$n"; done
+    done
+}
+#tll
+#<<< tll
+
+#>>> tname
+tname () { printf "\033k%s\033\\" $1; }
+#<<< tname
+
+#>>> types
+typef () { declare -a p; type -a $1 | while read -a p; do file ${p[-1]}; done; }
+
+typel () { declare -a p; type -a $1 | while read -a p; do ls -l ${p[-1]}; done; }
+
+typel () { declare -a p; type -a $1 | while read -a p; do less ${p[-1]}; done; }
+#<<< types
+
+#>>> vpurge
+_varsplit () {
+    [[ ${#1} -eq 1 ]] || set -- ':' "$1"
+    echo ${!2} | sed -n "s/$1/\n/gp"
+}
+#_varsplit
+
+_dedupe () {
+    declare x
+    declare -a out
+    while read x; do
+        for k in "${out[@]}"; do
+            [[ ":$x:" == ":$k:" ]] && break 2
+        done
+        out+=($x)
+    done
+    declare IFS=$':'
+    echo "${out[*]}"
+}
+#_dedupe
+
+vpurge () {
+    _varsplit $1 | _dedupe
+}
+#vpurge
+#<<< vpurge
+
+#>>> wup
+wup () {
+    declare cmd=$(type -p etherwake wol)
+    declare ip=$(dig +search +short -t txt $1)
+    eval $cmd $ip
+}
+#wup
+#<<< wup

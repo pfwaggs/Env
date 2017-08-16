@@ -1,0 +1,4 @@
+complete -r
+unalias -a
+unset -f $(compgen -A function)
+unset ${!LC_*}

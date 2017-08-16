@@ -3,44 +3,43 @@ SHELL = /bin/bash
 
 BASE = ~/Git/ENV
 
-DOTFILE_DIR = $(BASE)/dot_files
-DOTFILES = $(notdir $(wildcard $(DOTFILE_DIR)/*))
+fs = $(BASE)/dotfiles/fs_*
+fs := $(sort $(wildcard $(fs)))
 
-work_dirs = dot_files functions misc prep_files
-work_files = $(shell find $(work_dirs) -name \.git -prune -o -type f | sort)
+dots = $(BASE)/dotfiles/*
+dots := $(sort $(filter-out $(fs), $(wildcard $(dots))))
 
-all: info
+info := dots fs
 
-info:
-	@for x in $(DOTFILES); do echo $$x; done
-	@echo $(USER)
+.PHONEY = $(info)
+
+all: $(info)
+
+$(info) :
+	@echo listing $@;
+	@for x in $($@); do echo $$x; done
 
 link:
-	@for x in $(DOTFILES); do ln $(DOTFILE_DIR)/$$x ~/.$$x; done
+	@for x in $(dots) $(fs); do ln $$x ~/.$${x##*/}; done
 
 unlink:
-	@for x in $(DOTFILES); do [[ -f ~/.$$x ]] && rm ~/.$$x || continue; done
-
-update:
-	@git add .
-	@git commit
+	@for x in $(dots) $(fs) ; do rm ~/.$${x##*/}; done
 
 archive:
 	@git archive --format tar.gz -o /tmp/$(USER).tar.gz HEAD
 
-printme.txt:
+txt:
 	@echo making work copy
-	@for f in $(work_files); do \
-	    grep -q '#TAG:use' "$$f" || continue; \
+	@for f in Makefile $(dots) $(fs); do \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \
-	done > printme.txt
+	done > txt
 
-printme.ps: printme.txt
-	@enscript -2 -r -DDuplex:tru -DTumble:true -o printme.ps printme.txt
-	@rm printme.txt
+ps: txt
+	@enscript -2 -r -DDuplex:true -DTumble:true -o ps txt
+	@rm txt
 
-print: printme.ps
-	@enscript -Z -P local printme.ps
-	@rm printme.ps
+print: ps
+	@enscript -Z -P local ps
+	@rm ps
 
