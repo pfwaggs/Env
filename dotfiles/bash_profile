@@ -4,11 +4,9 @@
 
 # set some basic items
 export TZ=America/New_York
-export LANG=en_US.UTF-8
-export LC_COLLATE=C
-export PRINTER=local #this is a printer class
 umask 0022
 
+export PRINTER=local #this is a printer class
 shopt -s extglob
 
 PS1='\h:\w \u\$ '

@@ -1,0 +1,3 @@
+#>>> commas
+commas () { rev | sed -n 's/.../&,/g;s/,$//;p' | rev; }
+

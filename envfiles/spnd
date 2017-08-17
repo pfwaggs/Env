@@ -1,0 +1,5 @@
+#>>> spnd
+spnd () {
+    sudo at now + 5 minutes -f ~/suspend
+}
+

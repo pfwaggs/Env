@@ -1,0 +1,9 @@
+#>>> show
+_show () { compgen -v | grep -i -E ^_?$2; }
+
+show () {
+    [[ ${!1} ]] || echo ${ERROR:?"no valid variable for $1"}
+    set | grep ^$1= | sed -n -e 's/=/ = /p'
+}
+complete -C '_show' show
+

@@ -1,7 +1,42 @@
+#>>>> aliases
+alias ..='cd ..'
+alias ...='cd ../..'
+alias c='clear'
+alias ?='dirs -l -v'
+alias edit='$EDITOR'
+alias h='history'
+alias vimh='vim "+:help" "+:only"'
+alias l='ls -F'
+alias ll='l -l'
+alias lr='ll -R'
+alias now='date -u; date +"%a %h %d %T"; date +%s | commas'
+alias p='$PAGER'
+alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
+alias vm='vim'
+alias vi='$VISUAL'
+alias brewon='source ~/perl5/perlbrew/etc/bashrc'
+alias dateme='ntpdate 0.pool.ntp.org'
+alias shutdown='sudo /usr/bin/shutdown'
+alias pacman='sudo /usr/bin/pacman'
+alias pmnew='sudo /usr/bin/pacman -Sy; sudo /usr/bin/pacman -Qu'
+alias pmup='sudo /usr/bin/pacman -Su'
+alias su='sudo /bin/su -'
+alias Cat='clear; cat '
+
+#>>>> basevars
+host=${HOSTNAME%%.*}
+host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
+pc_s=$'\e]0;'
+pc_e=$'\a'
+case $TERM in
+    xterm) pc_m="${PWD#${PWD%/*/*}/}" ;;
+esac
+PROMPT_COMMAND='echo -ne ${pc_s}${pc_m}${pc_e}'
+STATE=normal
+export LOCAL=/usr/local
 
 #>>> L
 L () { ls -lad "${1:-.}"/.* 2>/dev/null; }
-#<<< L
 
 #>>> agent+
 agent+ () {
@@ -9,8 +44,6 @@ agent+ () {
     ssh-add -l -E md5 || ssh-add $(ls ~/.ssh/*_rsa)
     [[ -L $SMAP ]] || ln $LA $SMAP
 }
-#agent+
-#<<< agent+
 
 #>>> bpath
 declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin )
@@ -39,7 +72,6 @@ _bpath () {
         done
     fi
 }
-#_bpath
 
 bpath () {
     declare x
@@ -57,7 +89,6 @@ bpath () {
         _bpath
     fi
 }
-#bpath
 
 addpath () {
     declare x nbin
@@ -76,10 +107,8 @@ addpath () {
     done
 
 }
-#addpath
 
 export PERL5LIB
-#<<< bpath
 
 #>>> cd
 _cd () {
@@ -92,15 +121,11 @@ _cd () {
     done
     IFS=$' \t\n'
 }
-#_cd
 
 complete -o filenames -F '_cd' cd
 
-#<<< cd
-
 #>>> commas
 commas () { rev | sed -n 's/.../&,/g;s/,$//;p' | rev; }
-#<<< commas
 
 #>>> dfx
 dfx () {
@@ -110,8 +135,6 @@ dfx () {
 	printf "%s\n" "$(echo $line | cut -f5- -d' ')";
     done | column -t | awk '{print; printf"\n"}'
 }
-#dfx
-#<<< dfx
 
 #>>> ffunc
 ffunc () {
@@ -120,8 +143,6 @@ ffunc () {
     declare -F ${list[@]} | column -t
     shopt -u extdebug
 }
-#ffunc
-#<<< ffunc
 
 #>>> gigify
 gigify () {
@@ -132,8 +153,6 @@ gigify () {
     v=$(dc -e "4 k $v $f $m ^ / p")
     printf "%s%7.3f%s\n" "${s: }" $v ${u:$m:1}
 }
-#gigify
-#<<< gigify
 
 #>>> julian
 julian () {
@@ -149,8 +168,6 @@ julian () {
 	echo 'unknown request'
     fi
 }
-#julian
-#<<< julian
 
 #>>> killdir
 killdir () {
@@ -158,16 +175,12 @@ killdir () {
     read -p "remove \"${1:-${OLDPWD##*/}} ?\" ";
     [[ ${REPLY:0:1} = @(y|Y) ]] && rm -rf "${1:-${OLDPWD##*/}}"
 }
-#killdir
-#<<< killdir
 
 #>>> lister
 lister () {
     declare n
     for n in $(~/helpers/bin/pickme.pl $@); do echo $n; done
 }
-#lister
-#<<< lister
 
 #>>> load
 _loaddir () {
@@ -178,7 +191,6 @@ _loaddir () {
     done
     echo finished $1
 }
-#_loaddir
 
 _dircheck () {
     for x in ${ENV//:/ }; do
@@ -186,14 +198,10 @@ _dircheck () {
         echo $x/$1
     done
 }
-#_dircheck
-
-_envpurge () { . ~/.envpurge; }
-#_envpurge
 
 load () {
     if [[ $# -eq 0 ]]; then
-	_envpurge
+	. ~/.envpurge
 	set -- ${ENV//:/ }
     fi
     for x in $*; do
@@ -213,56 +221,6 @@ load () {
         esac
     done
 }
-#load
-
-#load () {
-#    declare path file dir n ans
-#    case $# in
-#	0)
-#	    echo reloading all
-#	    read -p 'are you sure? ' ans
-#	    [[ ! $ans =~ ^[yY] ]] && echo stopping now && return 1
-#
-#	    unalias -a
-#	    unset -f $(compgen -A function)
-#	    complete -r
-#
-#	    for dir in ${ENV//:/ }; do
-#		pushd $dir >/dev/null
-#		for n in $(ls -I#*); do
-#		    [[ $VERBOSE ]] && echo $PWD/$n || echo -n .
-#		    . ./$n
-#		done
-#		echo finished $PWD
-#		popd >/dev/null
-#	    done
-#	    ;;
-#	*)
-#	    for file in "$@"; do
-#		if [[ -s $file ]]; then
-#		    source "$file"
-#		    echo sourced $file
-#		elif [[ -d $file ]]; then
-#		    pushd $file >/dev/null
-#		    for n in $(ls -I#*); do
-#			[[ $VERBOSE ]] && echo $PWD/$n || echo -n .
-#			. ./$n
-#		    done
-#		    echo finished $PWD
-#		    popd >/dev/null
-#		else
-#		    for dir in ${ENV//:/ }; do
-#			[[  -s "$dir/$file" ]] && path=$dir/$file || break
-#			read -p "load $path ?" ans
-#			[[ $ans =~ ^[yY] ]] && source "$path" || echo skipping $path
-#		    done
-#		fi
-#	    done
-#	    ;;
-#    esac
-#}
-
-#<<< load
 
 #>>> lsu
 lsu () {
@@ -272,8 +230,6 @@ lsu () {
     done
     ls -ld /"${np[@]}"
 }
-#lsu
-#<<< lsu
 
 #>>> mkwdir
 mkwdir () {
@@ -282,8 +238,6 @@ mkwdir () {
     printf -v d "$d%02d" $((1+x));
     mkdir $d;
 }
-#mkwdir
-#<<< mkwdir
 
 #>>> mydd
 mydd () {
@@ -291,8 +245,6 @@ mydd () {
     shift
     dd if="$if" "$@"
 }
-#mydd
-#<<< mydd
 
 #>>> myenv
 myenv () {
@@ -319,8 +271,6 @@ myenv () {
 	    ;;
     esac
 }
-#myenv
-#<<< myenv
 
 #>>> mytab
 mytab () { 
@@ -335,8 +285,6 @@ mytab () {
 	    ;;
     esac
 }
-#mytab
-#<<< mytab
 
 #>>> mytail
 mytail () {
@@ -345,27 +293,19 @@ mytail () {
         echo $iface ${mac:(-8)};
     done | sed -n 's/:/ /gp'
 } 
-#mytail
 
 mytailf () {
     [[ $(type -p ip) ]] || return 0;
     ip -o link show | perl -anlE 'next if /\slo:/; say "@F[1,-3]"'
 } 
-#mytailf
 
 mytail2 () {
     mytailf | sed -n 's/ //; s/:/ 0x/gp' |
     perl -MData::Printer -an -lE '$n=shift @F; @F=map{0+$_}@F; $F[0]^=$F[3];$F[1]^=$F[4];$F[2]^=$F[5];p @F'; #printf "%s\t%x %x %x\n", @F[0..3]'
-#   while read iface mac; do
-#       echo $iface ${mac:(-8)};
-#   done |
 }
-#mytail2
-#<<< mytail
 
 #>>> parx
 parx () { [[ $PATH =~ '..:' ]] && PATH=${PATH/\.\.:} || PATH=..:$PATH; }
-#<<< parx
 
 #>>> pd
 pd () {
@@ -376,8 +316,6 @@ pd () {
     fi > /dev/null
     dirs -l -v
 }
-#pd
-#<<< pd
 
 #>>> prep
 prep () {
@@ -396,19 +334,15 @@ prep () {
 	echo prepped $name as ${map[$type]}
     done
 }
-#prep
-#<<< prep
 
 #>>> psfu
 psfu () { ps -f -u ${1:-$(id -un)}; }
-#<<< psfu
 
 #>>> qdirs
 for n in etc bin lib data tmp exp; do
     eval "$n () { declare here=\$PWD; until [[ -d $n || ( ! \$PWD =~ \$USER ) ]]; do cd ..; done;
     if [[ -d $n ]]; then cd $n; else cd \$here; echo $n not found; fi; }"
 done
-#<<< qdirs
 
 #>>> setprompt
 declare -g -A ct pc
@@ -436,7 +370,6 @@ mkpc () {
     done
     PS1+=$'\[\e[m\] '
 }
-#mkpc
 
 cs () {
     declare ncg=$(shopt -p nocaseglob) us=$1
@@ -448,7 +381,6 @@ cs () {
     [[ $us =~ ';' ]] && us="${us%;*};${ct[${us##*;}]}" || us=${ct[${us##*;}]}
     echo $us
 }
-#cs
 
 show_colors () {
     declare ndx
@@ -457,7 +389,6 @@ show_colors () {
     done
     echo ''
 }
-#show_colors
 
 build_select () {
     declare ndx tmp
@@ -473,7 +404,6 @@ build_select () {
 	unset colors
     fi
 }
-#build_select
 
 build_drop () {
     declare ndx
@@ -482,7 +412,6 @@ build_drop () {
 	[[ ! ${po[@]} =~ $ndx ]] && drop=(${drop[@]} $ndx)
     done
 }
-#build_drop
 
 p% () {
     declare OPTARG OPTIND REPLY
@@ -525,8 +454,6 @@ p% () {
     done
     mkpc
 }
-#p%
-#<<< setprompt
 
 #>>> show
 _show () { compgen -v | grep -i -E ^_?$2; }
@@ -536,18 +463,14 @@ show () {
     set | grep ^$1= | sed -n -e 's/=/ = /p'
 }
 complete -C '_show' show
-#<<< show
 
 #>>> spnd
 spnd () {
     sudo at now + 5 minutes -f ~/suspend
-#dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend & exit
 }
-#<<< spnd
 
 #>>> spx
 spx () { echo $@ | aspell -a; }
-#<<< spx
 
 #>>> tll
 tll () {
@@ -557,12 +480,9 @@ tll () {
         for n in $(type -aP $n); do ls -l "$n"; done
     done
 }
-#tll
-#<<< tll
 
 #>>> tname
 tname () { printf "\033k%s\033\\" $1; }
-#<<< tname
 
 #>>> types
 typef () { declare -a p; type -a $1 | while read -a p; do file ${p[-1]}; done; }
@@ -570,14 +490,12 @@ typef () { declare -a p; type -a $1 | while read -a p; do file ${p[-1]}; done; }
 typel () { declare -a p; type -a $1 | while read -a p; do ls -l ${p[-1]}; done; }
 
 typel () { declare -a p; type -a $1 | while read -a p; do less ${p[-1]}; done; }
-#<<< types
 
 #>>> vpurge
 _varsplit () {
     [[ ${#1} -eq 1 ]] || set -- ':' "$1"
     echo ${!2} | sed -n "s/$1/\n/gp"
 }
-#_varsplit
 
 _dedupe () {
     declare x
@@ -591,13 +509,10 @@ _dedupe () {
     declare IFS=$':'
     echo "${out[*]}"
 }
-#_dedupe
 
 vpurge () {
     _varsplit $1 | _dedupe
 }
-#vpurge
-#<<< vpurge
 
 #>>> wup
 wup () {
@@ -605,5 +520,3 @@ wup () {
     declare ip=$(dig +search +short -t txt $1)
     eval $cmd $ip
 }
-#wup
-#<<< wup

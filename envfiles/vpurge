@@ -1,0 +1,23 @@
+#>>> vpurge
+_varsplit () {
+    [[ ${#1} -eq 1 ]] || set -- ':' "$1"
+    echo ${!2} | sed -n "s/$1/\n/gp"
+}
+
+_dedupe () {
+    declare x
+    declare -a out
+    while read x; do
+        for k in "${out[@]}"; do
+            [[ ":$x:" == ":$k:" ]] && break 2
+        done
+        out+=($x)
+    done
+    declare IFS=$':'
+    echo "${out[*]}"
+}
+
+vpurge () {
+    _varsplit $1 | _dedupe
+}
+

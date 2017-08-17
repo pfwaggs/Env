@@ -1,0 +1,3 @@
+#>>> spx
+spx () { echo $@ | aspell -a; }
+

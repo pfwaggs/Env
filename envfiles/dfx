@@ -1,0 +1,9 @@
+#>>> dfx
+dfx () {
+    df -P | grep ${1:-.} | grep ${2:-.} | while read line; do
+	printf "%s " "$(echo $line | cut -f1 -d' ')";
+	printf "%s " "$(echo $line | cut -f2-4 -d' ' | commas)";
+	printf "%s\n" "$(echo $line | cut -f5- -d' ')";
+    done | column -t | awk '{print; printf"\n"}'
+}
+

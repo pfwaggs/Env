@@ -2,7 +2,7 @@
 # vim: ai si sw=4 sts=4 et ft=sh 
 
 declare add_extras env path
-case "$(uname -s -r)" in
+case "$(/usr/bin/uname -s -r)" in
     *v7+)
         PATH=/usr/sbin:/usr/bin:/sbin:/bin
         [[ $UID -eq 0 ]] || add_extras="LOCAL=/usr/local $HOME"

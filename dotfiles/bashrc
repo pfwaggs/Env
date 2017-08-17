@@ -11,9 +11,7 @@ export ENVDIR=~/Git/ENV
 
 echo $STATE 
 
-. ~/.aliases
-. ~/.basevars
-. ~/.fs_home
+. ~/.envsrc
 
 . ~/.mkpaths
 PATH=$(vpurge PATH)

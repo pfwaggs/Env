@@ -1,5 +1,4 @@
-
-#TAG:use
+#>>>> aliases
 alias ..='cd ..'
 alias ...='cd ../..'
 alias c='clear'
@@ -16,7 +15,6 @@ alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
 alias vm='vim'
 alias vi='$VISUAL'
 alias brewon='source ~/perl5/perlbrew/etc/bashrc'
-#alias make='gnumake'
 alias dateme='ntpdate 0.pool.ntp.org'
 alias shutdown='sudo /usr/bin/shutdown'
 alias pacman='sudo /usr/bin/pacman'
@@ -24,3 +22,4 @@ alias pmnew='sudo /usr/bin/pacman -Sy; sudo /usr/bin/pacman -Qu'
 alias pmup='sudo /usr/bin/pacman -Su'
 alias su='sudo /bin/su -'
 alias Cat='clear; cat '
+

@@ -1,6 +1,4 @@
-
-# vim: ai si sw=4 sts=4 et ft=sh 
-#TAG:use
+#>>>> basevars
 host=${HOSTNAME%%.*}
 host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
 pc_s=$'\e]0;'

@@ -1,0 +1,65 @@
+#>>> bpath
+declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin )
+declare -A base=( [path]=/usr/sbin:/usr/bin:/sbin:/bin )
+declare -A games=( [path]=/usr/local/games:/usr/games )
+
+_bpath () {
+    declare tmp family block str
+    for family in ${*:-local base}; do
+        [[ $@ ]] || echo $family >&2
+        for key in $(eval "echo \${!$family[*]}"); do
+            eval "str=\${$family[$key]}"
+            str=$(vpurge $str)
+            [[ $str ]] || continue
+            if [[ $@ ]]; then
+                eval "$key+=:$str"
+            else
+                printf "\t%8s = %s\n" ${key} $str >&2
+            fi
+        done
+    done
+    if [[ $@ ]]; then
+        for key in path perl5lib; do
+            eval "$key=\${$key#:}"
+            echo ${key^^}=${!key}
+        done
+    fi
+}
+
+bpath () {
+    declare x
+    if [[ $@ ]]; then
+        [ $1 = reset ] && shift
+        for x in $(_bpath ${@:-local base}); do
+            eval $x
+        done
+    else
+        echo help invoked
+        echo current configuration:
+        for x in PATH PERL5LIB; do
+            echo ${x}=${!x}
+        done
+        _bpath
+    fi
+}
+
+addpath () {
+    declare x nbin
+    declare -A update
+    [[ $1 ]] || set -- $PWD
+    [[ $1 =~ ^\. ]] && set -- $(sed -e "s:^.:$PWD:" <<< $1)
+    for x in $*; do
+        nbin=
+        [ -d "$x"/sbin ] && nbin=$x/sbin || :
+        [ -d "$x"/bin ] && nbin=${nbin:+$nbin:}$x/bin || :
+        [[ $nbin ]] && update[PATH]=$nbin${PATH:+:$PATH}
+        [ -d "$x"/lib ] && update[PERL5LIB]=$x/lib${PERL5LIB:+:$PERL5LIB} || :
+        for x in ${!update[@]}; do
+            eval "$x=${update[$x]}:${!x}"
+        done
+    done
+
+}
+
+export PERL5LIB
+
