@@ -1,0 +1,6 @@
+_dircheck () {
+    for x in ${ENV//:/ }; do
+        [[ -f $x/$1 ]] || continue
+        echo $x/$1
+    done
+}

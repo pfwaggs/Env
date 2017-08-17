@@ -4,94 +4,59 @@ SHELL = /bin/bash
 BASE = ~/Git/ENV
 
 ENVDIR = envfiles
+DOTDIR = dotfiles
 
 ifndef DEST
     DEST = $(HOME)
 endif
 
-# this section needs to pull filenames from envsrc file
-#fs = fs_*
-#fs := $(sort $(wildcard $(fs)))
-#envsrc := aliases basevars $(fs)
+misc = archive
+ifdef MISC
+    misc = $(misc) $(MISC)
+endif
 
-filter = $(addprefix $(ENVDIR)/, aliases basevars archive)
-envfiles = $(sort $(filter-out $(filter), $(wildcard $(ENVDIR)/*)))
-envsrc := $(addprefix $(ENVDIR)/, aliases basevars) $(envfiles)
+envfiles = $(wildcard $(ENVDIR)/*)
+head = $(addprefix $(ENVDIR)/, aliases basevars)
+tail = $(addprefix $(ENVDIR)/, completes)
+misc := $(addprefix $(ENVDIR)/, $(misc))
+body = $(filter-out $(head) $(tail) $(misc), $(envfiles))
+envfiles := $(head) $(sort $(body)) $(tail)
 
-dots = dotfiles/*
-dots := $(sort $(notdir $(wildcard $(dots))))
+dotfiles := $(sort $(notdir $(wildcard $(DOTDIR)/*)))
 
-info := dots envsrc 
+info := dotfiles envfiles
 
-.PHONEY = $(info) $(addprefix dotfiles/, $(envsrc)) functions $(fs) breakenv
+.PHONY: $(info) $(dotfiles) clean check 
 
 all: $(info)
 
-$(info) :
+$(info):
 	@echo listing $@;
 	@for x in $($@); do echo $$x; done
 
-dotfiles/envsrc: $(envsrc)
+$(DEST)/.envsrc: $(envfiles)
 	@cat $^ >| $@
 
-link: dotfiles/envsrc
-	@for f in $(dots) envsrc; do \
+envsrc: $(DEST)/.envsrc
+
+link: envsrc
+	@for f in $(dotfiles); do \
 	    [[ $(DEST)/.$$f -ef dotfiles/$$f ]] || ln dotfiles/$$f $(DEST)/.$$f; \
 	done
 
-unlink:
-	@for f in $(dots) envsrc; do \
-	    [[ ! $(DEST)/.$$f -ef dotfiles/$$f ]] || rm $(DEST)/.$$f; \
-	done
+clean: $(addprefix $(DEST)/., envsrc $(dotfiles))
+	@rm $^
+
+check: $(dotfiles)
+	@for f in $^; do [[ $(DEST)/.$$f -ef $(DOTDIR)/$$f ]] || echo missing $$f; done
+	@[[ -s $(DEST)/.envsrc ]] || echo missing envsrc
 
 archive:
 	@git archive --format tar.gz -o /tmp/$(USER).tar.gz HEAD
 
-breakenv2:
-	@csplit dotfiles/envsrc '/#>>>> /' {*}
-	@perl -anl -E 'say join(" ",$$ARGV, $$F[-1]) if $$F[0]=~/#>>>>/' $(ls -Ixx00 xx*) | \
-	    while read x n; do mv $$x $$n; done
-	@for d in fns_*; do \
-	    d=$$d.wrk; \
-	    mkdir $$d; \
-	    echo creating $$d files; \
-	    csplit --prefix=$$d/xx $${d/.wrk} '/#>>> /' {*}; \
-	    cd $$d; \
-	    perl -anl -E 'say join(" ",$$ARGV, $$F[-1]) if $$F[0]=~/#>>>/' $(ls -Ixx00 xx*) | \
-		while read x n; do mv $$x $$n; done; \
-	    cd ..; \
-	done
-
-breakenv:
-	@csplit dotfiles/envsrc '/#>>>> /' {*}
-	@perl -anl -E 'say join(" ",$$ARGV, $$F[-1]) if $$F[0]=~/#>>>>/' xx* | \
-	    while read x n; do mv $$x $$n; done
-	@for d in fns_*; do \
-	    d=$$d.wrk; \
-	    mkdir $$d; \
-	    echo creating $$d files; \
-	    csplit --prefix=$$d/xx $${d/.wrk} '/#>>> /' {*}; \
-	    cd $$d; \
-	    perl -anl -E 'say join(" ",$$ARGV, $$F[-1]) if $$F[0]=~/#>>>/' xx* | \
-		while read x n; do mv $$x $$n; done; \
-	    cd ..; \
-	done
-
-buildenv:
-	@for d in *.wrk; do \
-	    f=$${d/wrk/new}
-	    if [[ -d $$d ]]; then \
-		echo making $$f; \
-		cd $$d; \
-		cat xx00 $$(ls -Ixx00) > ../$$f; \
-		cd ..; \
-	    fi; \
-	done
-	@cat aliases basevars *.new > envsrc.new
-
 txt:
 	@echo making work copy
-	@for f in Makefile $(dots) $(fs); do \
+	@for f in Makefile $(dotfiles) $(envfiles); do \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \
 	done > txt

@@ -1,0 +1,8 @@
+_loaddir () {
+    echo checking $1
+    for n in $(grep -l '#TAG:use' $1/*); do
+        [[ -v VERBOSE ]] && echo $n || echo -n .
+        . $n
+    done
+    echo finished $1
+}

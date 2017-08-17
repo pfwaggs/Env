@@ -1,4 +1,4 @@
-#>>> cd
+#>>> _cd
 _cd () {
     declare x list=$(compgen -d $2)
     [[ $list ]] || list=$(compgen -d ../$2)
@@ -9,6 +9,4 @@ _cd () {
     done
     IFS=$' \t\n'
 }
-
-complete -o filenames -F '_cd' cd
 
