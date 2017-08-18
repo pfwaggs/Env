@@ -37,3 +37,11 @@ done
 
 unset add_extras env path
 
+PATH=$(vpurge PATH)
+
+# had to move these here because of path and function issues.
+export PAGER=$(type -p less more | head -n 1)
+[[ $PAGER =~ less ]] && export LESS='-RCMqsu~' || :
+export EDITOR=$(type -p vim vi | head -n 1)
+export VISUAL=$EDITOR
+

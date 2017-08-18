@@ -3,53 +3,52 @@ SHELL = /bin/bash
 
 BASE = ~/Git/ENV
 
-ENVDIR = envfiles
-DOTDIR = dotfiles
-
 ifndef DEST
     DEST = $(HOME)
 endif
 
-misc = archive
-ifdef MISC
-    misc = $(misc) $(MISC)
-endif
+#misc = archive
+#ifdef MISC
+#    misc = $(misc) $(MISC)
+#endif
 
-envfiles = $(wildcard $(ENVDIR)/*)
-head = $(addprefix $(ENVDIR)/, aliases basevars)
-tail = $(addprefix $(ENVDIR)/, completes)
-misc := $(addprefix $(ENVDIR)/, $(misc))
-body = $(filter-out $(head) $(tail) $(misc), $(envfiles))
-envfiles := $(head) $(sort $(body)) $(tail)
+#envfiles = $(wildcard $(ENVDIR)/*)
+#head = $(addprefix $(ENVDIR)/, aliases basevars)
+#tail = $(addprefix $(ENVDIR)/, completes)
+#misc := $(addprefix $(ENVDIR)/, $(misc))
+#body = $(filter-out $(head) $(tail) $(misc), $(envfiles))
+#envfiles := $(head) $(sort $(body)) $(tail)
 
-dotfiles := $(sort $(notdir $(wildcard $(DOTDIR)/*)))
+envfiles := $(notdir $(sort $(wildcard envfiles/envsrc*)))
+dotfiles := $(notdir $(sort $(wildcard dotfiles/*)))
+files := dotfiles envfiles
 
-info := dotfiles envfiles
+.PHONY: clean check 
 
-.PHONY: $(info) $(dotfiles) clean check 
+lists: $(addprefix list, $(files))
 
-all: $(info)
+list%: %
+	@echo $^;
+	@for x in $($^); do echo -e "\t$$x"; done
 
-$(info):
-	@echo listing $@;
-	@for x in $($@); do echo $$x; done
+links: $(addprefix link, $(files))
 
-$(DEST)/.envsrc: $(envfiles)
-	@cat $^ >| $@
-
-envsrc: $(DEST)/.envsrc
-
-link: envsrc
-	@for f in $(dotfiles); do \
-	    [[ $(DEST)/.$$f -ef dotfiles/$$f ]] || ln dotfiles/$$f $(DEST)/.$$f; \
+link%: %
+	@for f in $($^); do \
+	    t=$(DEST)/.$$f; \
+	    f=$^/$$f; \
+	    [[ $$t -ef $$f ]] || ln $$f $$t; \
 	done
 
-clean: $(addprefix $(DEST)/., envsrc $(dotfiles))
-	@rm $^
+clean: $(addprefix clean, $(files))
 
-check: $(dotfiles)
-	@for f in $^; do [[ $(DEST)/.$$f -ef $(DOTDIR)/$$f ]] || echo missing $$f; done
-	@[[ -s $(DEST)/.envsrc ]] || echo missing envsrc
+clean%: %
+	@d=; for f in $($^); do f=$(DEST)/.$$f; [[ -f $$f ]] && d+="$$f "; done; rm $$d
+
+checks: $(addprefix check, $(files))
+
+check%: %
+	@for f in $($^); do [[ $(DEST)/.$$f -ef $^/$$f ]] || echo missing $$f; done
 
 archive:
 	@git archive --format tar.gz -o /tmp/$(USER).tar.gz HEAD

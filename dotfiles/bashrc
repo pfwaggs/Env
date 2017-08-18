@@ -14,13 +14,6 @@ echo $STATE
 . ~/.envsrc
 
 . ~/.mkpaths
-PATH=$(vpurge PATH)
-
-# had to move these here because of path and function issues.
-export PAGER=$(type -p less more | sed -n 1p)
-[[ $PAGER =~ less ]] && export LESS='-RCMqsu~' || :
-export EDITOR=$(type -p vim vi | sed -n 1p)
-export VISUAL=$EDITOR
 
 [[ $UID -eq 0 ]] && pc[prmt]=red || :
 

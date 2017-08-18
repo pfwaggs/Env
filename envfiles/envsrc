@@ -1,0 +1,40 @@
+. ~/.envpurge
+
+. ~/Git/ENV/envfiles/aliases
+. ~/Git/ENV/envfiles/basevars
+
+. ~/Git/ENV/envfiles/L
+. ~/Git/ENV/envfiles/_cd
+. ~/Git/ENV/envfiles/agent+
+. ~/Git/ENV/envfiles/bpath
+. ~/Git/ENV/envfiles/commas
+. ~/Git/ENV/envfiles/dfx
+. ~/Git/ENV/envfiles/envsrc
+. ~/Git/ENV/envfiles/ffunc
+. ~/Git/ENV/envfiles/gigify
+. ~/Git/ENV/envfiles/julian
+. ~/Git/ENV/envfiles/killdir
+. ~/Git/ENV/envfiles/lister
+. ~/Git/ENV/envfiles/load
+. ~/Git/ENV/envfiles/lsu
+. ~/Git/ENV/envfiles/mkwdir
+. ~/Git/ENV/envfiles/mydd
+. ~/Git/ENV/envfiles/myenv
+. ~/Git/ENV/envfiles/mytab
+. ~/Git/ENV/envfiles/mytail
+. ~/Git/ENV/envfiles/parx
+. ~/Git/ENV/envfiles/pd
+. ~/Git/ENV/envfiles/prep
+. ~/Git/ENV/envfiles/psfu
+. ~/Git/ENV/envfiles/qdirs
+. ~/Git/ENV/envfiles/setprompt
+. ~/Git/ENV/envfiles/show
+. ~/Git/ENV/envfiles/spnd
+. ~/Git/ENV/envfiles/spx
+. ~/Git/ENV/envfiles/tll
+. ~/Git/ENV/envfiles/tname
+. ~/Git/ENV/envfiles/types
+. ~/Git/ENV/envfiles/vpurge
+. ~/Git/ENV/envfiles/wup
+
+. ~/Git/ENV/envfiles/completes
