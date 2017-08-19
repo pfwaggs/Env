@@ -9,7 +9,6 @@
 . ~/Git/ENV/envfiles/bpath
 . ~/Git/ENV/envfiles/commas
 . ~/Git/ENV/envfiles/dfx
-. ~/Git/ENV/envfiles/envsrc
 . ~/Git/ENV/envfiles/ffunc
 . ~/Git/ENV/envfiles/gigify
 . ~/Git/ENV/envfiles/julian
