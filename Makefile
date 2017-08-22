@@ -7,18 +7,6 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-#misc = archive
-#ifdef MISC
-#    misc = $(misc) $(MISC)
-#endif
-
-#envfiles = $(wildcard $(ENVDIR)/*)
-#head = $(addprefix $(ENVDIR)/, aliases basevars)
-#tail = $(addprefix $(ENVDIR)/, completes)
-#misc := $(addprefix $(ENVDIR)/, $(misc))
-#body = $(filter-out $(head) $(tail) $(misc), $(envfiles))
-#envfiles := $(head) $(sort $(body)) $(tail)
-
 envfiles := $(notdir $(sort $(wildcard envfiles/envsrc*)))
 dotfiles := $(notdir $(sort $(wildcard dotfiles/*)))
 files := dotfiles envfiles
@@ -53,9 +41,10 @@ check%: %
 archive:
 	@git archive --format tar.gz -o /tmp/$(USER).tar.gz HEAD
 
-txt:
+txt: Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
 	@echo making work copy
-	@for f in Makefile $(dotfiles) $(envfiles); do \
+	@for f in $^; do \
+	    [[ -f $$f ]] || continue; \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \
 	done > txt
