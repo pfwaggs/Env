@@ -1,0 +1,8 @@
+
+dir=${1%/*}
+for f in $(cat $1); do
+    [[ -f $dir/$f ]] || continue
+    [[ -v NORMAL ]] && echo -n . || echo $f
+    . $dir/$f
+done
+echo ''

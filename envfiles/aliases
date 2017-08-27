@@ -1,4 +1,3 @@
-#>>>> aliases
 alias ..='cd ..'
 alias ...='cd ../..'
 alias c='clear'
@@ -22,4 +21,4 @@ alias pmnew='sudo /usr/bin/pacman -Sy; sudo /usr/bin/pacman -Qu'
 alias pmup='sudo /usr/bin/pacman -Su'
 alias su='sudo /bin/su -'
 alias Cat='clear; cat '
-
+alias gitbr='b=play-$(date +%Y.%j); git branch $b; git checkout $b'

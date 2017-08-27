@@ -1,4 +1,3 @@
-#>>> setprompt
 declare -g -A ct pc
 ct=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
 pc=([user]=blue [host]=cyan [spath]=green [lpath]=green [prmt]=green [xtra]=red)
@@ -7,7 +6,7 @@ declare -g -a base_prompt po
 base_prompt=(xtra host user spath lpath prmt)
 po=(host prmt)
 
-mkpc () {
+function mkpc () {
     declare tmp ndx us
     PS1=''
     for ndx in ${po[@]}; do
@@ -25,7 +24,7 @@ mkpc () {
     PS1+=$'\[\e[m\] '
 }
 
-cs () {
+function cs () {
     declare ncg=$(shopt -p nocaseglob) us=$1
     [[ $ncg =~ -s ]] && shopt -u nocaseglob
     [[ $us =~ B ]] && us=${us/B/1;}
@@ -36,7 +35,7 @@ cs () {
     echo $us
 }
 
-show_colors () {
+function show_colors () {
     declare ndx
     for ndx in black red green yellow blue magenta cyan white; do
 	echo -ne "\E[${ct[$ndx]}m $ndx \E[m "
@@ -44,7 +43,7 @@ show_colors () {
     echo ''
 }
 
-build_select () {
+function build_select () {
     declare ndx tmp
     colors=()
     for ndx in ${base_prompt[@]}; do
@@ -59,7 +58,7 @@ build_select () {
     fi
 }
 
-build_drop () {
+function build_drop () {
     declare ndx
     drop=()
     for ndx in ${base_prompt[@]}; do
@@ -67,7 +66,7 @@ build_drop () {
     done
 }
 
-p% () {
+function p% () {
     declare OPTARG OPTIND REPLY
     declare ndx val new color
     declare -a colors
@@ -108,4 +107,3 @@ p% () {
     done
     mkpc
 }
-

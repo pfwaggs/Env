@@ -1,9 +1,7 @@
-#>>> tll
-tll () {
+function tll () {
     declare n
     for n in $@; do
         [[ $(type -t $n) != file ]] && echo "skipping $n" && continue
         for n in $(type -aP $n); do ls -l "$n"; done
     done
 }
-

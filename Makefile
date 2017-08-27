@@ -7,36 +7,34 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-envfiles := $(notdir $(sort $(wildcard envfiles/envsrc*)))
 dotfiles := $(notdir $(sort $(wildcard dotfiles/*)))
-files := dotfiles envfiles
 
 .PHONY: clean check 
 
-lists: $(addprefix list, $(files))
-
-list%: %
+list: dotfiles
 	@echo $^;
-	@for x in $($^); do echo -e "\t$$x"; done
+	@for x in $($^); do \
+	    echo -e "\t$$x"; \
+	done
 
-links: $(addprefix link, $(files))
-
-link%: %
+links: dotfiles
 	@for f in $($^); do \
 	    t=$(DEST)/.$$f; \
 	    f=$^/$$f; \
 	    [[ $$t -ef $$f ]] || ln $$f $$t; \
 	done
 
-clean: $(addprefix clean, $(files))
+clean: dotfiles
+	@for f in $($^); do \
+	    f=$(DEST)/.$$f; \
+	    [[ -f $$f ]] && d+="$$f "; \
+	done; \
+	[[ $$d ]] && rm $$d
 
-clean%: %
-	@d=; for f in $($^); do f=$(DEST)/.$$f; [[ -f $$f ]] && d+="$$f "; done; rm $$d
-
-checks: $(addprefix check, $(files))
-
-check%: %
-	@for f in $($^); do [[ $(DEST)/.$$f -ef $^/$$f ]] || echo missing $$f; done
+check: dotfiles
+	@for f in $($^); do \
+	    [[ $(DEST)/.$$f -ef $^/$$f ]] || echo missing $$f; \
+	done
 
 archive:
 	@git archive --format tar.gz -o /tmp/$(USER).tar.gz HEAD

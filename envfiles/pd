@@ -1,5 +1,4 @@
-#>>> pd
-pd () {
+function pd () {
     if [[ $1 =~ ^[-+[:digit:]][[:digit:]]*$ ]]; then
 	[[ $1 =~ ^[[:digit:]] ]] && pushd +$1 || pushd $1
     else
@@ -7,4 +6,3 @@ pd () {
     fi > /dev/null
     dirs -l -v
 }
-

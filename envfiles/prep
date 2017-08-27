@@ -1,5 +1,4 @@
-#>>> prep
-prep () {
+function prep () {
     declare name type dir=${ENVDIR}/prep_files
     [[ -s $dir/map ]] || continue
     source $dir/map
@@ -15,4 +14,3 @@ prep () {
 	echo prepped $name as ${map[$type]}
     done
 }
-

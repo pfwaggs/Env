@@ -1,4 +1,2 @@
-#>>> complete
 complete -o filenames -F '_cd' cd
 complete -C '_show' show
-

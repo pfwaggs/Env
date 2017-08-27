@@ -1,29 +1,34 @@
 
 [[ $- =~ i ]] || return 0
+
 trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 
 set -C -b -o vi
+shopt -s extglob
 
-HISTFILE=~/.history
+# set some basic items
+
+umask 0022
+
+(( NORMAL )) || unset NORMAL
+export HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
-#export ENV=$ENVDIR/misc:$ENVDIR/functions
+
 . ~/.envpurge
-
-echo $STATE 
-
-. ~/.envsrc
-
+. ~/.bloader $ENVDIR/envfiles/envsrc
 . ~/.mkpaths
+
+export LANG=en_US.UTF-8
+export TZ=America/New_York
+export LC_COLLATE=C
+export CDPATH=".:..:../..:~"
 
 [[ $UID -eq 0 ]] && pc[prmt]=red || :
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
-declare -xr LA=~/.ssh/smap/$host.load
-declare -xr SA=~/.ssh/smap/$host.socket
-declare -xr SECS=$(date +%s)
-declare -xr SMAP=~/.ssh/smap/$(echo -n $USER:$SECS:$HOSTNAME|md5sum|cut -c1-6)
-
+cd ~
+PS1='\h:\w \u\$ '
 mkpc
 
