@@ -4,11 +4,10 @@
 declare add_extras env path
 case "$(/usr/bin/uname -s -r)" in
     *v7+)
-        PATH=/usr/sbin:/usr/bin:/sbin:/bin
         [[ $UID -eq 0 ]] || add_extras="LOCAL=/usr/local $HOME"
         ;;
     *ARCH)
-        PATH=/usr/bin/core_perl:/usr/bin
+        PATH=${KEEPPATH:-/usr/sbin:/usr/bin:/sbin:/bin}
         [[ $UID -eq 0 ]] || add_extras="$HOME"
         ;;
     Darwin*)

@@ -14,6 +14,7 @@ umask 0022
 export HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
 
+(( KEEPPATH )) && KEEPPATH=$PATH || unset KEEPPATH
 . ~/.envpurge
 . ~/.bloader $ENVDIR/envfiles/envsrc
 . ~/.mkpaths
