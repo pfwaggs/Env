@@ -1,5 +1,4 @@
-#>>> wup
-wup () {
+function wup () {
     declare cmd=$(type -p etherwake wol)
     declare ip=$(dig +search +short -t txt $1)
     eval $cmd $ip

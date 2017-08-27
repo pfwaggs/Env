@@ -1,3 +1,1 @@
-#>>> load
-load () { complete -r; unalias -a; unset -f $(compgen -A function); . ~/.envsrc; }
-
+function load () { complete -r; unalias -a; unset -f $(compgen -A function); . ~/.envsrc; }

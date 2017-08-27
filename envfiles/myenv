@@ -1,5 +1,4 @@
-#>>> myenv
-myenv () {
+function myenv () {
     declare -a retry
     case $1 in
 	LIST)
@@ -23,4 +22,3 @@ myenv () {
 	    ;;
     esac
 }
-

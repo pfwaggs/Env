@@ -1,7 +1,5 @@
-#>>> mydd
-mydd () {
+function mydd () {
     declare if="$1"
     shift
     dd if="$if" "$@"
 }
-

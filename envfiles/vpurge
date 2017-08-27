@@ -1,10 +1,9 @@
-#>>> vpurge
-_varsplit () {
+function _varsplit () {
     [[ ${#1} -eq 1 ]] || set -- ':' "$1"
     echo ${!2} | sed -n "s/$1/\n/gp"
 }
 
-_dedupe () {
+function _dedupe () {
     declare x
     declare -a out
     while read x; do
@@ -17,7 +16,6 @@ _dedupe () {
     echo "${out[*]}"
 }
 
-vpurge () {
+function vpurge () {
     _varsplit $1 | _dedupe
 }
-

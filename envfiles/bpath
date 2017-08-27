@@ -1,9 +1,8 @@
-#>>> bpath
 declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin )
 declare -A base=( [path]=/usr/sbin:/usr/bin:/sbin:/bin )
 declare -A games=( [path]=/usr/local/games:/usr/games )
 
-_bpath () {
+function _bpath () {
     declare tmp family block str
     for family in ${*:-local base}; do
         [[ $@ ]] || echo $family >&2
@@ -26,7 +25,7 @@ _bpath () {
     fi
 }
 
-bpath () {
+function bpath () {
     declare x
     if [[ $@ ]]; then
         [ $1 = reset ] && shift
@@ -43,7 +42,7 @@ bpath () {
     fi
 }
 
-addpath () {
+function addpath () {
     declare x nbin
     declare -A update
     [[ $1 ]] || set -- $PWD
@@ -62,4 +61,3 @@ addpath () {
 }
 
 export PERL5LIB
-

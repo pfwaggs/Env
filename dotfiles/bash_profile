@@ -1,16 +1,7 @@
 
-# first we need to clear up the crap from the system
-. ~/.envpurge
+# so much wants to work in bashrc, tmxu runs bash_profile (since shell
+# starts in login mode) we might as well minimize this and just
+# rely on bashrc
 
-# set some basic items
-export TZ=America/New_York
-umask 0022
-
-export PRINTER=local #this is a printer class
-shopt -s extglob
-
-PS1='\h:\w \u\$ '
-
-export CDPATH=".:..:../..:~"
-cd ~
+export NORMAL=1
 . ~/.bashrc
