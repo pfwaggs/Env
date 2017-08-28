@@ -1,1 +1,3 @@
-function tname () { printf "\033k%s\033\\" $1; }
+function tname () {
+    printf "\033k%s\033\\" $1;
+}

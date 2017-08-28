@@ -1,11 +1,7 @@
-
 aliases
-basevars
-
 L
 _cd
 agent+
-bpath
 commas
 dfx
 ffunc
@@ -32,7 +28,5 @@ spx
 tll
 tname
 types
-vpurge
 wup
-
 completes

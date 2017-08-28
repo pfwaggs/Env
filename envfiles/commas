@@ -1,1 +1,3 @@
-function commas () { rev | sed -n 's/.../&,/g;s/,$//;p' | rev; }
+function commas () {
+    rev | sed -n 's/.../&,/g;s/,$//;p' | rev;
+}

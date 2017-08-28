@@ -1,1 +1,3 @@
-function psfu () { ps -f -u ${1:-$(id -un)}; }
+function psfu () {
+    ps -f -u ${1:-$(id -un)};
+}

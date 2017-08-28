@@ -1,3 +1,20 @@
-function typef () { declare -a p; type -a $1 | while read -a p; do file ${p[-1]}; done; }
-function typel () { declare -a p; type -a $1 | while read -a p; do ls -l ${p[-1]}; done; }
-function typel () { declare -a p; type -a $1 | while read -a p; do less ${p[-1]}; done; }
+function typef () {
+    declare -a p;
+    type -a $1 | while read -a p; do
+	file ${p[-1]};
+    done;
+}
+
+function typel () {
+    declare -a p;
+    type -a $1 | while read -a p; do
+	ls -l ${p[-1]};
+    done;
+}
+
+function typel () {
+    declare -a p;
+    type -a $1 | while read -a p; do
+	less ${p[-1]};
+    done;
+}

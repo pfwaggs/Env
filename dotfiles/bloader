@@ -1,8 +1,11 @@
-
-dir=${1%/*}
-for f in $(cat $1); do
-    [[ -f $dir/$f ]] || continue
-    [[ -v NORMAL ]] && echo -n . || echo $f
-    . $dir/$f
+[[ $# -gt 0 ]] || return 0
+for file in $*; do
+    dir=${file%/*}
+    [[ -v NORMAL ]] || echo ${file##*/}
+    for f in $(cat $file); do
+	[[ -s $dir/$f ]] || continue
+	[[ -v NORMAL ]] && echo -n . || echo $f
+	. $dir/$f
+    done
+    echo ''
 done
-echo ''

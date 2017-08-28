@@ -18,13 +18,7 @@ KEEPPATH=1
 echo KEEPPATH=$KEEPPATH
 (( KEEPPATH )) && KEEPPATH=$PATH || unset KEEPPATH
 . ~/.envpurge
-. ~/.bloader $ENVDIR/envfiles/envsrc
-. ~/.mkpaths
-
-export LANG=en_US.UTF-8
-export TZ=America/New_York
-export LC_COLLATE=C
-export CDPATH=".:..:../..:~"
+. ~/.bloader $ENVDIR/envfiles/envsrc_{pre,main,post}
 
 [[ $UID -eq 0 ]] && pc[prmt]=red || :
 

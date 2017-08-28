@@ -1,1 +1,3 @@
-function parx () { [[ $PATH =~ '..:' ]] && PATH=${PATH/\.\.:} || PATH=..:$PATH; }
+function parx () {
+    [[ $PATH =~ '..:' ]] && PATH=${PATH/\.\.:} || PATH=..:$PATH;
+}

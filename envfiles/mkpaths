@@ -1,6 +1,3 @@
-
-# vim: ai si sw=4 sts=4 et ft=sh 
-
 declare add_extras env path
 case "$(/usr/bin/uname -s -r)" in
     *v7+)
