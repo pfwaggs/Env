@@ -15,7 +15,7 @@ export NORMAL=1
 export HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
 
-KEEPPATH=0
+KEEPPATH=1
 echo KEEPPATH=$KEEPPATH
 [[ $KEEPPATH -gt 0 ]] && KEEPPATH=$PATH || unset KEEPPATH
 . ~/.envpurge
