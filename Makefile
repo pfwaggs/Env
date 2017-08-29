@@ -2,6 +2,10 @@
 SHELL = /bin/bash
 
 BASE = ~/Git/ENV
+NAME = $(notdir $(BASE))
+BRANCH = $(shell git branch | sed -n '$$p' | cut -c3-)
+VER = $(shell git tag | sed -n '$$p')
+TAR = $(NAME)_$(BRANCH)_$(VER).tgz
 
 ifndef DEST
     DEST = $(HOME)
@@ -37,7 +41,7 @@ check: dotfiles
 	done
 
 archive:
-	@git archive --format tar.gz -o /tmp/$(USER).tar.gz HEAD
+	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
 
 txt: Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
 	@echo making work copy
