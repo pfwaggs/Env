@@ -10,13 +10,14 @@ shopt -s extglob
 
 umask 0022
 
-(( NORMAL )) || unset NORMAL
+export NORMAL=1
+[[ $NORMAL -gt 0 ]] || unset NORMAL
 export HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
 
-KEEPPATH=1
+KEEPPATH=0
 echo KEEPPATH=$KEEPPATH
-(( KEEPPATH )) && KEEPPATH=$PATH || unset KEEPPATH
+[[ $KEEPPATH -gt 0 ]] && KEEPPATH=$PATH || unset KEEPPATH
 . ~/.envpurge
 . ~/.bloader $ENVDIR/envfiles/envsrc_{pre,main,post}
 
