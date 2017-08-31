@@ -1,0 +1,31 @@
+
+function stk () {
+    eval "declare save=~/.dirstk.txt"
+    declare op=$1; shift
+    case ${op:0:1} in
+	r) tac ${2:-$save} > $$
+	    exec 4<$$
+	    while read -u 4 f; do
+		pushd -n "$f"
+	    done >/dev/null
+	    exec 4<&-
+	    rm $$
+	    [[ -d ~1 ]] && popd >/dev/null
+	    ;;
+	s) dirs -p | tac | tee ${2:-$save};;
+	c) if [[ $# -gt 0 ]]; then
+		for x in $@; do popd -$x >/dev/null; done
+	    else
+		dirs -c
+	    fi
+	    ;;
+	*) declare tmp
+	    if [[ $op ]]; then
+		[[ $op =~ ^\~ ]] && eval "tmp=$op; popd +${op:1} >/dev/null"
+		[[ $op =~ ^[0-9] ]] && tmp=+$op
+	    fi
+	    pushd ${tmp:-$op} >/dev/null
+	    dirs -l -v
+	    ;;
+    esac
+}
