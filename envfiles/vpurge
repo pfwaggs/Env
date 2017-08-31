@@ -20,8 +20,14 @@ function vpurge () {
     _varsplit $1 | _dedupe
 }
 
-function purge () { 
-    eval "perl -E 'say for grep {! -l \$_} split/:/,\$ENV{$2}'" |
+function purge1 () { 
+    declare -x t
+    [[ -v $2 ]] && t="${!2}" || t="$2"
+    perl -E 'say for grep {! -l $_} split/:/,$ENV{t}' |
     grep -v "$1" |
     perl -nl -E 'push @z, $_;END{say join ":", @z}'
+}
+
+function purge2 () {
+    echo -e "${!2//:/\\n}" | grep -v "$1" | tr '\n' ':' | sed 's/:$/\n/'
 }

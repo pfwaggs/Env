@@ -36,7 +36,7 @@ unset add_extras env path
 
 PATH=$(vpurge PATH)
 
-PATH=$(purge /usr/local PATH) # /usr/local is bad for now
+PATH=$(purge1 /usr/local PATH) # /usr/local is bad for now
 
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
