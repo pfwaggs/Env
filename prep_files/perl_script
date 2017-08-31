@@ -1,7 +1,5 @@
 #!/usr/bin/env perl
 
-# vim: ai si sw=4 sts=4 et
-
 # normal junk #AAA
 use warnings;
 use strict;
