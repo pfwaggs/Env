@@ -1,31 +1,34 @@
 
 function stk () {
-    eval "declare save=~/.dirstk.txt"
-    declare op=$1; shift
+    declare z=~/$$; save=~/.dirstk.txt op="$1"; shift
+    eval "declare tmp=$op"
     case ${op:0:1} in
-	r) tac ${2:-$save} > $$
-	    exec 4<$$
+	l) [[ -f ${2:-$save} ]] && cat ${2:-$save} || : ;;
+	s) dirs -l -p | tee ${2:-$save};;
+	r) tac ${2:-$save} > $z
+	    exec 4<$z
 	    while read -u 4 f; do
-		pushd -n "$f"
+		pushd -n $f
 	    done >/dev/null
 	    exec 4<&-
-	    rm $$
+	    rm $z
 	    [[ -d ~1 ]] && popd >/dev/null
 	    ;;
-	s) dirs -p | tac | tee ${2:-$save};;
 	c) if [[ $# -gt 0 ]]; then
-		for x in $@; do popd -$x >/dev/null; done
+		for x in $(echo $@ | xargs -n 1 | sort -rn | xargs); do
+		    popd +$x
+		done >/dev/null
 	    else
 		dirs -c
 	    fi
 	    ;;
-	*) declare tmp
-	    if [[ $op ]]; then
-		[[ $op =~ ^\~ ]] && eval "tmp=$op; popd +${op:1} >/dev/null"
-		[[ $op =~ ^[0-9] ]] && tmp=+$op
-	    fi
-	    pushd ${tmp:-$op} >/dev/null
-	    dirs -l -v
+	\~) popd +${op:1} >/dev/null
+	    pushd "$tmp" >/dev/null
+	    ;;
+	[0-9]) pushd +$op >/dev/null
+	    ;;
+	*) [[ $op ]] && pushd "$op" >/dev/null
 	    ;;
     esac
+    dirs -l -v
 }
