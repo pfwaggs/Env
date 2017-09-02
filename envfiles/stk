@@ -1,10 +1,15 @@
 
 function stk () {
-    declare z=~/$$; save=~/.dirstk.txt op="$1"; shift
-    eval "declare tmp=$op"
-    case ${op:0:1} in
+    declare z=~/$$ save=~/.dirstk.txt
+    case ${1:0:1} in
+	'') pushd ;;
 	l) [[ -f ${2:-$save} ]] && cat ${2:-$save} || : ;;
 	s) dirs -l -p | tee ${2:-$save};;
+	k) [[ $1 = kk ]] || return 0
+	    pushd .. >/dev/null
+	    rm -r ~1
+	    popd +1 >/dev/null
+	    ;;
 	r) tac ${2:-$save} > $z
 	    exec 4<$z
 	    while read -u 4 f; do
@@ -22,12 +27,17 @@ function stk () {
 		dirs -c
 	    fi
 	    ;;
-	\~) popd +${op:1} >/dev/null
-	    pushd "$tmp" >/dev/null
+	\~) eval "declare tmp=$1"
+	    popd +${1:1} >/dev/null
+	    pushd $tmp >/dev/null
 	    ;;
 	[0-9]) pushd +$op >/dev/null
 	    ;;
-	*) [[ $op ]] && pushd "$op" >/dev/null
+	*) if [[ ! -d $1 ]]; then
+		read -p 'create dir?: ' -e -i "$1"
+		mkdir "$REPLY"
+	    fi
+	    pushd "$1" >/dev/null
 	    ;;
     esac
     dirs -l -v
