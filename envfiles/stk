@@ -31,7 +31,7 @@ function stk () {
 	    popd +${1:1} >/dev/null
 	    pushd $tmp >/dev/null
 	    ;;
-	[0-9]) pushd +$op >/dev/null
+	[0-9]) pushd +$1 >/dev/null
 	    ;;
 	*) if [[ ! -d $1 ]]; then
 		read -p 'create dir?: ' -e -i "$1"

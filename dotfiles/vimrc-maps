@@ -18,6 +18,7 @@
 :map ,<F1> :set foldcolumn=0<CR>
 :map ,<F2> :set foldcolumn=4<CR>
 :imap <F10> <C-R>=strftime(" %F %T ")<CR>
+:map <M-F2> :set filetype=sh<CR>
 
 ":map V :w<CR>:!ispell -x %<CR>:e!<CR><CR>
 ":map <F3> mm:.t$<CR>GO<Esc>`m
