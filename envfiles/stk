@@ -1,6 +1,7 @@
 
 function stk () {
     declare z=~/$$ save=~/.dirstk.txt
+    echo $1 >&2
     case ${1:0:1} in
 	'') pushd ;;
 	l) [[ -f ${2:-$save} ]] && cat ${2:-$save} || : ;;

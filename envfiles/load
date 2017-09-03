@@ -1,6 +1,13 @@
+
 function load () {
-    complete -r;
-    unalias -a;
-    unset -f $(compgen -A function);
-    . ~/.envsrc;
+    declare f
+    case $1 in
+	'') . ~/.envurge; . ~/.envsrc ;;
+	/*) echo loading $1; . $1 ;;
+	*) for f in $*; do
+		echo loading $f
+		. $ENVDIR/envfiles/$f
+	    done
+	    ;;
+    esac
 }
