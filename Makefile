@@ -6,8 +6,9 @@ ifndef DEST
 endif
 
 ifdef COMMIT
+    CURRENT := $(shell git log -n 1 --oneline | cut -c1-7)
     COMMIT := $(shell git log -n 20 --oneline | sed -n $(COMMIT)p | cut -c1-7)
-    LIST = $(shell git diff-tree -r --name-only $(COMMIT) | \
+    LIST = $(shell git diff-tree -r --name-only $(CURRENT) $(COMMIT) | \
 	perl -nl -E 'say $$_ if -f $$_')
 else
     COMMIT := $(shell git log -n 1 --oneline | cut -c1-7)
