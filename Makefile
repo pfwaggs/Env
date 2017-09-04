@@ -59,7 +59,12 @@ check: dotfiles
 archive:
 	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
 
-#full.txt: Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
+ltxt:
+	@echo listing updated files since $(COMMIT)
+	@for f in $(LIST); do \
+	    echo -e "\t$$f"; \
+	done
+
 txt:
 	@echo making text file
 	@for f in $(LIST); do \
