@@ -1,31 +1,32 @@
 
 SHELL = /bin/bash
 
-CURRENT = $(shell git log -n 1 --oneline | cut -c1-7)
-BASE = ~/Git/ENV
-NAME = $(notdir $(BASE))
-BRANCH = $(shell git branch | sed -n '$$p' | cut -c3-)
-VER = $(shell git tag | sed -n '$$p')
-TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-export CURRENT BASE NAME BRANCH VER
-
 ifndef DEST
     DEST = $(HOME)
 endif
 
 ifdef COMMIT
-    LIST = $(shell git diff-tree -r --name-only $(CURRENT) $(COMMIT) | \
+    COMMIT := $(shell git log -n 20 --oneline | sed -n $(COMMIT)p | cut -c1-7)
+    LIST = $(shell git diff-tree -r --name-only $(COMMIT) | \
 	perl -nl -E 'say $$_ if -f $$_')
 else
+    COMMIT := $(shell git log -n 1 --oneline | cut -c1-7)
     LIST = Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
 endif
+
+BASE = ~/Git/ENV
+NAME = $(notdir $(BASE))
+BRANCH = $(shell git branch | sed -n '$$p' | cut -c3-)
+VER = $(shell git tag | sed -n '$$p')
+TAR = $(NAME)_$(BRANCH)_$(VER).tgz
+export COMMIT BASE NAME BRANCH VER
 
 dotfiles := $(notdir $(sort $(wildcard dotfiles/*)))
 
 .PHONY: clean check 
 
 status:
-	@for v in CURRENT BASE NAME BRANCH VER; do \
+	@for v in COMMIT BASE NAME BRANCH VER; do \
 	    eval "echo $$v = $${!v}"; \
 	done
 

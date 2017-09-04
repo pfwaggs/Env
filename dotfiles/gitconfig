@@ -9,11 +9,11 @@
 	autocrlf = input
 [alias]
 	st = status -s
-	lg = log --oneline -n 10 --graph --decorate
+	lg = log --oneline -n 20 --graph --decorate --date=short
 	co = checkout
 	ci = commit
 	bl = branch --list
-	hist = log -n 10 --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+	hist = log -n 20 --pretty=format:\"%h %ad | %s%d\" --graph --date=short
 [push]
 	default = simple
 [credential]
