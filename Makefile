@@ -15,7 +15,7 @@ endif
 
 ifdef COMMIT
     LIST = $(shell git diff-tree -r --name-only $(CURRENT) $(COMMIT) | \
-	/usr/bin/perl -nl -E 'say $$_ if -f $$_')
+	perl -nl -E 'say $$_ if -f $$_')
 else
     LIST = Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
 endif
@@ -25,14 +25,14 @@ dotfiles := $(notdir $(sort $(wildcard dotfiles/*)))
 .PHONY: clean check 
 
 status:
-	@for x in CURRENT BASE NAME BRANCH VER; do \
-	    eval "echo $$x = $${!x}"; \
+	@for v in CURRENT BASE NAME BRANCH VER; do \
+	    eval "echo $$v = $${!v}"; \
 	done
 
 list: dotfiles
 	@echo $^;
-	@for x in $($^); do \
-	    echo -e "\t$$x"; \
+	@for f in $($^); do \
+	    echo -e "\t$$f"; \
 	done
 
 links: dotfiles
@@ -59,7 +59,7 @@ archive:
 
 #full.txt: Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
 txt:
-	@echo making current copy
+	@echo making text file
 	@for f in $(LIST); do \
 	    [[ -f $$f ]] || continue; \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
@@ -67,9 +67,11 @@ txt:
 	done > txt
 
 ps: txt
+	@echo converting text to ps.
 	@enscript -2 -r -DDuplex:true -DTumble:true -o $@ $^
 	@rm $^
 
 print: ps
+	@echo printing ps file
 	@enscript -Z -P local $^
 	@rm $^

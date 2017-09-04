@@ -8,8 +8,12 @@
 [core]
 	autocrlf = input
 [alias]
-	s = "status -s "
-	lg = log --oneline --all --graph --decorate
+	st = status -s
+	lg = log --oneline -n 10 --graph --decorate
+	co = checkout
+	ci = commit
+	bl = branch --list
+	hist = log -n 10 --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
 [push]
 	default = simple
 [credential]
