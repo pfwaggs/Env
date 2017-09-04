@@ -16,7 +16,7 @@ endif
 
 BASE = ~/Git/ENV
 NAME = $(notdir $(BASE))
-BRANCH = $(shell git branch | sed -n '$$p' | cut -c3-)
+BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
 export COMMIT BASE NAME BRANCH VER
