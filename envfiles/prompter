@@ -1,0 +1,59 @@
+
+declare -A PPARTS
+
+function _AttribParser () {
+    declare o=$1
+    [[ $o =~ b ]] && o=${o/b/1;}
+    [[ $o =~ u ]] && o=${o/u/4;}
+    [[ $o =~ r ]] && o=${o/r/7;}
+    echo "$o"
+}
+
+function _FieldParser () {
+    declare -a po=(xtra tag host user spath lpath prompt)
+    declare OPTIND field txt color attrib
+
+    declare -A _ColorNum _PromptColor
+    . $ENVDIR/envfiles/color_list
+
+    declare -A _field=(
+	[x]=xtra [t]=tag [h]=host [u]=user
+	[l]=lpath [s]=spath [p]=prompt
+    )
+
+    while getopts x:t:h:u:l:s:p: z; do
+	[[ $z =~ [xthulsp] ]] || continue
+	field=${_field[$z]}
+	read txt color attrib <<< ${OPTARG//:/ }
+	if [[ $txt = . ]]; then
+	    txt=
+	    attrib=
+	    color=${_PromptColor[$field]}
+	else
+	    [[ $color = . ]] && color=${_PromptColor[$field]}
+	    [[ $attrib = . ]] && attrib= || attrib=$(_AttribParser $attrib)
+	fi
+	PPARTS[$field]=$'\[\e['"${attrib:+$attrib;}${color}m"
+	case $field in
+	    xtra|tag)
+		PPARTS[$field]+=$txt
+		;;
+	    prompt)
+		PPARTS[$field]+=$'\$ '
+		;;
+	    lpath)
+		PPARTS[$field]+=$'\w'
+		;;
+	    spath)
+		PPARTS[$field]+=$'\W'
+		;;
+	    host)
+		PPARTS[$field]+=$'\h'
+		;;
+	    user)
+		PPARTS[$field]+=$'\u'
+		;;
+	esac
+	PPARTS[$field]+=$'\]'
+    done
+}

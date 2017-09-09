@@ -16,7 +16,7 @@ export ENVDIR=~/Git/ENV
 [[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH || :
 
 . ~/.envpurge
-. ~/.bloader $ENVDIR/envfiles/envsrc_{pre,main,post}
+. ~/.bloader $ENVDIR/envfiles/envsrc{_pre,}
 
 [[ $UID -eq 0 ]] && pc[prmt]=red || :
 

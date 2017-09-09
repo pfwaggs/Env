@@ -1,0 +1,63 @@
+
+#declare -A Breve
+#declare breve=~/.breve.conf
+
+#function breve () { #AzA
+#    case $1 in
+#	save) for x in ${!Breve[@]}; do
+#		echo $x ${Breve[$x]}
+#	    done | sort | tee $breve
+#	    ;;
+#	load) exec 4<$breve
+#	    while read -u 4 a b; do
+#		Breve[$a]="$b"
+#	    done
+#	    exec 4<&-
+#	    ;;
+#	clear) Breve=() ;;
+#	add) Breve[$2]="$3" ;;
+#    esac
+#} #ZaZ
+
+#breve load
+
+#function _FindDate () { #AzA
+#    case ${#1} in
+#	6) echo ${1:0:4}-${1:4} ;;
+#	8) echo ${1:0:4}-${1:4:2}-${1:6} ;;
+#	0|1) date +%F ;;
+#	*) echo $1 ;;
+#    esac
+#} #ZaZ
+
+#function _FindPath () { #AzA
+#    declare a b out
+#    read a b <<< ${1/,/ }
+#    if [[ ${Breve[$a]} ]]; then
+#	out=${Breve[$a]}
+#	if [[ $b ]]; then
+#	    declare d=$(_FindDate $b)
+#	    out+=/$d
+#	fi
+#	echo $out
+#    fi
+#} #ZaZ
+
+function _ParseArg () { #AzA
+    declare x
+    [[ -v COMP_LINE ]] && x=$2 || x=$1
+    if [[ $x =~ , ]]; then
+	x=$(_FindPath $x)
+    fi
+    declare -a list
+    for dir in ${CDPATH//:/ }; do
+	[[ $dir =~ ^\. ]] || continue
+	for file in $(compgen -d "$dir/$x"); do
+	    list+=("$file")
+	done
+    done
+    [[ ${#list[@]} -gt 0 ]] || list+=("$x")
+    for x in "${list[@]}"; do echo $x; done
+} #ZaZ
+
+complete -o filenames -C '_ParseArg' stk

@@ -1,11 +1,16 @@
+
 [[ $# -gt 0 ]] || return 0
-for file in $*; do
-    dir=${file%/*}
-    [[ -v NORMAL ]] || echo ${file##*/}
-    for f in $(cat $file); do
-	[[ -s $dir/$f ]] || continue
-	[[ -v NORMAL ]] && echo -n . || echo $f
-	. $dir/$f
-    done
+for load in $*; do
+    [[ -v NORMAL ]] || echo ${load##*/}
+    if [[ $load =~ envsrc ]]; then
+	dir=${load%/*}
+	for file in $(cat $load); do
+	    [[ -s $dir/$file ]] || continue
+	    [[ -v NORMAL ]] && echo -n . || echo $file
+	    . $dir/$file
+	done
+    else
+	. $dir/$file
+    fi
     echo ''
 done
