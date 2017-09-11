@@ -24,5 +24,5 @@ export ENVDIR=~/Git/ENV
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
 PS1='\h:\w \u\$ '
-mkpc
+SetPrompt
 
