@@ -8,7 +8,7 @@ function _bpath () {
         [[ $@ ]] || echo $family >&2
         for key in $(eval "echo \${!$family[*]}"); do
             eval "str=\${$family[$key]}"
-            str=$(vpurge $str)
+            str=$(_FixPath p $str)
             [[ $str ]] || continue
             if [[ $@ ]]; then
                 eval "$key+=:$str"

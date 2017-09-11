@@ -1,59 +1,58 @@
 
-declare -A PPARTS
+#function _AttribParser () { #AzA
+#    declare rtn
+#    [[ ${1:-.} =~ b   ]] && rtn+='1;'
+#    [[ ${1:-.} =~ u   ]] && rtn+='4;'
+#    [[ ${1:-.} =~ r   ]] && rtn+='7;'
+#    echo "$rtn"
+#} #ZaZ
 
-function _AttribParser () {
-    declare o=$1
-    [[ $o =~ b ]] && o=${o/b/1;}
-    [[ $o =~ u ]] && o=${o/u/4;}
-    [[ $o =~ r ]] && o=${o/r/7;}
-    echo "$o"
-}
-
-function _FieldParser () {
-    declare -a po=(xtra tag host user spath lpath prompt)
-    declare OPTIND field txt color attrib
-
+function SetPrompt () { #AzA
+    declare OPTIND field color attrib x key val
     declare -A _ColorNum _PromptColor
     . $ENVDIR/envfiles/color_list
 
-    declare -A _field=(
-	[x]=xtra [t]=tag [h]=host [u]=user
-	[l]=lpath [s]=spath [p]=prompt
-    )
-
-    while getopts x:t:h:u:l:s:p: z; do
-	[[ $z =~ [xthulsp] ]] || continue
-	field=${_field[$z]}
-	read txt color attrib <<< ${OPTARG//:/ }
-	if [[ $txt = . ]]; then
-	    txt=
-	    attrib=
-	    color=${_PromptColor[$field]}
-	else
-	    [[ $color = . ]] && color=${_PromptColor[$field]}
-	    [[ $attrib = . ]] && attrib= || attrib=$(_AttribParser $attrib)
-	fi
-	PPARTS[$field]=$'\[\e['"${attrib:+$attrib;}${color}m"
-	case $field in
-	    xtra|tag)
-		PPARTS[$field]+=$txt
-		;;
-	    prompt)
-		PPARTS[$field]+=$'\$ '
-		;;
-	    lpath)
-		PPARTS[$field]+=$'\w'
-		;;
-	    spath)
-		PPARTS[$field]+=$'\W'
-		;;
-	    host)
-		PPARTS[$field]+=$'\h'
-		;;
-	    user)
-		PPARTS[$field]+=$'\u'
-		;;
-	esac
-	PPARTS[$field]+=$'\]'
+    declare valids
+    for x in xtra tag $@; do
+	read key color <<< ${x/[^[:alpha:]]/ }
+	[[ ${!_PromptColor[@]} =~ $key ]] || continue
+	valids+=:$key
+	[[ $color ]] || continue
+	[[ ${!_ColorNum[@]} =~ $color ]] || continue
+	_PromptColor[$key]=$color
     done
-}
+    valids=$(_FixPath p $MPR:$valids:${tag:+tag}:${xtra:+xtra}:host:prompt)
+
+    key=
+    declare po='xtra tag host user spath lpath prompt'
+    for x in $po; do
+	[[ ${!x} ]] || continue
+	val=$'\[\e['${_ColorNum[${_PromptColor[$x]}]}m$'\]'
+	eval "$x=${val@Q}${!x@Q}"
+	[[ $key =~ :$x ]] && continue
+	key+=:$x
+    done
+    key=${key:1}
+    PS1=
+    for key in ${key//:/ }; do
+	[[ $valids =~ $key ]] || continue
+	PS1+="${!key} "
+    done
+    PS1+=$'\[\e[37m\]'
+} #ZaZ
+
+function setkey () { #AzA
+    declare spec key=$1
+    shift
+    if [[ $# -gt 1 ]]; then
+	spec=$1
+	shift
+    fi
+    if [[ $# -gt 0 ]]; then
+	eval "${key}=$@"
+    else
+	unset ${key}
+    fi
+    SetPrompt $spec
+} #ZaZ
+

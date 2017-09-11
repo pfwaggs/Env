@@ -11,6 +11,14 @@ _PromptColor[user]=blue
 _PromptColor[host]=cyan
 _PromptColor[spath]=green
 _PromptColor[lpath]=green
-_PromptColor[prmt]=green
+_PromptColor[prompt]=green
 _PromptColor[xtra]=red
+_PromptColor[tag]=magenta
 
+declare user=$'\u'
+declare host=$'\h'
+declare spath=$'\W'
+declare lpath=$'\w'
+declare prompt=$'\$'
+declare xtra="$xtra"
+declare tag="$tag"

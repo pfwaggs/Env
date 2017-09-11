@@ -22,3 +22,5 @@ alias pmup='sudo /usr/bin/pacman -Su'
 alias su='sudo /bin/su -'
 alias Cat='clear; cat '
 alias gitbr='b=play-$(date +%Y.%j); git branch $b; git checkout $b'
+alias tag="setkey tag "
+alias xtra="setkey xtra "

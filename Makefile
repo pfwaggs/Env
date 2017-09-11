@@ -64,10 +64,14 @@ ltxt:
 	@for f in $(LIST); do \
 	    echo -e "\t$$f"; \
 	done
+flist:
+	@echo making flist
+	@for x in $(LIST); do echo $$x; done > flist
 
-txt:
+txt: flist
 	@echo making text file
-	@for f in $(LIST); do \
+	@for f in $$(cat $^); do \
+	    echo checking $$f >&2; \
 	    [[ -f $$f ]] || continue; \
 	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
 	    cat $$f; \

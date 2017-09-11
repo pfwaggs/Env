@@ -27,16 +27,17 @@ esac
 for x in $add_extras; do
     read env path <<< ${x/=/ }
     [[ $path ]] && eval "export $x" || :
-    addpath ${path:-$env}
+    PATH=${path:-$env}:$PATH
+    #addpath ${path:-$env}
 done
 
 [[ -z $PERL5LIB ]] || export PERL5LIB
 
 unset add_extras env path
 
-PATH=$(vpurge PATH)
+PATH=$(_FixPath p PATH)
 
-PATH=$(purge1 /usr/local PATH) # /usr/local is bad for now
+PATH=$(_FixPath f /usr/local PATH) # /usr/local is bad for now
 
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
