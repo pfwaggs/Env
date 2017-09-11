@@ -12,8 +12,9 @@ umask 0022
 export HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
 
-[[ -f ~/NORMAL ]] && export NORMAL=1 || :
-[[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH || :
+unset NORMAL KEEPPATH
+[[ -f ~/NORMAL ]] && export NORMAL=1
+[[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH
 
 . ~/.envpurge
 . ~/.bloader $ENVDIR/envfiles/envsrc{_pre,}
