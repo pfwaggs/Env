@@ -35,9 +35,9 @@ done
 
 unset add_extras env path
 
-PATH=$(_FixPath p PATH)
+PATH=$(_FixPath p $PATH)
 
-PATH=$(_FixPath f /usr/local PATH) # /usr/local is bad for now
+PATH=$(_FixPath f /usr/local $PATH) # /usr/local is bad for now
 
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
