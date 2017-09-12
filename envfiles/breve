@@ -56,6 +56,12 @@ function _ParseArg () { #AzA
 	    list+=("$file")
 	done
     done
+    if [[ ${#list[@]} -eq 0 ]]; then
+	for dir in $(dirs -p | sed -n '2,$p'); do
+	    [[ -d "$dir/$x" ]] || continue
+	    list+=("$dir/$x")
+	done
+    fi
     [[ ${#list[@]} -gt 0 ]] || list+=("$x")
     for x in "${list[@]}"; do echo $x; done
 } #ZaZ
