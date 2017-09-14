@@ -1,8 +1,35 @@
-function _show () {
-    compgen -v | grep -i -E ^_?$2;
+
+function _ShowEnv () {
+    declare x w m
+    declare -a list
+    [[ -v COMP_LINE ]] && x=$2 || x=$1
+    w="$x _$x ${x^^} _${x^^}"
+    for m in $w; do
+	list+=($(compgen -v $m))
+    done
+    for x in ${list[@]}; do echo $x; done
+}
+
+function _GetInfo () {
+    declare -a rtn
+    declare x
+#   [[ -v COMP_LINE ]] && x=$2 || x=$1
+    for x in $(_ShowEnv "$@"); do
+	rtn+=("$x")
+    done
+    for x in ${rtn[@]}; do echo "$x"; done
 }
 
 function show () {
-    [[ ${!1} ]] || echo ${ERROR:?"no valid variable for $1"}
-    set | grep ^$1= | sed -n -e 's/=/ = /p'
+    declare x=$(declare -p $1 | awk '{print $2}')
+    if [[ $x =~ [aA] ]]; then
+	echo array $1:
+	for x in $(eval "echo \${!$1[@]}"); do
+	    eval "echo $x = \${$1[$x]}"
+	done
+    else
+	echo $1 = ${!1}
+    fi
 }
+
+complete -C '_GetInfo' show
