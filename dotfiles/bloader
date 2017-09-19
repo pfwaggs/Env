@@ -2,15 +2,12 @@
 [[ $# -gt 0 ]] || return 0
 for load in $*; do
     [[ -v NORMAL ]] || echo ${load##*/}
-    if [[ $load =~ envsrc ]]; then
-	dir=${load%/*}
-	for file in $(cat $load); do
-	    [[ -s $dir/$file ]] || continue
-	    [[ -v NORMAL ]] && echo -n . || echo $file
-	    . $dir/$file
-	done
-    else
+    dir=${load%/*}
+    for file in $(cat $load | grep -v '#'); do
+	[[ $file ]] || continue
+	[[ -s $dir/$file ]] || continue
+	[[ -v NORMAL ]] && echo -n . || echo $file
 	. $dir/$file
-    fi
+    done
     echo ''
 done

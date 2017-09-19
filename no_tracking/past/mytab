@@ -1,4 +1,4 @@
-function mytab () { 
+function mytab () { #AzA
     case $1 in
 	str) PROMPT_COMMAND='echo -ne $ps_s$str$ps_e';;
 	reset)
@@ -9,4 +9,4 @@ function mytab () {
 	    fi
 	    ;;
     esac
-}
+} #ZaZ

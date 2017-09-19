@@ -3,7 +3,7 @@ function load () { #AzA
     declare f
     case $1 in
 	'') . ~/.envpurge
-	    . ~/.bloader $ENVDIR/{init,envsrc,finish}
+	    . ~/.bloader $ENVDIR/envsrc{_pre,}
 	    ;;
 	/*) echo loading $1; . $1 ;;
 	*) for f in $*; do

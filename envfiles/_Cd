@@ -1,4 +1,4 @@
-function _cd () {
+function _Cd () { #AzA
     declare x list=$(compgen -d $2)
     [[ $list ]] || list=$(compgen -d ../$2)
     [[ $list ]] || list=$(compgen -d ~/$2)
@@ -7,4 +7,5 @@ function _cd () {
 	COMPREPLY+=($x);
     done
     IFS=$' \t\n'
-}
+} #ZaZ
+complete -o filenames -F '_Cd' cd

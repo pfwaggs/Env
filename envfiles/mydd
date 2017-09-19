@@ -1,5 +1,6 @@
-function mydd () {
-    declare if="$1"
+
+function mydd () { #AzA
+    declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
     shift
-    dd if="$if" "$@"
-}
+    $DD if="$if" "$@"
+} #ZaZ

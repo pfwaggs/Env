@@ -1,0 +1,50 @@
+
+#function _AttribParser () { #AzA
+#    declare rtn
+#    [[ ${1:-.} =~ b   ]] && rtn+='1;'
+#    [[ ${1:-.} =~ u   ]] && rtn+='4;'
+#    [[ ${1:-.} =~ r   ]] && rtn+='7;'
+#    echo "$rtn"
+#} #ZaZ
+
+function _SetPrompt () { #AzA
+    declare OPTIND field color attrib x key val
+    declare -A _ColorNum _PromptColor
+    . ~/.prompt.conf
+    [[ -f ~/prompt.conf ]] && . ~/prompt.conf
+
+    declare valids
+    for x in xtra tag $@; do
+	read key color <<< ${x/[^[:alpha:]]/ }
+	[[ ${!_PromptColor[@]} =~ $key ]] || continue
+	valids+=:$key
+	[[ $color ]] || continue
+	[[ ${!_ColorNum[@]} =~ $color ]] || continue
+	_PromptColor[$key]=$color
+    done
+    valids=$(_FixVar p $MPR:$valids:${tag:+tag}:${xtra:+xtra}:host:prompt)
+
+    key=
+    declare po='xtra tag host user spath lpath prompt'
+    for x in $po; do
+	[[ ${!x} ]] || continue
+	val=$'\[\e['${_ColorNum[${_PromptColor[$x]}]}m$'\]'
+	eval "$x=${val@Q}${!x@Q}"
+	[[ $key =~ :$x ]] && continue
+	key+=:$x
+    done
+    key=${key:1}
+    PS1=
+    for key in ${key//:/ }; do
+	[[ $valids =~ $key ]] || continue
+	PS1+="${!key} "
+    done
+    PS1+=$'\[\e[m\]'
+} #ZaZ
+
+function prompt () { #AzA
+    declare spec=$1 text="${@:2}"
+    [[ $text ]] && eval ${spec%:*}="\${text}"
+    _SetPrompt $spec
+} #ZaZ
+

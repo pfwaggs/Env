@@ -1,12 +1,3 @@
-#function _GetInfo () { #AzA
-#    declare -a rtn
-#    declare x
-##   [[ -v COMP_LINE ]] && x=$2 || x=$1
-#    for x in $(_ShowEnv "$@"); do
-#	rtn+=("$x")
-#    done
-#    for x in ${rtn[@]}; do echo "$x"; done
-#} #ZaZ
 
 function _ShowEnv () { #AzA
     declare x w m
@@ -18,6 +9,16 @@ function _ShowEnv () { #AzA
     [[ ${#list[@]} -gt 0 ]] || list=($(compgen -v _${x,,}))
     for x in ${list[@]}; do echo $x; done
 } #ZaZ
+
+#function _GetInfo () { #AzA
+#    declare -a rtn
+#    declare x
+##   [[ -v COMP_LINE ]] && x=$2 || x=$1
+#    for x in $(_ShowEnv "$@"); do
+#	rtn+=("$x")
+#    done
+#    for x in ${rtn[@]}; do echo "$x"; done
+#} #ZaZ
 
 function show () { #AzA
     declare x=$(declare -p $1 | awk '{print $2}')
@@ -31,4 +32,3 @@ function show () { #AzA
     fi
 } #ZaZ
 
-complete -o filenames -C '_ShowEnv' show

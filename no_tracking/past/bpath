@@ -2,7 +2,7 @@ declare -A local=( [path]=$LOCAL/sbin:$LOCAL/bin )
 declare -A base=( [path]=/usr/sbin:/usr/bin:/sbin:/bin )
 declare -A games=( [path]=/usr/local/games:/usr/games )
 
-function _bpath () {
+function _bpath () { #AzA
     declare tmp family block str
     for family in ${*:-local base}; do
         [[ $@ ]] || echo $family >&2
@@ -23,9 +23,9 @@ function _bpath () {
             echo ${key^^}=${!key}
         done
     fi
-}
+} #ZaZ
 
-function bpath () {
+function bpath () { #AzA
     declare x
     if [[ $@ ]]; then
         [ $1 = reset ] && shift
@@ -40,9 +40,9 @@ function bpath () {
         done
         _bpath
     fi
-}
+} #ZaZ
 
-function addpath () {
+function addpath () { #AzA
     declare x nbin
     declare -A update
     [[ $1 ]] || set -- $PWD
@@ -58,6 +58,6 @@ function addpath () {
         done
     done
 
-}
+} #ZaZ
 
 export PERL5LIB

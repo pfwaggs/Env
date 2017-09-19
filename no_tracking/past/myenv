@@ -1,4 +1,4 @@
-function myenv () {
+function myenv () { #AzA
     declare -a retry
     case $1 in
 	LIST)
@@ -21,4 +21,4 @@ function myenv () {
 	    myenv list $@
 	    ;;
     esac
-}
+} #ZaZ

@@ -1,0 +1,19 @@
+
+function _ParseArg () { #AzA
+    declare x cdlist
+    for x in ${CDPATH//:/ }; do
+	x=$(eval echo $x)
+	cdlist+=" $(realpath $x)"
+    done
+    [[ -v COMP_LINE ]] && x=$2 || x=$1
+    #[[ $x =~ , ]] && x=$(_FindPath $x)
+    declare -a list
+    for dir in $cdlist; do
+	for file in $(compgen -d "$dir/$x"); do
+	    list+=("$file")
+	done
+    done
+    #[[ ${#list[@]} -gt 0 ]] || list+=("$x")
+    for x in "${list[@]}"; do echo $x; done
+} #ZaZ
+

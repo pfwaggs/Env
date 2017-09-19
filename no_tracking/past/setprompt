@@ -8,7 +8,7 @@ declare -g -a base_prompt po
 base_prompt=(xtra host user spath lpath prmt)
 po=(host prmt)
 
-function mkpc () {
+function mkpc () { #AzA
     declare tmp ndx us
     PS1=''
     for ndx in ${po[@]}; do
@@ -24,9 +24,9 @@ function mkpc () {
 	[[ $tmp =~ ';' ]] && PS1+=$'\[\e[m\]'
     done
     PS1+=$'\[\e[m\] '
-}
+} #ZaZ
 
-function cs () {
+function cs () { #AzA
     declare ncg=$(shopt -p nocaseglob) us=$1
     [[ $ncg =~ -s ]] && shopt -u nocaseglob
     [[ $us =~ B ]] && us=${us/B/1;}
@@ -35,17 +35,17 @@ function cs () {
     [[ $ncg =~ -s ]] && $ncg
     [[ $us =~ ';' ]] && us="${us%;*};${ct[${us##*;}]}" || us=${ct[${us##*;}]}
     echo $us
-}
+} #ZaZ
 
-function show_colors () {
+function show_colors () { #AzA
     declare ndx
     for ndx in black red green yellow blue magenta cyan white; do
 	echo -ne "\E[${ct[$ndx]}m $ndx \E[m "
     done
     echo ''
-}
+} #ZaZ
 
-function build_select () {
+function build_select () { #AzA
     declare ndx tmp
     colors=()
     for ndx in ${base_prompt[@]}; do
@@ -58,17 +58,17 @@ function build_select () {
 	done
 	unset colors
     fi
-}
+} #ZaZ
 
-function build_drop () {
+function build_drop () { #AzA
     declare ndx
     drop=()
     for ndx in ${base_prompt[@]}; do
 	[[ ! ${po[@]} =~ $ndx ]] && drop=(${drop[@]} $ndx)
     done
-}
+} #ZaZ
 
-function p% () {
+function p% () { #AzA
     declare OPTARG OPTIND REPLY
     declare ndx val new color
     declare -a colors
@@ -108,4 +108,4 @@ function p% () {
 	done
     done
     mkpc
-}
+} #ZaZ

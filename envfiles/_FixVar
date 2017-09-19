@@ -1,5 +1,4 @@
-
-function _FixPath () {
+function _FixVar () { #AzA
     declare -x o p s
     declare op=$1; shift
     case $op in
@@ -7,8 +6,7 @@ function _FixPath () {
 	    ;;
 	l) echo ${@//:/ } | perl -anl -E '@F=map{-l $_ ? readlink($_) : $_}@F;END{say join":",@F}'
 	    ;;
-	f) s=$1
-	    echo ${@//:/ } | perl -anl -E '@F=grep{$_ !~ /$ENV{s}/}@F;END{say join ":", @F}'
+	f) s=$1; compgen  -W "${*//:/ }" -X$s* | xargs | perl -anl -E 'say join ":", @F'
 	    ;;
 	p) for p in ${@//:/ }; do
 		[[ $o =~ :$p ]] && continue
@@ -17,5 +15,4 @@ function _FixPath () {
 	    echo ${o:1}
 	    ;;
     esac
-}
-
+} #ZaZ

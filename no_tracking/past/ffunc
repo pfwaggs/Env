@@ -1,6 +1,6 @@
-function ffunc () {
+function ffunc () { #AzA
     declare -a list=(${1:-$(compgen -A function)})
     shopt -s extdebug
     declare -F ${list[@]} | column -t
     shopt -u extdebug
-}
+} #ZaZ

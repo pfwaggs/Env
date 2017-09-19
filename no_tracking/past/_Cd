@@ -1,0 +1,10 @@
+function _Cd () { #AzA
+    declare x list=$(compgen -d $2)
+    [[ $list ]] || list=$(compgen -d ../$2)
+    [[ $list ]] || list=$(compgen -d ~/$2)
+    IFS=$'\n'
+    for x in $list; do
+	COMPREPLY+=($x);
+    done
+    IFS=$' \t\n'
+} #ZaZ
