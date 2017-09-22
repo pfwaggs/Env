@@ -4,6 +4,11 @@ SHELL = /bin/bash
 ifndef DEST
     DEST = $(HOME)
 endif
+DEST_DOTFILES = $(DEST)
+DEST_ENVFILES = $(DEST)/envfiles
+$(shell [[ -d $(DEST_DOTFILES) ]] || mkdir $(DEST_DOTFILES))
+
+DIRS := dotfiles $(DIRS)
 
 ifdef LINE
     CURRENT := $(shell git log -n 1 --oneline | cut -c1-7)
@@ -15,6 +20,16 @@ else
     LIST = Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
 endif
 
+ifndef CMD
+    CMD = cp
+endif
+
+ifeq (envfiles, $(findstring envfiles, $(DIRS)))
+    $(warning this check is limited)
+    $(info  envfiles will be created)
+    $(shell [[ -d $(DEST_ENVFILES) ]] || mkdir -p $(DEST_ENVFILES))
+endif
+
 BASE = $(PWD)
 NAME = $(notdir $(BASE))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
@@ -22,23 +37,19 @@ VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
 export COMMIT BASE NAME BRANCH VER TAR
 
-DEST_DOTFILES = $(DEST)
-DEST_ENVFILES = $(DEST)/envfiles
 dotfiles := $(sort $(wildcard dotfiles/*))
 envfiles := $(sort $(wildcard envfiles/*))
 export dotfiles envfiles DEST_DOTFILES DEST_ENVFILES
 
-$(shell [[ -d $(DEST_DOTFILES) ]] || mkdir $(DEST_DOTFILES))
-$(shell [[ -d $(DEST_ENVFILES) ]] || mkdir $(DEST_ENVFILES))
 
 .PHONY: clean check
 
 status:
-	@for v in COMMIT BASE NAME BRANCH VER TAR DEST_DOTFILES DEST_ENVFILES; do \
+	@for v in COMMIT BASE NAME BRANCH VER TAR; do \
 	    eval "echo $$v = $${!v}"; \
 	done
 
-list: dotfiles envfiles
+list: $(DIRS)
 	@for dir in $^; do \
 	    echo $$dir; \
 	    for file in $${!dir}; do \
@@ -47,32 +58,32 @@ list: dotfiles envfiles
 	    echo; \
 	done
 
-links: dotfiles envfiles
+files: $(DIRS)
 	@for dir in $^; do \
 	    [[ $$dir = dotfiles ]] && d='.' || d=''; \
 	    dest=DEST_$${dir^^}; dest=$${!dest}; \
 	    for file in $${!dir}; do \
-		to=$$dest/$$d$${file#*/}; \
-		[[ $$to -ef $$file ]] || ln $$file $$to; \
+		to="$$dest/$$d$${file#*/}"; \
+		[[ $$to -ef $$file ]] || echo $$file $$to; \
 	    done; \
-	done
+	done | xargs -L 1 $(CMD)
 
-clean: dotfiles envfiles
+clean: $(DIRS)
 	@for dir in $^; do \
 	    [[ $$dir = dotfiles ]] && d='.' || d=''; \
 	    dest=DEST_$${dir^^}; dest=$${!dest}; \
 	    for file in $${!dir}; do \
-		x=$$dest/$$d$${file#*/}; \
+		x="$$dest/$$d$${file#*/}"; \
 		[[ -f $$x ]] && echo $$x; \
 	    done; \
 	done | xargs rm
 
-check: dotfiles envfiles
+check: $(DIRS)
 	@for dir in $^; do \
 	    [[ $$dir = dotfiles ]] && d='.' || d=''; \
 	    dest=DEST_$${dir^^}; dest=$${!dest}; \
 	    for file in $${!dir}; do \
-		x=$$dest/$$d$${file#*/}; \
+		x="$$dest/$$d$${file#*/}"; \
 		[[ $$x -ef $$file ]] || echo missing $$x; \
 	    done; \
 	done
