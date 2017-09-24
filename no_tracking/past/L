@@ -1,3 +1,0 @@
-function L () { #AzA
-    ls -lad "${1:-.}"/.* 2>/dev/null;
-} #ZaZ

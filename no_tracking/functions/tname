@@ -1,4 +1,0 @@
-
-#TAG:use
-tname () { printf "\033k%s\033\\" $1; }
-

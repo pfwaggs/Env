@@ -1,3 +1,0 @@
-function psfu () { #AzA
-    ps -f -u ${1:-$(id -un)};
-} #ZaZ

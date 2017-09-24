@@ -1,12 +1,12 @@
-#function _AttribParser () { #AzA
+#function _AttribParser () {
 #    declare rtn
 #    [[ ${1:-.} =~ b   ]] && rtn+='1;'
 #    [[ ${1:-.} =~ u   ]] && rtn+='4;'
 #    [[ ${1:-.} =~ r   ]] && rtn+='7;'
 #    echo "$rtn"
-#} #ZaZ
+#}
 
-function _SetPrompt () { #AzA
+function _SetPrompt () {
     declare OPTIND field color attrib x key val
     declare -A _ColorNum _PromptColor
     . ~/.prompt.conf
@@ -39,14 +39,14 @@ function _SetPrompt () { #AzA
 	PS1+="${!key} "
     done
     PS1+=$'\[\e[m\]'
-} #ZaZ
+}
 
 
-function prompt () { #AzA
+function prompt () {
     declare spec=$1 text="${@:2}"
     [[ $text ]] && eval ${spec%:*}="\${text}"
     _SetPrompt $spec
-} #ZaZ
+}
 
 alias tag="prompt tag "
 alias xtra="prompt xtra "

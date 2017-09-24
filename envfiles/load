@@ -1,15 +1,15 @@
 
-function load () { #AzA
+function load () {
     declare f
     case $1 in
 	'') . ~/.envpurge
-	    . ~/.bloader $ENVDIR/{init,envsrc,finish}
+	    . ~/.bloader $ENVDIR/envfiles/envsrc_{pre,main,post}
 	    ;;
 	/*) echo loading $1; . $1 ;;
 	*) for f in $*; do
 		echo loading $f
-		. $ENVDIR/$f
+		. $ENVDIR/envfiles/$f
 	    done
 	    ;;
     esac
-} #ZaZ
+}

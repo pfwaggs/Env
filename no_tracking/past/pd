@@ -1,8 +1,0 @@
-function pd () { #AzA
-    if [[ $1 =~ ^[-+[:digit:]][[:digit:]]*$ ]]; then
-	[[ $1 =~ ^[[:digit:]] ]] && pushd +$1 || pushd $1
-    else
-	[[ $1 ]] && pushd "$1" || pushd
-    fi > /dev/null
-    dirs -l -v
-} #ZaZ

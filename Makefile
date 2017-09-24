@@ -1,120 +1,135 @@
-
+# initializing system AzA
 SHELL = /bin/bash
 
 ifndef DEST
     DEST = $(HOME)
 endif
-DEST_DOTFILES = $(DEST)
-DEST_ENVFILES = $(DEST)/envfiles
-$(shell [[ -d $(DEST_DOTFILES) ]] || mkdir $(DEST_DOTFILES))
 
-DIRS := dotfiles $(DIRS)
+ifdef XTRAS
+    XTRAS := $(sort $(filter-out dotfiles, $(XTRAS)))
+endif
+
+DOTFILES := $(sort $(wildcard dotfiles/*))
+FILES := $(DOTFILES) $(foreach dir, $(XTRAS), $(sort $(shell find $(dir) -type f)))
+DIRS := dotfiles $(XTRAS)
+
+export FILES XTRAS
 
 ifdef LINE
+    export LINE
     CURRENT := $(shell git log -n 1 --oneline | cut -c1-7)
     COMMIT := $(shell git log -n 20 --oneline | sed -n $(LINE)p | cut -c1-7)
-    LIST = $(shell git diff-tree -r --name-only $(CURRENT) $(COMMIT) | \
+    MASTER = $(shell git diff-tree -r --name-only $(CURRENT) $(COMMIT) | \
 	perl -nl -E 'say $$_ if -f $$_')
 else
     COMMIT := $(shell git log -n 1 --oneline | cut -c1-7)
-    LIST = Makefile $(sort $(wildcard dotfiles/*)) $(sort $(wildcard envfiles/*))
+    MASTER = Makefile $(FILES)
 endif
 
-ifndef CMD
-    CMD = cp
-endif
-
-ifeq (envfiles, $(findstring envfiles, $(DIRS)))
-    $(warning this check is limited)
-    $(info  envfiles will be created)
-    $(shell [[ -d $(DEST_ENVFILES) ]] || mkdir -p $(DEST_ENVFILES))
-endif
+.PHONY: clean check $(DIRS)
 
 BASE = $(PWD)
 NAME = $(notdir $(BASE))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-export COMMIT BASE NAME BRANCH VER TAR
+STATUS = COMMIT BASE NAME BRANCH VER TAR
+export STATUS $(STATUS)
 
-dotfiles := $(sort $(wildcard dotfiles/*))
-envfiles := $(sort $(wildcard envfiles/*))
-export dotfiles envfiles DEST_DOTFILES DEST_ENVFILES
+#ZaZ
 
+# targets AzA
 
-.PHONY: clean check
+all: info
 
+info: status list
+
+# status AzA
 status:
-	@for v in COMMIT BASE NAME BRANCH VER TAR; do \
+	@for v in $(STATUS); do \
 	    eval "echo $$v = $${!v}"; \
 	done
+#ZaZ
 
-list: $(DIRS)
-	@for dir in $^; do \
+# list AzA
+list:
+	@for dir in $(DIRS); do \
 	    echo $$dir; \
-	    for file in $${!dir}; do \
+	    for file in $$(echo $(FILES) | xargs -n 1 | grep $$dir); do \
 		echo -e "\t$${file#*/}"; \
 	    done; \
 	    echo; \
 	done
+#ZaZ
 
-files: $(DIRS)
-	@for dir in $^; do \
-	    [[ $$dir = dotfiles ]] && d='.' || d=''; \
-	    dest=DEST_$${dir^^}; dest=$${!dest}; \
-	    for file in $${!dir}; do \
-		to="$$dest/$$d$${file#*/}"; \
-		[[ $$to -ef $$file ]] || echo $$file $$to; \
-	    done; \
-	done | xargs -L 1 $(CMD)
+# making environment AzA
+files:
+	@tar cf $@.tar --xform='s,^dotfiles/,.,' $(FILES)
+#ZaZ
 
-clean: $(DIRS)
-	@for dir in $^; do \
-	    [[ $$dir = dotfiles ]] && d='.' || d=''; \
-	    dest=DEST_$${dir^^}; dest=$${!dest}; \
-	    for file in $${!dir}; do \
-		x="$$dest/$$d$${file#*/}"; \
-		[[ -f $$x ]] && echo $$x; \
-	    done; \
-	done | xargs rm
+# install: AzA
+install:
+	@[[ -d $(DEST) ]] || mkdir -p $(DEST)
+	@tar cf - --xform='s,^dotfiles/,.,' $(FILES) | tar xf - -C $(DEST)
+#ZaZ
 
-check: $(DIRS)
-	@for dir in $^; do \
-	    [[ $$dir = dotfiles ]] && d='.' || d=''; \
-	    dest=DEST_$${dir^^}; dest=$${!dest}; \
-	    for file in $${!dir}; do \
-		x="$$dest/$$d$${file#*/}"; \
-		[[ $$x -ef $$file ]] || echo missing $$x; \
-	    done; \
+# state: AzA
+state:
+	@echo $(FILES) | xargs -n 1 | \
+	    sed -e "s,dotfiles/,.,g;s,^,$(DEST)/,g" | \
+	    tee | tar cf installed.tar -P -T -
+#ZaZ
+
+# check: AzA
+check:
+	@echo the following dest files are different:
+	@for file in $(FILES); do \
+	    x="$(DEST)/$${file/dotfiles\//.}"; \
+	    [[ -f $$x ]] || continue; \
+    	    cmp -s "$$x" "$$file" || echo $$x; \
+	done | tee differences
+#ZaZ
+
+# clean: AzA
+clean:
+	@echo cleaning up dotfiles:
+	@for file in $(DOTFILES); do \
+	    rm -r "$(DEST)/$${file/dotfiles\//.}"; \
 	done
+	@if [[ $$XTRAS ]]; then \
+	    echo removing extra dirs; \
+	    for dir in $(XTRAS); do \
+		echo -e "\t$(DEST)/$$dir"; \
+		rm -r $(DEST)/$$dir; \
+	    done; \
+	fi
+# ZaZ
 
+# tgz archive AzA
 archive:
 	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
+#ZaZ
 
-ltxt:
-	@echo listing updated files since $(COMMIT)
-	@for f in $(LIST); do \
-	    echo -e "\t$$f"; \
-	done
-flist:
-	@echo making flist
-	@for x in $(LIST); do echo $$x; done > flist
+# preview AzA
+preview:
+	@if [[ $$LINE ]]; then \
+	    echo listing updated files since $(COMMIT); \
+	else \
+	    echo preview file list; \
+	fi
+	@echo $(MASTER) | xargs -n 1 | tee preview
+#ZaZ
 
-txt: flist
-	@echo making text file
-	@for f in $$(cat $^); do \
-	    echo checking $$f >&2; \
-	    [[ -f $$f ]] || continue; \
-	    echo -e "\n#### $$f <<<<<<<<<<<<<"; \
-	    cat $$f; \
-	done > txt
+# printout AzA
+printout: preview
+	@echo printing
+	@for file in $$(cat preview); do \
+	    [[ -f $$file ]] || continue; \
+	    echo -e "\n#### $$file <<<<<<<<<<<<<"; \
+	    cat $$file; \
+	done | tee | \
+	enscript -2 -r -DDuplex:true -DTumble:true -P local
+	@rm preview
+#ZaZ
 
-ps: txt
-	@echo converting text to ps.
-	@enscript -2 -r -DDuplex:true -DTumble:true -o $@ $^
-	@rm $^
-
-print: ps
-	@echo printing ps file
-	@enscript -Z -P local $^
-	@rm $^
+#ZaZ

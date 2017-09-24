@@ -1,4 +1,4 @@
-function prep () { #AzA
+function prep () {
     declare name type dir=${ENVDIR}/prep_files
     [[ -s $dir/map ]] || continue
     source $dir/map
@@ -12,4 +12,4 @@ function prep () { #AzA
 	[[ $type =~ sh|pl|py ]] && chmod 755 $name
 	echo prepped $name as ${map[$type]}
     done
-} #ZaZ
+}

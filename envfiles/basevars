@@ -1,19 +1,5 @@
-
-trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
-
-set -C -b -o vi
-shopt -s extglob
-umask 0022
-
-#unset NORMAL KEEPPATH
-#[[ -f ~/NORMAL   ]] && export NORMAL=1
-#[[ -v ~/KEEPPATH ]] && export KEEPPATH=1
-
-[[ -v HISTFILE ]] || export HISTFILE=~/.history
-[[ -v ENVDIR ]] || export ENVDIR=~/envfiles
-
 host=${HOSTNAME%%.*}
-host2=$(echo $host | perl -nlE 'print s/(\D+)(\d+)$/$1 $2/r')
+host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
 #pc_s=$'\e]0;'
 #pc_e=$'\a'
 
@@ -25,6 +11,8 @@ export PRINTER=local # this is a printer class
 [[ -v TZ ]]         || export TZ=America/New_York
 [[ -v LC_COLLATE ]] || export LC_COLLATE=C
 [[ -v CDPATH ]]     || export CDPATH=".:..:../..:~/Git:~"
+
+[[ -v ViM ]] || export ViM=~/.vim
 
 #case $TERM in
 #    xterm) pc_m="${PWD#${PWD%/*/*}/}" ;;

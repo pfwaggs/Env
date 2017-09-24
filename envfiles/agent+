@@ -3,8 +3,8 @@
 [[ -v SECS ]] || declare -xr SECS=$(date +%s)
 [[ -v SMAP ]] || declare -xr SMAP=~/.ssh/smap/$(echo -n $USER:$SECS:$HOSTNAME|md5sum|cut -c1-6)
 
-function agent+ () { #AzA
+function agent+ () {
     [[ -s $LA ]] && . $LA || eval "$(ssh-agent -a $SA | tee $LA)"
     ssh-add -l -E md5 || ssh-add $(ls ~/.ssh/*_rsa)
     [[ $LA -ef $SMAP ]] || ln $LA $SMAP
-} #ZaZ
+}

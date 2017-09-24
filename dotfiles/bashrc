@@ -1,13 +1,23 @@
 
 [[ $- =~ i ]] || return 0
 
-[[ -f ~/RESET ]] && unset NORMAL KEEPPATH ENVDIR
-[[ -v NORMAL   ]] || { [[ -f ~/NORMAL   ]] && export NORMAL=1; }
-[[ -v KEEPPATH ]] || { [[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH; }
-[[ -v ENVDIR   ]] || { [[ -d ~/envfiles ]] && export ENVDIR=~/envfiles; }
+trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
+
+set -C -b -o vi
+shopt -s extglob
+
+# set some basic items
+
+umask 0022
+export HISTFILE=~/.history
+export ENVDIR=~/envfiles
+[[ -d $ENVDIR ]] || ENVDIR=~/Git/ENV/envfiles
+
+[[ -f ~/NORMAL ]] && export NORMAL=1
+[[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH
 
 . ~/.envpurge
-. ~/.bloader $ENVDIR/{init,envsrc,finish}
+. ~/.bloader $ENVDIR/USER*
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :

@@ -1,3 +1,0 @@
-
-#TAG:use
-L () { ls -lad "${1:-.}"/.* 2>/dev/null; }

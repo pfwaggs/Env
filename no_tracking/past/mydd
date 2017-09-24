@@ -1,5 +1,0 @@
-function mydd () { #AzA
-    declare if="$1"
-    shift
-    dd if="$if" "$@"
-} #ZaZ

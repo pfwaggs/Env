@@ -1,5 +1,4 @@
 
-declare add_extras env path
 case "$(/usr/bin/uname -s -r)" in
     *v7+)
         [[ $UID -eq 0 ]] || add_extras="LOCAL=/usr/local $HOME"
@@ -28,8 +27,7 @@ esac
 for x in $add_extras; do
     read env path <<< ${x/=/ }
     [[ $path ]] && eval "export $x" || :
-    PATH=${path:-$env}:$PATH
-    #addpath ${path:-$env}
+    addpath ${path:-$env}
 done
 
 [[ -z $PERL5LIB ]] || export PERL5LIB
@@ -46,3 +44,4 @@ export PAGER=$(type -p less more | head -n 1)
 export EDITOR=$(type -p vim vi | head -n 1)
 export VISUAL=$EDITOR
 
+complete -C '_ParseArg' cd

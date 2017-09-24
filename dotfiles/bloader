@@ -3,11 +3,10 @@
 for load in $*; do
     [[ -v NORMAL ]] || echo ${load##*/}
     dir=${load%/*}
-    for file in $(cat $load | grep -v '#'); do
-	[[ $file ]] || continue
-	[[ -s $dir/$file ]] || continue
-	[[ -v NORMAL ]] && echo -n . || echo $file
-	. $dir/$file
+    for file in $(cat $load | grep -v '#' | sed s,^,$dir/,); do
+	[[ -s $file ]] || continue
+	[[ -v NORMAL ]] && echo -n . || echo ${file##*/}
+	. "$file"
     done
     echo ''
 done

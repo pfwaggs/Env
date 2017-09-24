@@ -1,13 +1,11 @@
-function typef () { #AzA
-    declare -a p;
-    type -a $1 | while read -a p; do
-	file ${p[-1]};
-    done;
-} #ZaZ
+function typef () {
+    file $(type -a -p $@)
+}
 
-function typel () { #AzA
-    declare -a p;
-    type -a $1 | while read -a p; do
-	less ${p[-1]};
-    done;
-} #ZaZ
+function typel () {
+    ls -l $(type -a -p $@)
+}
+
+function typeL () {
+    less $(type -a -p $@)
+}

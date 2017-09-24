@@ -1,4 +1,4 @@
-function julian () { #AzA
+function julian () {
     if [[ $# -eq 0 ]]; then
 	date +%Y.%j
     elif [[ $1 =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2} ]]; then
@@ -10,4 +10,4 @@ function julian () { #AzA
     else
 	echo 'unknown request'
     fi
-} #ZaZ
+}

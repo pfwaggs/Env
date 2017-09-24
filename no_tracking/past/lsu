@@ -1,7 +1,0 @@
-function lsu () { #AzA
-    declare np[0]=${1:-$PWD}
-    while [[ ${np[0]%/*} =~ / ]]; do
-	np=("${np[0]%/*}" "${np[@]}")
-    done
-    ls -ld /"${np[@]}"
-} #ZaZ

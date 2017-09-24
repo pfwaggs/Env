@@ -1,25 +1,13 @@
-#function _GetInfo () { #AzA
-#    declare -a rtn
-#    declare x
-##   [[ -v COMP_LINE ]] && x=$2 || x=$1
-#    for x in $(_ShowEnv "$@"); do
-#	rtn+=("$x")
-#    done
-#    for x in ${rtn[@]}; do echo "$x"; done
-#} #ZaZ
 
-function _ShowEnv () { #AzA
-    declare x w m
-    [[ -v COMP_LINE ]] && x=${2^^} || x=${1^^}
-    #w="$x _$x ${x^^} _${x^^}"
-    declare -a list=($(compgen -v $x))
-    [[ ${#list[@]} -gt 0 ]] || list=($(compgen -v _$x))
-    [[ ${#list[@]} -gt 0 ]] || list=($(compgen -v  ${x,,}))
-    [[ ${#list[@]} -gt 0 ]] || list=($(compgen -v _${x,,}))
+function _ShowEnv () {
+    declare -x x
+    [[ -v COMP_LINE ]] && x=$2 || x=$1
+    declare -a list
+    list=($(compgen -v | perl -nl -E 'push @f, grep {/^_?$ENV{x}/i} $_;END{say for @f}'))
     for x in ${list[@]}; do echo $x; done
-} #ZaZ
+}
 
-function show () { #AzA
+function show () {
     declare x=$(declare -p $1 | awk '{print $2}')
     if [[ $x =~ [aA] ]]; then
 	echo array $1:
@@ -29,6 +17,6 @@ function show () { #AzA
     else
 	echo $1 = ${!1}
     fi
-} #ZaZ
+}
 
-complete -o filenames -C '_ShowEnv' show
+complete -C '_ShowEnv' show

@@ -1,4 +1,4 @@
-function _FixVar () { #AzA
+function _FixVar () {
     declare -x o p s
     declare op=$1; shift
     case $op in
@@ -15,4 +15,4 @@ function _FixVar () { #AzA
 	    echo ${o:1}
 	    ;;
     esac
-} #ZaZ
+}
