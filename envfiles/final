@@ -27,7 +27,7 @@ esac
 for x in $add_extras; do
     read env path <<< ${x/=/ }
     [[ $path ]] && eval "export $x" || :
-    addpath ${path:-$env}
+    PATH=${path:-$env}:$PATH
 done
 
 [[ -z $PERL5LIB ]] || export PERL5LIB

@@ -12,7 +12,11 @@ export PRINTER=local # this is a printer class
 [[ -v LC_COLLATE ]] || export LC_COLLATE=C
 [[ -v CDPATH ]]     || export CDPATH=".:..:../..:~/Git:~"
 
-[[ -v ViM ]] || export ViM=~/.vim
+# bah. horrible crap
+if [[ ! -v VIM ]]; then
+    export VIM=~/.vim
+    export VIMRUNTIME=/usr/share/vim/vim80
+fi
 
 #case $TERM in
 #    xterm) pc_m="${PWD#${PWD%/*/*}/}" ;;

@@ -9,7 +9,9 @@ ifdef XTRAS
     XTRAS := $(sort $(filter-out dotfiles, $(XTRAS)))
 endif
 
-DOTFILES := $(sort $(wildcard dotfiles/*))
+#DOTFILES := $(sort $(wildcard dotfiles/*))
+DOTFILES := $(sort $(shell find dotfiles -type f))
+#$(error $(DOTFILES))
 FILES := $(DOTFILES) $(foreach dir, $(XTRAS), $(sort $(shell find $(dir) -type f)))
 DIRS := dotfiles $(XTRAS)
 
@@ -40,6 +42,17 @@ export STATUS $(STATUS)
 
 # targets AzA
 
+help:
+	@echo 'status   shows current variables'
+	@echo 'list     shows current files to be installed'
+	@echo 'install  will install files in designated DEST'
+	@echo 'check    will show what has changed wrt Git structure'
+	@echo 'clean    will uninstall the current environment'
+	@echo 'tgz      generate a complete tar file of Git structure'
+	@echo 'preview  see 1) current file list, or 2) file list wrt'
+	@echo '             given Git check-in'
+	@echo 'printout a printed copy of changes.'
+
 all: info
 
 info: status list
@@ -62,19 +75,13 @@ list:
 	done
 #ZaZ
 
-# making environment AzA
-files:
-	@tar cf $@.tar --xform='s,^dotfiles/,.,' $(FILES)
-#ZaZ
+## making environment AzA
+#files:
+#	@tar cf $@.tar --xform='s,^dotfiles/,.,' $(FILES)
+##ZaZ
 
 # install: AzA
 install:
-	@[[ -d $(DEST) ]] || mkdir -p $(DEST)
-	@tar cf - --xform='s,^dotfiles/,.,' $(FILES) | tar xf - -C $(DEST)
-#ZaZ
-
-# state: AzA
-state:
 	@echo $(FILES) | xargs -n 1 | \
 	    sed -e "s,dotfiles/,.,g;s,^,$(DEST)/,g" | \
 	    tee | tar cf installed.tar -P -T -
