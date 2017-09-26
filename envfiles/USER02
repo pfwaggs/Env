@@ -2,8 +2,6 @@ L
 _ParseArg
 agent+
 commas
-dfx
-ffunc
 gigify
 julian
 killdir
@@ -12,14 +10,8 @@ load
 lsu
 mkwdir
 mydd
-myenv
-mytab
-mytail
-parx
-pd
 prep
 psfu
-qdirs
 prompt
 show
 spnd
