@@ -12,8 +12,11 @@ endif
 #DOTFILES := $(sort $(wildcard dotfiles/*))
 DOTFILES := $(sort $(shell find dotfiles -type f))
 #$(error $(DOTFILES))
+
 FILES := $(DOTFILES) $(foreach dir, $(XTRAS), $(sort $(shell find $(dir) -type f)))
+#$(error $(FILES))
 DIRS := dotfiles $(XTRAS)
+#$(error $(DIRS))
 
 export FILES XTRAS
 
@@ -43,15 +46,15 @@ export STATUS $(STATUS)
 # targets AzA
 
 help:
-	@echo 'status   shows current variables'
-	@echo 'list     shows current files to be installed'
-	@echo 'install  will install files in designated DEST'
-	@echo 'check    will show what has changed wrt Git structure'
-	@echo 'clean    will uninstall the current environment'
-	@echo 'tgz      generate a complete tar file of Git structure'
-	@echo 'preview  see 1) current file list, or 2) file list wrt'
-	@echo '             given Git check-in'
-	@echo 'printout a printed copy of changes.'
+	@echo 'status   : shows current variables'
+	@echo 'list     : shows current files to be installed'
+	@echo 'install  : will install files in designated DEST'
+	@echo 'tarchive : create an arcive of the installed files'
+	@echo 'check    : will show what has changed wrt Git structure'
+	@echo 'clean    : will uninstall the current environment'
+	@echo 'tgz      : generate a complete tar file of Git structure'
+	@echo 'preview  : show a list of files to be printed'
+	@echo 'printout : print the files shown from preview'
 
 all: info
 
@@ -75,16 +78,18 @@ list:
 	done
 #ZaZ
 
-## making environment AzA
-#files:
-#	@tar cf $@.tar --xform='s,^dotfiles/,.,' $(FILES)
-##ZaZ
+# tarchive: AzA
+tarchive:
+	@echo $(FILES) | xargs -n 1 | \
+	    sed -e 's,dotfiles/,.,g;s,^,$(DEST)/,g' | tee | \
+	    tar cf installed.tar -P -T -
+#	@tar tf installed.tar
+#ZaZ
 
 # install: AzA
 install:
-	@echo $(FILES) | xargs -n 1 | \
-	    sed -e "s,dotfiles/,.,g;s,^,$(DEST)/,g" | \
-	    tee | tar cf installed.tar -P -T -
+	@[[ -d $(DEST) ]] || mkdir -p $(DEST)
+	@tar --create --file=- --xform='s,^dotfiles/,.,' $(FILES) | tar --extract --file=- -C $(DEST)
 #ZaZ
 
 # check: AzA

@@ -44,9 +44,9 @@ set undodir=$VIM/undos//
 set undofile
 
 " yes, folding is good
-set foldcolumn=4
-set foldmethod=marker
-set foldmarker=AzA,ZaZ
+"set foldcolumn=4
+"set foldmethod=marker
+"set foldmarker=AzA,ZaZ
 
 "abbreviations
 :source $VIM/vimrc-abbr
