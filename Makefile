@@ -25,9 +25,8 @@ DOTDIRS  := $(sort $(filter dotfiles%, $(DIRS)))
 XDIRS    := $(sort $(filter-out dotfiles%, $(DIRS)))
 DIRS     := $(DOTDIRS) $(XDIRS)
 FILES    := $(foreach dir, $(DIRS), $(sort $(shell find $(dir) -type f)))
-TARFILES := $(shell echo $(FILES) | xargs -n 1 | sed -e 's,dotfiles[^/]*/,.,')
 DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
-export FILES DOTDIRS XDIRS TARFILES
+export FILES DOTDIRS XDIRS
 
 BASE = $(PWD)
 NAME = $(notdir $(BASE))
@@ -77,7 +76,7 @@ list:
 
 # tar archive: AzA
 tarchive:
-	@tar -czvf installed.tar.gz -C $(DEST) -P $(TARFILES)
+	@tar -czvf installed.tar.gz --xform='s,dotfiles[^/]*/,.,;s,^,$(DEST)/,' -P $(FILES)
 #ZaZ
 
 # install: AzA
@@ -140,7 +139,7 @@ printout: preview
 	    echo -e "\n#### $$file <<<<<<<<<<<<<"; \
 	    cat $$file; \
 	done | tee | \
-	enscript -2 -r -DDuplex:true -DTumble:true -P local
+	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -P local
 	@rm preview
 #ZaZ
 
