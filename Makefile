@@ -136,9 +136,9 @@ printout: preview
 	@echo printing
 	@for file in $$(cat preview); do \
 	    [[ -f $$file ]] || continue; \
-	    echo -e "\n#### $$file <<<<<<<<<<<<<"; \
+	    echo -e "\n#### $$(md5sum $$file))"; \
 	    cat $$file; \
-	done | tee | \
+	done | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -P local
 	@rm preview
 #ZaZ
