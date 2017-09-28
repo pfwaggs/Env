@@ -5,20 +5,10 @@ ifndef DEST
     DEST = $(HOME)
 endif
 
-ifdef XTRAS
-    XTRAS := $(sort $(filter-out dotfiles, $(XTRAS)))
+ifndef DIRS
+    DIRS = dotfiles envfiles
+    $(warning DIRS has default value: $(DIRS))
 endif
-
-#DOTFILES := $(sort $(wildcard dotfiles/*))
-DOTFILES := $(sort $(shell find dotfiles -type f))
-#$(error $(DOTFILES))
-
-FILES := $(DOTFILES) $(foreach dir, $(XTRAS), $(sort $(shell find $(dir) -type f)))
-#$(error $(FILES))
-DIRS := dotfiles $(XTRAS)
-#$(error $(DIRS))
-
-export FILES XTRAS
 
 ifdef LINE
     export LINE
@@ -31,7 +21,13 @@ else
     MASTER = Makefile $(FILES)
 endif
 
-.PHONY: clean check $(DIRS)
+DOTDIRS  := $(sort $(filter dotfiles%, $(DIRS)))
+XDIRS    := $(sort $(filter-out dotfiles%, $(DIRS)))
+DIRS     := $(DOTDIRS) $(XDIRS)
+FILES    := $(foreach dir, $(DIRS), $(sort $(shell find $(dir) -type f)))
+TARFILES := $(shell echo $(FILES) | xargs -n 1 | sed -e 's,dotfiles[^/]*/,.,')
+DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
+export FILES DOTDIRS XDIRS TARFILES
 
 BASE = $(PWD)
 NAME = $(notdir $(BASE))
@@ -41,10 +37,13 @@ TAR = $(NAME)_$(BRANCH)_$(VER).tgz
 STATUS = COMMIT BASE NAME BRANCH VER TAR
 export STATUS $(STATUS)
 
+.PHONY: clean check $(DIRS)
+
 #ZaZ
 
 # targets AzA
 
+# help: AzA
 help:
 	@echo 'status   : shows current variables'
 	@echo 'list     : shows current files to be installed'
@@ -56,9 +55,7 @@ help:
 	@echo 'preview  : show a list of files to be printed'
 	@echo 'printout : print the files shown from preview'
 
-all: info
-
-info: status list
+#ZaZ
 
 # status AzA
 status:
@@ -78,28 +75,31 @@ list:
 	done
 #ZaZ
 
-# tarchive: AzA
+# tar archive: AzA
 tarchive:
-	@echo $(FILES) | xargs -n 1 | \
-	    sed -e 's,dotfiles/,.,g;s,^,$(DEST)/,g' | tee | \
-	    tar cf installed.tar -P -T -
-#	@tar tf installed.tar
+	@tar -czvf installed.tar.gz -C $(DEST) -P $(TARFILES)
 #ZaZ
 
 # install: AzA
 install:
 	@[[ -d $(DEST) ]] || mkdir -p $(DEST)
-	@tar --create --file=- --xform='s,^dotfiles/,.,' $(FILES) | tar --extract --file=- -C $(DEST)
+	@tar --create --file=- --xform='s,dotfiles[^/]*/,.,g' $(FILES) | \
+	    tar -C $(DEST) --extract --file=-
 #ZaZ
 
 # check: AzA
 check:
 	@echo the following dest files are different:
 	@for file in $(FILES); do \
-	    x="$(DEST)/$${file/dotfiles\//.}"; \
+	    x=$(DEST)/; \
+	    [[ $$file =~ dotfiles ]] \
+		&& x+="$${file#dotfiles/}" \
+	    || x+="$$file"; \
 	    [[ -f $$x ]] || continue; \
     	    cmp -s "$$x" "$$file" || echo $$x; \
-	done | tee differences
+	done | tee differences; \
+	[[ -s differences ]] || rm differences; \
+	echo -e "\n"any files listed above are also in the file 'differences'
 #ZaZ
 
 # clean: AzA
@@ -108,17 +108,17 @@ clean:
 	@for file in $(DOTFILES); do \
 	    rm -r "$(DEST)/$${file/dotfiles\//.}"; \
 	done
-	@if [[ $$XTRAS ]]; then \
+	@if [[ $$XDIRS ]]; then \
 	    echo removing extra dirs; \
-	    for dir in $(XTRAS); do \
+	    for dir in $(XDIRS); do \
 		echo -e "\t$(DEST)/$$dir"; \
 		rm -r $(DEST)/$$dir; \
 	    done; \
 	fi
 # ZaZ
 
-# tgz archive AzA
-archive:
+# git archive AzA
+garchive:
 	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
 #ZaZ
 

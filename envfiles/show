@@ -1,4 +1,3 @@
-
 function _ShowEnv () {
     declare -x x
     [[ -v COMP_LINE ]] && x=$2 || x=$1

@@ -1,5 +1,3 @@
-
-
 clear
 [[ $SHLVL -eq 1 ]] || return 0
 [[ -f $LA ]] && { ssh-agent -k; rm $LA $SA; }

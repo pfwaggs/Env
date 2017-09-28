@@ -1,12 +1,14 @@
-
 [[ $# -gt 0 ]] || return 0
 for load in $*; do
     [[ -v NORMAL ]] || echo ${load##*/}
     dir=${load%/*}
-    for file in $(cat $load | grep -v '#' | sed s,^,$dir/,); do
-	[[ -s $file ]] || continue
-	[[ -v NORMAL ]] && echo -n . || echo ${file##*/}
-	. "$file"
+    perl -nl -E '/^(\W|$)/ || say s/\W.+//r' $load |
+    while read; do
+	path=$dir/$REPLY
+	[[ -s $path ]] || continue
+	[[ -v NORMAL ]] && echo -n . || echo $REPLY
+	. "$path"
     done
     echo ''
 done
+unset load dir path

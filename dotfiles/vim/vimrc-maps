@@ -1,4 +1,3 @@
-
 "F2 and F3 toggle paste
 :map <F2> :set paste<CR>
 :map <F3> :set nopaste<CR>

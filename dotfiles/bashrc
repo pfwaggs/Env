@@ -1,4 +1,3 @@
-
 [[ $- =~ i ]] || return 0
 
 trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
@@ -17,7 +16,7 @@ export ENVDIR=~/envfiles
 [[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH
 
 . ~/.envpurge
-. ~/.bloader $ENVDIR/USER*
+. ~/.bloader $ENVDIR/_LOAD01
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :

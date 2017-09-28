@@ -1,4 +1,3 @@
-
 function _ParseArg () {
     declare x dir DIR
     [[ -v COMP_LINE ]] && x=$2 || x=$1
@@ -23,4 +22,3 @@ function _ParseArg () {
     #[[ ${#list[@]} -gt 0 ]] || list+=("$x")
     for x in "${list[@]}"; do echo $x; done
 }
-

@@ -1,4 +1,3 @@
-
 # so much wants to work in bashrc, tmxu runs bash_profile (since shell
 # starts in login mode) we might as well minimize this and just
 # rely on bashrc
