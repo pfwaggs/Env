@@ -2,12 +2,11 @@
 for load in $*; do
     [[ -v NORMAL ]] || echo ${load##*/}
     dir=${load%/*}
-    for file in $(perl -nl -E '/^(\W|$)/ || say s/\W.+//r' $load); do
-	path=$dir/$file
-	[[ -s $path ]] || continue
-	[[ -v NORMAL ]] && echo -n . || echo $file
-	. "$path"
+    for file in $(grep '^+' $load | cut -f1 -d' ' | sed -e s,^+,$dir/,); do
+	[[ -s $file ]] || continue
+	[[ -v NORMAL ]] && echo -n . || echo ${file##*/}
+	. "$file"
     done
     echo ''
 done
-unset load dir path file
+unset load dir file

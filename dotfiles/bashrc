@@ -16,7 +16,7 @@ export ENVDIR=~/envfiles
 [[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH
 
 . ~/.envpurge
-. ~/.bloader $ENVDIR/_LOAD01
+. ~/.bloader $ENVDIR/_${USER^^}
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :

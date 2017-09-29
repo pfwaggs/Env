@@ -1,0 +1,36 @@
+# initial files to install first
++basevars
++_FixList
++_List2Var
++_ParseArg
++_SetPrompt
+ _AttribParser
++_ShowEnv
+# useful functions that depend on the above files
++L
+
++agent+ # this is for ssh
++commas
++gigify
+
++julian
++killdir
++lister # attempt for menu support
++load
++lsu
++mkwdir
++mydd
++prep
++psfu
++prompt
++show
++spnd
++spx
++stk
++tll
++tname
++types
++wup
+# final things like fixing paths, adding aliases
++final
++aliases

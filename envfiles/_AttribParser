@@ -1,0 +1,8 @@
+#function _AttribParser () {
+#    declare rtn
+#    [[ ${1:-.} =~ b   ]] && rtn+='1;'
+#    [[ ${1:-.} =~ u   ]] && rtn+='4;'
+#    [[ ${1:-.} =~ r   ]] && rtn+='7;'
+#    echo "$rtn"
+#}
+

@@ -1,11 +1,3 @@
-function _ShowEnv () {
-    declare -x x
-    [[ -v COMP_LINE ]] && x=$2 || x=$1
-    declare -a list
-    list=($(compgen -v | perl -nl -E 'push @f, grep {/^_?$ENV{x}/i} $_;END{say for @f}'))
-    for x in ${list[@]}; do echo $x; done
-}
-
 function show () {
     declare x=$(declare -p $1 | awk '{print $2}')
     if [[ $x =~ [aA] ]]; then
