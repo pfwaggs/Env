@@ -22,4 +22,3 @@ export ENVDIR=~/envfiles
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND=${PROMPT_COMMAND#* } || :
 
 prompt
-

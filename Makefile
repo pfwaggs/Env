@@ -7,8 +7,15 @@ endif
 
 ifndef DIRS
     DIRS = dotfiles envfiles
-    $(warning DIRS has default value: $(DIRS))
+    $(warning using default values for DIRS: $(DIRS))
 endif
+
+DOTDIRS  := $(sort $(filter dotfiles%, $(DIRS)))
+XDIRS    := $(sort $(filter-out dotfiles%, $(DIRS)))
+DIRS     := $(DOTDIRS) $(XDIRS)
+FILES    := $(foreach dir, $(DIRS), $(sort $(wildcard $(dir)/*)))
+#DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
+export FILES DOTDIRS XDIRS
 
 ifdef LINE
     export LINE
@@ -20,13 +27,6 @@ else
     COMMIT := $(shell git log -n 1 --oneline | cut -c1-7)
     MASTER = Makefile $(FILES)
 endif
-
-DOTDIRS  := $(sort $(filter dotfiles%, $(DIRS)))
-XDIRS    := $(sort $(filter-out dotfiles%, $(DIRS)))
-DIRS     := $(DOTDIRS) $(XDIRS)
-FILES    := $(foreach dir, $(DIRS), $(sort $(shell find $(dir) -type f)))
-DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
-export FILES DOTDIRS XDIRS
 
 BASE = $(PWD)
 NAME = $(notdir $(BASE))
@@ -58,9 +58,7 @@ help:
 
 # status AzA
 status:
-	@for v in $(STATUS); do \
-	    eval "echo $$v = $${!v}"; \
-	done
+	@for v in $(STATUS); do eval "echo $$v = $${!v}"; done
 #ZaZ
 
 # list AzA
@@ -74,9 +72,21 @@ list:
 	done
 #ZaZ
 
+# md5sum AzA
+md5sum:
+	@for dir in $(DIRS); do \
+	    echo $$dir; \
+	    for file in $$(echo $(FILES) | xargs -n 1 | grep $$dir); do \
+		[[ -f $$file ]] || continue; \
+		echo -e "\t$$(md5sum $$file)"; \
+	    done | sed -e s,$$dir/,,; \
+	    echo; \
+	done
+#ZaZ
+
 # tar archive: AzA
 tarchive:
-	@tar -czvf installed.tar.gz --xform='s,dotfiles[^/]*/,.,;s,^,$(DEST)/,' -P $(FILES)
+	@tar -cvzf installed.tar.gz -P --xform='s,dotfiles[^/]*/,.,;s,^,$(DEST)/,' $(FILES)
 #ZaZ
 
 # install: AzA
@@ -89,31 +99,28 @@ install:
 # check: AzA
 check:
 	@echo the following dest files are different:
-	@for file in $(FILES); do \
-	    x=$(DEST)/; \
-	    [[ $$file =~ dotfiles ]] \
-		&& x+="$${file#dotfiles/}" \
-	    || x+="$$file"; \
-	    [[ -f $$x ]] || continue; \
-    	    cmp -s "$$x" "$$file" || echo $$x; \
-	done | tee differences; \
-	[[ -s differences ]] || rm differences; \
-	echo -e "\n"any files listed above are also in the file 'differences'
-#ZaZ
+	@find $(DIRS) -type f | \
+	    sed -n 'h;G;s/\n/ /;s,dotfiles[^/]*/,.,;s,^,$(DEST)/,p' | \
+	    while read; do \
+		cmp -s $$REPLY || echo $${REPLY% *}; \
+	    done | tee differences
+	@[[ -s differences ]] || rm differences
+	@echo -e "\n"any files listed above are also in the file 'differences'
+# ZaZ
 
 # clean: AzA
 clean:
 	@echo cleaning up dotfiles:
-	@for file in $(DOTFILES); do \
-	    rm -r "$(DEST)/$${file/dotfiles\//.}"; \
-	done
-	@if [[ $$XDIRS ]]; then \
-	    echo removing extra dirs; \
-	    for dir in $(XDIRS); do \
-		echo -e "\t$(DEST)/$$dir"; \
-		rm -r $(DEST)/$$dir; \
-	    done; \
-	fi
+	@for file in $(FILES); do \
+	    if [[ $$file =~ dotfiles ]]; then \
+		xfile="$(DEST)/.$${file#dotfiles*/}"; \
+	    else \
+		xfile="$(DEST)/$$file"; \
+	    fi; \
+	    echo $$file to $$xfile >&2; \
+	    [[ -d $$xfile || -f $$xfile ]] || continue; \
+	    [[ -d $$xfile ]] && rm -r "$$xfile" || rm "$$xfile"; \
+	done; \
 # ZaZ
 
 # git archive AzA

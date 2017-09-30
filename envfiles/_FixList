@@ -6,7 +6,7 @@ function _FixList () {
 	    ;;
 	l) echo ${@:2} | perl -anl -E '@F=map{-l $_ ? readlink($_) : $_}@F;END{say for @F}'
 	    ;;
-	f) compgen -W "${*:3}" -X"$2"
+	f) compgen -W "${*:3}" -X"$2*"
 	    ;;
 	p) for p in ${@:2}; do
 		[[ ${list[@]} =~ ":$p" ]] && continue
