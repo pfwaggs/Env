@@ -13,7 +13,7 @@ function _SetPrompt () {
 	[[ ${!_ColorNum[@]} =~ $color ]] || continue
 	_PromptColor[$key]=$color
     done
-    valids=$(_FixVar p $MPR:$valids:${tag:+tag}:${xtra:+xtra}:host:prompt)
+    valids=$(_FixList p $MPR $valids ${tag:+tag} ${xtra:+xtra} host prompt | _List2Var)
 
     key=
     declare po='xtra tag host user spath lpath prompt'
