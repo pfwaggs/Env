@@ -6,8 +6,11 @@ ifndef DEST
 endif
 
 ifndef DIRS
-    DIRS = dotfiles envfiles
-    $(warning using default values for DIRS: $(DIRS))
+    DIRS := $(sort $(wildcard dotfiles*)) envfiles
+endif
+
+ifndef MISC
+    DIRS := $(filter-out %misc%, $(DIRS))
 endif
 
 DOTDIRS  := $(sort $(filter dotfiles%, $(DIRS)))
@@ -15,7 +18,7 @@ XDIRS    := $(sort $(filter-out dotfiles%, $(DIRS)))
 DIRS     := $(DOTDIRS) $(XDIRS)
 FILES    := $(foreach dir, $(DIRS), $(sort $(wildcard $(dir)/*)))
 #DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
-export FILES DOTDIRS XDIRS
+export DIRS FILES DOTDIRS XDIRS
 
 ifdef LINE
     export LINE
@@ -33,7 +36,7 @@ NAME = $(notdir $(BASE))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-STATUS = COMMIT BASE NAME BRANCH VER TAR
+STATUS = DIRS COMMIT BASE NAME BRANCH VER TAR
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
@@ -98,15 +101,36 @@ install:
 
 # check: AzA
 check:
-	@echo the following dest files are different:
-	@find $(DIRS) -type f | \
-	    sed -n 'h;G;s/\n/ /;s,dotfiles[^/]*/,.,;s,^,$(DEST)/,p' | \
-	    while read; do \
-		cmp -s $$REPLY || echo $${REPLY% *}; \
-	    done | tee differences
-	@[[ -s differences ]] || rm differences
-	@echo -e "\n"any files listed above are also in the file 'differences'
+	@for file in $(FILES); do \
+	    [[ -f $$file ]] \
+		|| { echo skipping $$file; continue; }; \
+	    [[ $$file =~ dotfiles ]] \
+		&& xfile=$(DEST)/."$${file#dotfiles*/}" \
+		|| xfile=$(DEST)/$$file; \
+	    if [[ -f "$$xfile" ]]; then \
+		cmp -s "$$xfile" "$$file" || echo -e $$xfile"\t"$$file > differences; \
+	    else \
+		echo skipping $$xfile; \
+		continue; \
+	    fi; \
+	done
+	@if [[ -s differences ]]; then \
+	    echo 'the following dest files are different:'; \
+	    cat differences | cut -f1; \
+	    echo -e "\n"check differences for the above results; \
+	else \
+	    [[ -f differences ]] && rm differences; \
+	fi
 # ZaZ
+
+difference: check
+
+diffs: difference
+	@if [[ -f differences ]]; then \
+	    cat differences | while read d l; do \
+	    diff -y $$d $$l | less; \
+	    done; \
+	fi
 
 # clean: AzA
 clean:
