@@ -1,3 +1,3 @@
 function L () { 
-    ls -lAd "${1:+$1/}".* 2> /dev/null
+    ls -lAd ${1:-.}/.??* 2> /dev/null
 }
