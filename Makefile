@@ -77,15 +77,10 @@ list:
 
 # md5sum AzA
 md5sum:
-	@for dir in $(DIRS); do \
-	    echo $$dir; \
-	    for file in $$(echo $(FILES) | xargs -n 1 | grep $$dir); do \
-		[[ -f $$file ]] || continue; \
-		echo -e "\t$$(md5sum $$file)"; \
-	    done | sed -e s,$$dir/,,; \
-	    echo; \
-	done
-#ZaZ
+	@for file in Makefile $(FILES); do \
+	    [[ -d $$file ]] && find $$file -type f || echo $$file; \
+	done | xargs md5sum
+# ZaZ
 
 # tar archive: AzA
 tarchive:
