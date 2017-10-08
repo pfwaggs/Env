@@ -17,7 +17,7 @@ DOTDIRS  := $(sort $(filter dotfiles%, $(DIRS)))
 XDIRS    := $(sort $(filter-out dotfiles%, $(DIRS)))
 DIRS     := $(DOTDIRS) $(XDIRS)
 FILES    := $(foreach dir, $(DIRS), $(sort $(wildcard $(dir)/*)))
-#DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
+DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
 export DIRS FILES DOTDIRS XDIRS
 
 ifdef LINE
@@ -36,7 +36,7 @@ NAME = $(notdir $(BASE))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-STATUS = DIRS COMMIT BASE NAME BRANCH VER TAR
+STATUS = PWD DIRS COMMIT BASE NAME BRANCH VER TAR
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
@@ -49,8 +49,8 @@ export STATUS $(STATUS)
 help:
 	@echo 'status   : shows current variables'
 	@echo 'list     : shows current files to be installed'
-	@echo 'install  : will install files in designated DEST'
-	@echo 'tarchive : create an arcive of the installed files'
+	@echo 'tarinstall  : will install files in designated DEST'
+	@echo 'tararchive : create an arcive of the installed files'
 	@echo 'check    : will show what has changed wrt Git structure'
 	@echo 'clean    : will uninstall the current environment'
 	@echo 'tgz      : generate a complete tar file of Git structure'
@@ -82,20 +82,82 @@ md5sum:
 	done | xargs md5sum
 # ZaZ
 
-# tar archive: AzA
-tarchive:
+# install AzA
+install:
+	@for fr in $(DOTFILES); do \
+	    to="$(DEST)/.$${fr#dotfiles*/}"; \
+	    [[ -e $$to ]] && echo skipping $$to && continue; \
+	    [[ -d $$fr ]] && ln -s $(PWD)/$$fr $$to || ln $$fr $$to; \
+	done
+# ZaZ
+
+# check AzA
+check:
+	@for file in $(DOTFILES); do \
+	    name="$${file#dotfiles*/}"; \
+	    to=$(DEST)/.$$name; \
+	    if [[ -e $$to ]]; then \
+		[[ $$file -ef $$to ]] && continue; \
+		if [[ -L $$to ]]; then \
+		    z=$(namei $$to | sed -ne '$$p'); \
+		    [[ $$z == "- $$name" ]] && continue; \
+		    echo "$$to: does not point to $$file"; \
+		else \
+		    echo "$$to: is not a link"; \
+		fi; \
+	    else \
+		echo "$$to: does not exist"; \
+	    fi; \
+	done | tee differences
+	@if [[ -s differences ]]; then \
+	    echo 'the following files have problems:';\
+	    cat differences; \
+	else \
+	    rm differences; \
+	fi
+# ZaZ
+
+difference: check
+	@touch differences
+
+diffs: difference
+	@if [[ -s differences ]]; then \
+	    cat differences | while read d l; do \
+	    diff -y $$d $$l | less; \
+	    done; \
+	else \
+	    [[ -e differences ]] && rm differences; \
+	fi
+
+# clean: AzA
+clean:
+	@echo cleaning up dotfiles:
+	@for file in $(FILES); do \
+	    if [[ $$file =~ dotfiles ]]; then \
+		xfile="$(DEST)/.$${file#dotfiles*/}"; \
+	    else \
+		xfile="$(DEST)/$$file"; \
+	    fi; \
+	    echo $$file to $$xfile >&2; \
+	    [[ -d $$xfile || -f $$xfile ]] || continue; \
+	    [[ -d $$xfile ]] && rm -r "$$xfile" || rm "$$xfile"; \
+	done; \
+# ZaZ
+
+# tararchive: AzA
+tararchive:
 	@tar -cvzf installed.tar.gz -P --xform='s,dotfiles[^/]*/,.,;s,^,$(DEST)/,' $(FILES)
 #ZaZ
 
-# install: AzA
-install:
+# tarinstall: AzA
+tarinstall:
 	@[[ -d $(DEST) ]] || mkdir -p $(DEST)
 	@tar --create --file=- --xform='s,dotfiles[^/]*/,.,g' $(FILES) | \
 	    tar -C $(DEST) --extract --file=-
 #ZaZ
 
-# check: AzA
-check:
+# tarcheck: AzA
+tarcheck:
 	@for file in $(FILES); do \
 	    [[ -f $$file ]] \
 		|| { echo skipping $$file; continue; }; \
@@ -118,32 +180,8 @@ check:
 	fi
 # ZaZ
 
-difference: check
-
-diffs: difference
-	@if [[ -f differences ]]; then \
-	    cat differences | while read d l; do \
-	    diff -y $$d $$l | less; \
-	    done; \
-	fi
-
-# clean: AzA
-clean:
-	@echo cleaning up dotfiles:
-	@for file in $(FILES); do \
-	    if [[ $$file =~ dotfiles ]]; then \
-		xfile="$(DEST)/.$${file#dotfiles*/}"; \
-	    else \
-		xfile="$(DEST)/$$file"; \
-	    fi; \
-	    echo $$file to $$xfile >&2; \
-	    [[ -d $$xfile || -f $$xfile ]] || continue; \
-	    [[ -d $$xfile ]] && rm -r "$$xfile" || rm "$$xfile"; \
-	done; \
-# ZaZ
-
-# git archive AzA
-garchive:
+# gitarchive AzA
+gitarchive:
 	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
 #ZaZ
 

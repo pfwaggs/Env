@@ -1,4 +1,4 @@
-: source $VIM/exrc
+: source $VIMDIR/exrc
 
 :set t_Co=256
 :syntax on
@@ -24,23 +24,23 @@
 ":source $VIM/vim-tmux
 
 "put all swap files together in one place
-if isdirectory($VIM . 'swaps') == 0
-    :silent !mkdir -p $VIM/swaps >/dev/null 2>&1
+if isdirectory($VIMHOME . '.swaps') == 0
+    :silent !mkdir -p $VIMHOME/.swaps >/dev/null 2>&1
 endif
-set dir=$VIM/swaps//
+set dir=$VIMHOME/.swaps//
 
 "put all backup files together in one place
-if isdirectory($VIM . 'backups') == 0
-    :silent !mkdir -p $VIM/backups >/dev/null 2>&1
+if isdirectory($VIMHOME . '.backups') == 0
+    :silent !mkdir -p $VIMHOME/.backups >/dev/null 2>&1
 endif
-set backupdir=$VIM/backups//
+set backupdir=$VIMHOME/.backups//
 set backup
 
-"put all backup files together in one place
-if isdirectory($VIM . 'undos') == 0
-    :silent !mkdir -p $VIM/undos >/dev/null 2>&1
+"put all undo files together in one place
+if isdirectory($VIMHOME . '.undos') == 0
+    :silent !mkdir -p $VIMHOME/.undos >/dev/null 2>&1
 endif
-set undodir=$VIM/undos//
+set undodir=$VIMHOME/.undos//
 set undofile
 
 " yes, folding is good
@@ -48,6 +48,6 @@ set undofile
 "set foldmethod=marker
 "set foldmarker=AzA,ZaZ
 
-"abbreviations
-:source $VIM/vimrc-abbr
-:source $VIM/vimrc-maps
+"abbreviations and mappings
+:source $VIMDIR/vimrc-abbr
+:source $VIMDIR/vimrc-maps

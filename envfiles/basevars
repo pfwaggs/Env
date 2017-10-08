@@ -10,13 +10,11 @@ export PRINTER=local # this is a printer class
 [[ -v LANG ]]       || export LANG=en_US.UTF-8
 [[ -v TZ ]]         || export TZ=America/New_York
 [[ -v LC_COLLATE ]] || export LC_COLLATE=C
-[[ -v CDPATH ]]     || export CDPATH=".:..:../..:~/Git:~"
+[[ -v CDPATH ]]     || export CDPATH=".:..:../..:~:~/Git"
 
-# bah. horrible crap
-if [[ ! -v VIM ]]; then
-    export VIM=~/.vim
-    export VIMRUNTIME=/usr/share/vim/vim80
-fi
+[[ -v VIMHOME ]] || export VIMHOME=~
+[[ -v VIMDIR ]] || export VIMDIR=$VIMHOME/.vim
+[[ -v VIMINIT ]] || export VIMINIT=":source $VIMDIR/vimrc"
 
 #case $TERM in
 #    xterm) pc_m="${PWD#${PWD%/*/*}/}" ;;
