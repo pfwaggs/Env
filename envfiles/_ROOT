@@ -1,36 +1,39 @@
 # initial files to install first
 +basevars
-+_FixList
-+_List2Var
-+_ParseArg
-+_SetPrompt
- _AttribParser
-+_ShowEnv
+
+# items commonlly shared
+ Common/_AttribParser
++Common/_FixList
++Common/_List2Var
++Common/_ParseArg
++Common/_SetPrompt
++Common/_Show
++Common/L
++Common/commas
++Common/killdir
++Common/load
++Common/lsu
++Common/mkwdir
++Common/mydd
++Common/prompt
++Common/show
++Common/stk
+
 # useful functions that depend on the above files
-+L
 
 +agent+ # this is for ssh
-+commas
 +gigify
-
 +julian
-+killdir
 +lister # attempt for menu support
-+load
-+lsu
-+mkwdir
-+mydd
 +prep
 +psfu
-+prompt
-+show
 +spnd
 +spx
-+stk
 +tll
 +tname
 +types
 +wup
+
 # final things like fixing paths, adding aliases
 +final
 +aliases

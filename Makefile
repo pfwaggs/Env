@@ -93,28 +93,22 @@ install:
 
 # check AzA
 check:
-	@for file in $(DOTFILES); do \
-	    name="$${file#dotfiles*/}"; \
+	@for fr in $(DOTFILES); do \
+	    name="$${fr#dotfiles*/}"; \
 	    to=$(DEST)/.$$name; \
 	    if [[ -e $$to ]]; then \
-		[[ $$file -ef $$to ]] && continue; \
+		[[ $$fr -ef $$to ]] && continue; \
 		if [[ -L $$to ]]; then \
 		    z=$(namei $$to | sed -ne '$$p'); \
 		    [[ $$z == "- $$name" ]] && continue; \
-		    echo "$$to: does not point to $$file"; \
+		    echo "$$to: does not point to $$fr"; \
 		else \
 		    echo "$$to: is not a link"; \
 		fi; \
 	    else \
 		echo "$$to: does not exist"; \
 	    fi; \
-	done | tee differences
-	@if [[ -s differences ]]; then \
-	    echo 'the following files have problems:';\
-	    cat differences; \
-	else \
-	    rm differences; \
-	fi
+	done > differences
 # ZaZ
 
 difference: check
@@ -122,9 +116,8 @@ difference: check
 
 diffs: difference
 	@if [[ -s differences ]]; then \
-	    cat differences | while read d l; do \
-	    diff -y $$d $$l | less; \
-	    done; \
+	    echo 'the following files have problems:';\
+	    cat differences; \
 	else \
 	    [[ -e differences ]] && rm differences; \
 	fi

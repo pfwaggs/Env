@@ -1,18 +1,20 @@
 function _FixList () {
-    declare -x p 
+    declare -x p
     declare -a list
     case $1 in
-	r) echo ${@:2} | perl -anl -E 'say for reverse @F'
+	e) echo ${*:2} | perl -anl -E 'say grep {-e $_} @F'
 	    ;;
-	l) echo ${@:2} | perl -anl -E '@F=map{-l $_ ? readlink($_) : $_}@F;END{say for @F}'
+	r) echo ${*:2} | perl -anl -E 'say for reverse @F'
+	    ;;
+	l) echo ${*:2} | perl -anl -E '@F=map{-l $_ ? readlink($_) : $_}@F;END{say for @F}'
 	    ;;
 	f) compgen -W "${*:3}" -X"$2*"
 	    ;;
 	p) for p in ${@:2}; do
-		[[ ${list[@]} =~ ":$p" ]] && continue
+		[[ ${list[@]} =~ :$p ]] && continue
 		list+=(":$p")
 	    done
-	    for file in ${list[@]}; do echo ${file:1}; done
+	    for p in "${list[@]}"; do echo ${p:1}; done
 	    ;;
-    esac
+    esac | xargs
 }

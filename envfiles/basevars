@@ -6,6 +6,7 @@ host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
 #PROMPT_COMMAND='echo -ne ${pc_s}${pc_m}${pc_e}'
 export LOCAL=/usr/local
 export PRINTER=local # this is a printer class
+[[ -v Prompt ]] || export Prompt=$ENVDIR
 
 [[ -v LANG ]]       || export LANG=en_US.UTF-8
 [[ -v TZ ]]         || export TZ=America/New_York

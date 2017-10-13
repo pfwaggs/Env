@@ -10,4 +10,4 @@ function show () {
     fi
 }
 
-complete -C '_ShowEnv' show
+complete -C '_Show' show
