@@ -2,5 +2,4 @@
 # starts in login mode) we might as well minimize this and just
 # rely on bashrc
 
-export NORMAL=1
 . ~/.bashrc
