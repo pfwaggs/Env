@@ -2,22 +2,22 @@
 +basevars
 
 # items commonlly shared
- Common/_AttribParser
-+Common/_FixList
-+Common/_List2Var
-+Common/_ParseArg
-+Common/_SetPrompt
-+Common/_Show
-+Common/L
-+Common/commas
-+Common/killdir
-+Common/load
-+Common/lsu
-+Common/mkwdir
-+Common/mydd
-+Common/prompt
-+Common/show
-+Common/stk
+ _AttribParser
++_FixList
++_List2Var
++_ParseArg
++_SetPrompt
++_Show
++L
++commas
++killdir
++load
++lsu
++mkwdir
++mydd
++prompt
++show
++stk
 
 # useful functions that depend on the above files
 
