@@ -1,6 +1,6 @@
 function prep () {
-    declare name type dir=${ENVDIR}/prep_files
-    [[ -s $dir/map ]] || continue
+    declare name type dir=${ENVFILES}/prep_files
+    [[ -s $dir/map ]] || return 0
     source $dir/map
     for name in $@; do
 	read name type <<< ${name/./ }
