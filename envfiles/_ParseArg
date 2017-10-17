@@ -4,7 +4,7 @@ function _ParseArg () {
     #[[ $x =~ , ]] && x=$(_FindPath $x)
     declare -a list
     case $x in
-	/*) for dir in $(compgen -d "$x"); do
+	*/*) for dir in $(compgen -d "$x"); do
 		list+=("$dir")
 	    done
 	    ;;

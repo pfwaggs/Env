@@ -9,10 +9,8 @@ shopt -s extglob
 
 umask 0022
 export HISTFILE=~/.history
-[[ -v RESET ]] && unset ENVDIR ENVFILES
-
-[[ -v ENVDIR   ]] || export ENVDIR=~/Git/ENV
-[[ -v ENVFILES ]] || export ENVFILES=$ENVDIR/envfiles
+export ENVDIR=~/Git/ENV
+export ENVFILES=$ENVDIR/envfiles
 
 [[ -f ~/NORMAL ]] && export NORMAL=1
 [[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH

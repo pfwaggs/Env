@@ -6,16 +6,16 @@ host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
 #PROMPT_COMMAND='echo -ne ${pc_s}${pc_m}${pc_e}'
 export LOCAL=/usr/local
 export PRINTER=local # this is a printer class
-[[ -v Prompt ]] || export Prompt=$ENVFILES
+export Prompt=$ENVFILES
 
-[[ -v LANG ]]       || export LANG=en_US.UTF-8
-[[ -v TZ ]]         || export TZ=America/New_York
-[[ -v LC_COLLATE ]] || export LC_COLLATE=C
-[[ -v CDPATH ]]     || export CDPATH=".:..:../..:~:~/Git"
+export LANG=en_US.UTF-8
+export TZ=America/New_York
+export LC_COLLATE=C
+export CDPATH=".:..:../..:~:~/Git"
 
-[[ -v VIMHOME ]] || export VIMHOME=~
-[[ -v VIMDIR ]] || export VIMDIR=$VIMHOME/.vim
-[[ -v VIMINIT ]] || export VIMINIT=":source $VIMDIR/vimrc"
+export VIMHOME=~
+export VIMDIR=$VIMHOME/.vim
+export VIMINIT=":source $VIMDIR/vimrc"
 
 #case $TERM in
 #    xterm) pc_m="${PWD#${PWD%/*/*}/}" ;;
