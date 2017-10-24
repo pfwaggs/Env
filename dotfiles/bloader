@@ -1,12 +1,11 @@
 [[ $# -gt 0 ]] || return 0
-for load in $*; do
-    [[ -v NORMAL ]] || echo ${load##*/}
-    dir=${load%/*}
-    for file in $(grep '^+' $load | cut -f1 -d' ' | sed -e s,^+,$dir/,); do
-	[[ -s $file ]] || continue
-	[[ -v NORMAL ]] && echo -n . || echo ${file##*/}
-	. "$file"
+for file in $*; do
+    [[ -v NORMAL ]] || echo ${file##*/}
+    sed -n -e /^+/s,^+,${file%/*}/,p $file |
+    while read load junk; do
+	[[ -v NORMAL ]] && echo -n . || echo ${load##*/}
+	. "$load"
     done
-    echo ''
+    echo
 done
-unset load dir file
+unset file
