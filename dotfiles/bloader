@@ -1,11 +1,11 @@
 [[ $# -gt 0 ]] || return 0
 for file in $*; do
     [[ -v NORMAL ]] || echo ${file##*/}
-    sed -n -e /^+/s,^+,${file%/*}/,p $file |
-    while read load junk; do
-	[[ -v NORMAL ]] && echo -n . || echo ${load##*/}
-	. "$load"
+    dir=${file%/*}
+    for line in $(awk '/^+/ {print $1}' $file); do
+ 	[[ -v NORMAL ]] && echo -n . || echo $dir/${line/+}
+ 	. "$dir/${line/+}"
     done
     echo
 done
-unset file
+unset file line dir
