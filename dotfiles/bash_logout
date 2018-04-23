@@ -3,7 +3,7 @@ clear
 [[ -f $LA ]] && { ssh-agent -k; rm $LA $SA; }
 [[ -f $SMAP ]] && rm $SMAP
 printf "%s closing subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
-fortune=$(type fortune)
+fortune=$(type -p fortune)
 [[ $fortune ]] || return 0
 read -t 5 -p 'fortune? '
 [[ ${REPLY:-n} =~ ^[yY] ]] || exit 0
