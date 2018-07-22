@@ -12,8 +12,8 @@ export HISTFILE=~/.history
 export ENVDIR=~/Git/ENV
 export ENVFILES=$ENVDIR/envfiles
 
-[[ -f ~/NORMAL ]] && export NORMAL=1
-[[ -f ~/KEEPPATH ]] && export KEEPPATH=$PATH
+[[ -f ~/.normal ]] && export NORMAL=1
+[[ -f ~/.keeppath ]] && export KEEPPATH=$PATH
 
 . ~/.envpurge
 . ~/.bloader $ENVFILES/_${USER^^}
