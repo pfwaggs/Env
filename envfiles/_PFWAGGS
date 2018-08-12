@@ -21,7 +21,6 @@
 
 # useful functions that depend on the above files
 
-+agent+ # this is for ssh
 +gigify
 +julian
 +lister # attempt for menu support
