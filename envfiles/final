@@ -1,4 +1,4 @@
-case "$(/usr/bin/uname -s -r)" in
+case "$(/bin/uname -s -r)" in
     *v7+)
         [[ $UID -eq 0 ]] || add_extras="LOCAL=/usr/local $HOME"
         ;;

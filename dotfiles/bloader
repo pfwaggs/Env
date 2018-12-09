@@ -2,9 +2,9 @@
 for file in $*; do
     [[ -v NORMAL ]] || echo ${file##*/}
     dir=${file%/*}
-    for line in $(awk '/^+/ {print $1}' $file); do
- 	[[ -v NORMAL ]] && echo -n . || echo $dir/${line/+}
- 	. "$dir/${line/+}"
+    for line in $(sed -n 's/#.*//;p' $file); do
+ 	[[ -v NORMAL ]] && echo -n . || echo $dir/$line
+ 	. "$dir/$line"
     done
     echo
 done
