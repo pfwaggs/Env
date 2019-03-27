@@ -1,0 +1,23 @@
+
+
+function bloader () {
+    declare file dir line
+    for file in ${ENVFILES//:/ }; do
+	dir=${file%/*}
+	for line in $(grep -o -P '^\w+' $file); do
+	    load=$dir/$line
+	    [[ -f ~/.quiet ]] && echo -n . || echo $load
+	    [[ -f $load ]] && . "$load" || continue
+	done
+	echo done with $file
+    done
+}
+
+function envpurge () {
+    complete -r
+    unalias -a
+    unset -f $(compgen -A function)
+    unset ${!LC_*}
+}
+
+declare -f -r -x bloader envpurge

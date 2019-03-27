@@ -9,14 +9,12 @@ shopt -s extglob
 
 umask 0022
 export HISTFILE=~/.history
-export ENVDIR=~/Git/ENV
-export ENVFILES=$ENVDIR/envfiles
+export ENVDIR=~/Env
+export ENVFILES=$ENVDIR/envfiles/LOADLIST
+. $ENVDIR/envfiles/bashrcfuncs
 
-[[ -f ~/.normal ]] && export NORMAL=1
-[[ -f ~/.keeppath ]] && export KEEPPATH=$PATH
-
-. ~/.envpurge
-. ~/.bloader $ENVFILES/_${USER^^}
+envpurge
+bloader
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :

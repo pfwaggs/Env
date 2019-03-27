@@ -1,3 +1,4 @@
+
 # initializing system AzA
 SHELL = /bin/bash
 
@@ -6,19 +7,18 @@ ifndef DEST
 endif
 
 ifndef DIRS
-    DIRS := $(sort $(wildcard dotfiles*)) envfiles
+    DOTDIRS  := $(sort $(wildcard dotfiles*))
+    ENVDIRS  := $(sort $(wildcard envfiles*))
+    SYNCDIRS := $(sort $(wildcard syncdirs*))
+    DIRS := $(DOTDIRS) $(ENVDIRS) $(SYNCDIRS)
+else
+    DOTDIRS  := $(filter dotfiles, $(DIRS))
+    ENVDIRS  := $(filter envfiles, $(DIRS))
+    SYNCDIRS := $(filter syncdirs, $(DIRS))
 endif
 
-ifndef MISC
-    DIRS := $(filter-out %misc%, $(DIRS))
-endif
-
-DOTDIRS  := $(sort $(filter dotfiles%, $(DIRS)))
-XDIRS    := $(sort $(filter-out dotfiles%, $(DIRS)))
-DIRS     := $(DOTDIRS) $(XDIRS)
-FILES    := $(foreach dir, $(DIRS), $(sort $(wildcard $(dir)/*)))
 DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
-export DIRS FILES DOTDIRS XDIRS
+export DIRS DOTDIRS ENVDIRS SYNCDIRS
 
 ifdef LINE
     export LINE
@@ -36,7 +36,7 @@ NAME = $(notdir $(BASE))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-STATUS = PWD DIRS COMMIT BASE NAME BRANCH VER TAR
+STATUS = PWD DOTDIRS ENVDIRS SYNCDIRS COMMIT BASE NAME BRANCH VER TAR
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
@@ -64,77 +64,61 @@ status:
 	@for v in $(STATUS); do eval "echo $$v = $${!v}"; done
 #ZaZ
 
-# list AzA
-list:
-	@for dir in $(DIRS); do \
-	    echo $$dir; \
-	    for file in $$(echo $(FILES) | xargs -n 1 | grep $$dir); do \
-		echo -e "\t$${file#*/}"; \
-	    done; \
-	    echo; \
-	done
-#ZaZ
-
-# md5sum AzA
-md5sum:
-	@for file in Makefile $(FILES); do \
-	    [[ -d $$file ]] && find $$file -type f || echo $$file; \
-	done | xargs md5sum
-# ZaZ
-
 # install AzA
-install:
-	@for fr in $(DOTFILES); do \
-	    to="$(DEST)/.$${fr#dotfiles*/}"; \
-	    [[ -e $$to ]] && echo skipping $$to && continue; \
-	    [[ -d $$fr ]] && ln -s $(PWD)/$$fr $$to || ln $$fr $$to; \
+install: install-dots install-sync
+
+install-dots:
+	@for fr in $(DOTDIRS); do \
+	    for file in $$fr/*; do \
+	        name="$${file##*/}"; \
+		[[ -e $(DEST)/.$$name ]] || ln $$file $(DEST)/.$$name; \
+	    done; \
 	done
+
+install-sync:
+	@for fr in $(SYNCDIRS); do \
+	    for dir in $$fr/*; do \
+		name="$${dir##*/}"; \
+		[[ -d $(DEST)/.$$name ]] || rsync -a $$dir/ $(DEST)/.$$name; \
+	    done; \
+	done
+
+remove: remove-dots remove-sync
+
+remove-dots:
+	@for fr in $(DOTDIRS); do \
+	    for file in $$fr/*; do \
+	        name="$${file##*/}"; \
+		[[ -e $(DEST)/.$$name ]] && rm $(DEST)/.$$name || :; \
+	    done; \
+	done
+
+remove-sync:
+	@for fr in $(SYNCDIRS); do \
+	    for dir in $$fr/*; do \
+		name="$${dir##*/}"; \
+		[[ -d $(DEST)/.$$dest ]] && rm -r $(DEST)/.$$name ||:; \
+	    done; \
+	done
+
 # ZaZ
 
 # check AzA
 check:
-	@for fr in $(DOTFILES); do \
-	    name="$${fr#dotfiles*/}"; \
-	    to=$(DEST)/.$$name; \
-	    if [[ -e $$to ]]; then \
-		[[ $$fr -ef $$to ]] && continue; \
-		if [[ -L $$to ]]; then \
-		    z=$(namei $$to | sed -ne '$$p'); \
-		    [[ $$z == "- $$name" ]] && continue; \
-		    echo "$$to: does not point to $$fr"; \
-		else \
-		    echo "$$to: is not a link"; \
-		fi; \
-	    else \
-		echo "$$to: does not exist"; \
-	    fi; \
-	done > differences
-# ZaZ
-
-difference: check
-	@touch differences
-
-diffs: difference
-	@if [[ -s differences ]]; then \
-	    echo 'the following files have problems:';\
-	    cat differences; \
-	else \
-	    [[ -e differences ]] && rm differences; \
-	fi
-
-# clean: AzA
-clean:
-	@echo cleaning up dotfiles:
-	@for file in $(FILES); do \
-	    if [[ $$file =~ dotfiles ]]; then \
-		xfile="$(DEST)/.$${file#dotfiles*/}"; \
-	    else \
-		xfile="$(DEST)/$$file"; \
-	    fi; \
-	    echo $$file to $$xfile >&2; \
-	    [[ -d $$xfile || -f $$xfile ]] || continue; \
-	    [[ -d $$xfile ]] && rm -r "$$xfile" || rm "$$xfile"; \
-	done; \
+	@for fr in $(DOTDIRS); do \
+	    echo checking $$fr; \
+	    for file in $$fr/*; do \
+	        name="$${file##*/}"; \
+		[[ -e $(DEST)/.$$name ]] || echo missing $$file; \
+	    done; \
+	done
+	@for fr in $(SYNCDIRS); do \
+	    echo checking $$fr; \
+	    for dir in $$fr/*; do \
+		name="$${dir##*/}"; \
+		diff -r -q $$dir $(DEST)/.$$name; \
+	    done; \
+	done
 # ZaZ
 
 # tararchive: AzA

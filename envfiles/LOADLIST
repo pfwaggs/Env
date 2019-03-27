@@ -1,0 +1,38 @@
+# initial files to install first
+basevars
+
+# items commonlly shared
+#_AttribParser
+FixList
+List2Var
+ParseArg
+SetPrompt
+Show
+L
+commas
+killdir
+load
+lsu
+mkwdir
+mydd
+prompt
+show
+stk
+
+# useful functions that depend on the above files
+
+gigify
+julian
+lister # attempt for menu support
+prep
+psfu
+spnd
+spx
+tll
+tname
+types
+wup
+
+# final things like fixing paths, adding aliases
+final
+aliases

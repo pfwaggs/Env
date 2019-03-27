@@ -1,0 +1,7 @@
+function _Show () {
+    declare -x x
+    [[ -v COMP_LINE ]] && x=$2 || x=$1
+    declare -a list
+    list=($(compgen -v | perl -nl -E 'push @f, grep {/^_?$ENV{x}/i} $_;END{say for @f}'))
+    for x in ${list[@]}; do echo $x; done
+}
