@@ -1,3 +1,0 @@
-function _List2Var () {
-    perl -anl -E 'push @f, @F;END{say join(":", @f)}'
-}
