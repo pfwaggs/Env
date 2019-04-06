@@ -16,7 +16,7 @@ function bloader () {
 function envpurge () {
     complete -r
     unalias -a
-    unset -f $(compgen -A function)
+    unset -f $(compgen -A function) 2>/dev/null
     unset ${!LC_*}
 }
 
