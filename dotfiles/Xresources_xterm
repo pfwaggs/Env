@@ -1,5 +1,16 @@
 ! comments lines
-!XTerm.termName: xterm-256color
+*customization:	-color
+Xcursor.size:	24
+Xcursor.theme:	DMZ-White
+Xft.antialias:	1
+Xft.dpi:	96
+Xft.hinting:	1
+Xft.hintstyle:	hintslight
+Xft.rgba:	rgb
+xterm*faceName:	Hack
+xterm*faceSize:	12
+xterm*renderFont:	true
+xterm.*font:	-*-hack-medium-r-*-*-*-120-*-*-*-*-*-u
 xterm.vt100.locale: true
 xterm.vt100.metaSendsEscape: true
 xterm.vt100.backarrowKey: false
@@ -8,7 +19,3 @@ xterm.vt100.classMode: true
 xterm.vt100.foreground: grey75
 xterm.vt100.background: black
 xterm.vt100.keyboardType: tcapFunctionKeys
-!xterm.*font: -*-hack-medium-r-*-*-*-120-*-*-*-*-*-u
-!xterm.*font: -*-terminus-medium-r-*-*-*-180-*-*-*-*-*-u
-xterm*faceName: Terminus
-xterm*faceSize: 11

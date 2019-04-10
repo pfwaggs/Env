@@ -101,8 +101,8 @@ check-dots:
 	@for dir in $(DOTDIRS); do \
 	    echo checking $$dir; \
 	    for fr in $$dir/*; do \
-	        to="$${fr##*/}"; \
-		[[ $$to -ef $$fr]] || echo missing $$fr; \
+	        to=$(DEST)/."$${fr##*/}"; \
+		[[ $$to -ef $$fr ]] || echo missing $$fr; \
 	    done; \
 	done
 
@@ -110,7 +110,7 @@ check-syncs:
 	@for dir in $(SYNCDIRS); do \
 	    echo checking $$dir; \
 	    for fr in $$dir/*; do \
-		to="$${fr##*/}"; \
+		to=$(DEST)/."$${fr##*/}"; \
 		[[ -d $$to ]] && diff -r -q $$fr $$to || echo missing $$fr; \
 	    done; \
 	done
