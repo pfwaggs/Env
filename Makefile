@@ -129,7 +129,7 @@ printout:
 	    echo -e "\n#### $$(md5sum $$file))"; \
 	    cat $$file; \
 	done > review
-#	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -P local
+	@enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -p localview review
 #ZaZ
 
 #ZaZ

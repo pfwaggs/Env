@@ -1,38 +1,3 @@
-#case "$(/bin/uname -s -r)" in
-#    *v7+)
-#        [[ $UID -eq 0 ]] || add_extras="LOCAL=/usr/local $HOME"
-#        ;;
-#    *ARCH)
-#        [[ -f ~/.keeppath ]] && PATH=/usr/sbin:/usr/bin:/sbin:/bin
-#        [[ $UID -eq 0 ]] || add_extras="$HOME"
-#        ;;
-#    Darwin*)
-#        echo 'not changing your paths on this machine for now'
-#	#PATH=/usr/sbin:/usr/bin:/sbin:/bin
-#	#MANPATH=/usr/share/man
-#	#if [[ -d /usr/local ]]; then
-#	#fi
-#	#for x in /usr/local/opt/{coreutils,findutils}/libexec; do
-#	#    [[ ! -d $x/gnubin ]] || PATH=$x/gnubin:$PATH
-#	#    [[ ! -d $x/gnuman/share ]] || MANPATH=$x/gnuman/share:$MANPATH
-#	#done
-#	#for x in /usr/X11 /usr/local/MacGPG2; do
-#	#    [[ ! -d $x/bin ]] || PATH+=:$x/bin
-#	#    [[ ! -d $x/share/man ]] || MANPATH+=:$x/share/man
-#	#done
-#	;;
-#esac
-
-#for x in $add_extras; do
-#    read env path <<< ${x/=/ }
-#    [[ $path ]] && eval "export $x" || :
-#    PATH=${path:-$env}:$PATH
-#done
-
-#[[ -z $PERL5LIB ]] || export PERL5LIB
-
-#unset add_extras env path
-
 PATH=$(_FixList p ${PATH//:/ } | _List2Var)
 
 PATH=$(_FixList f /usr/local ${PATH//:/ } | _List2Var) # /usr/local is bad for now

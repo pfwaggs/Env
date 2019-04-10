@@ -2,7 +2,6 @@
 basevars
 
 # items commonlly shared
-#_AttribParser
 FixList
 List2Var
 ParseArg

@@ -5,6 +5,6 @@
 
 function agent+ () {
     [[ -s $LA ]] && . $LA || eval "$(ssh-agent -a $SA | tee $LA)"
-    ssh-add -l -E md5 || ssh-add $(ls ~/.ssh/*_rsa)
+    ssh-add -l -E md5 || ssh-add ~/.ssh/*_rsa
     [[ $LA -ef $SMAP ]] || ln $LA $SMAP
 }
