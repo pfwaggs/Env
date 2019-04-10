@@ -57,7 +57,7 @@ install: install-dots install-sync
 
 install-dots:
 	@for dir in $(DOTDIRS); do \
-	    echo $$dir; \
+	    echo adding dots: $$dir; \
 	    for fr in $$dir/*; do \
 	        to=$(DEST)/."$${fr##*/}"; \
 		[[ -e $$to ]] || ln $$fr $$to; \
@@ -66,6 +66,7 @@ install-dots:
 
 install-sync:
 	@for dir in $(SYNCDIRS); do \
+	    echo adding syncs: $$dir; \
 	    for fr in $$dir/*; do \
 		to=$(DEST)/."$${fr##*/}"; \
 		[[ -d $$to ]] || rsync -a $$fr/ $$to; \
@@ -78,6 +79,7 @@ remove: remove-dots remove-sync
 
 remove-dots:
 	@for dir in $(DOTDIRS); do \
+	    echo clearing dots: $$dir; \
 	    for fr in $$dir/*; do \
 	        to=$(DEST)/."$${fr##*/}"; \
 		[[ $$fr -ef $$to ]] && rm $$to || :; \
@@ -86,6 +88,7 @@ remove-dots:
 
 remove-sync:
 	@for dir in $(SYNCDIRS); do \
+	    echo clearing sync: $$dir; \
 	    for fr in $$dir/*; do \
 		to=$(DEST)/."$${fr##*/}"; \
 		[[ -d $$to ]] && rm -r $$to || :; \
