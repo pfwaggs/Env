@@ -10,33 +10,21 @@ ifndef DIRS
     DOTDIRS  := $(sort $(wildcard dotfiles*))
     ENVDIRS  := $(sort $(wildcard envfiles*))
     SYNCDIRS := $(sort $(wildcard syncdirs*))
-    DIRS := $(DOTDIRS) $(ENVDIRS) $(SYNCDIRS)
 else
     DOTDIRS  := $(filter dotfiles, $(DIRS))
     ENVDIRS  := $(filter envfiles, $(DIRS))
     SYNCDIRS := $(filter syncdirs, $(DIRS))
 endif
+DIRS := $(DOTDIRS) $(ENVDIRS) $(SYNCDIRS)
 
-DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
+#DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
 export DIRS DOTDIRS ENVDIRS SYNCDIRS
 
-ifdef LINE
-    export LINE
-    CURRENT := $(shell git log -n 1 --oneline | cut -c1-7)
-    COMMIT := $(shell git log -n 20 --oneline | sed -n $(LINE)p | cut -c1-7)
-    MASTER = $(shell git diff-tree -r --name-only $(CURRENT) $(COMMIT) | \
-	perl -nl -E 'say $$_ if -f $$_')
-else
-    COMMIT := $(shell git log -n 1 --oneline | cut -c1-7)
-    MASTER = Makefile $(FILES)
-endif
-
-BASE = $(PWD)
-NAME = $(notdir $(BASE))
+NAME = $(notdir $(PWD))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-STATUS = PWD DOTDIRS ENVDIRS SYNCDIRS COMMIT BASE NAME BRANCH VER TAR
+STATUS = PWD DOTDIRS ENVDIRS SYNCDIRS NAME BRANCH VER TAR
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
@@ -68,93 +56,64 @@ status:
 install: install-dots install-sync
 
 install-dots:
-	@for fr in $(DOTDIRS); do \
-	    for file in $$fr/*; do \
-	        name="$${file##*/}"; \
-		[[ -e $(DEST)/.$$name ]] || ln $$file $(DEST)/.$$name; \
+	@for dir in $(DOTDIRS); do \
+	    echo $$dir; \
+	    for fr in $$dir/*; do \
+	        to=$(DEST)/."$${fr##*/}"; \
+		[[ -e $$to ]] || ln $$fr $$to; \
 	    done; \
 	done
 
 install-sync:
-	@for fr in $(SYNCDIRS); do \
-	    for dir in $$fr/*; do \
-		name="$${dir##*/}"; \
-		[[ -d $(DEST)/.$$name ]] || rsync -a $$dir/ $(DEST)/.$$name; \
+	@for dir in $(SYNCDIRS); do \
+	    for fr in $$dir/*; do \
+		to=$(DEST)/."$${fr##*/}"; \
+		[[ -d $$to ]] || rsync -a $$fr/ $$to; \
 	    done; \
 	done
+#ZaZ
 
+# remove AzA
 remove: remove-dots remove-sync
 
 remove-dots:
-	@for fr in $(DOTDIRS); do \
-	    for file in $$fr/*; do \
-	        name="$${file##*/}"; \
-		[[ -e $(DEST)/.$$name ]] && rm $(DEST)/.$$name || :; \
+	@for dir in $(DOTDIRS); do \
+	    for fr in $$dir/*; do \
+	        to=$(DEST)/."$${fr##*/}"; \
+		[[ $$fr -ef $$to ]] && rm $$to || :; \
 	    done; \
 	done
 
 remove-sync:
-	@for fr in $(SYNCDIRS); do \
-	    for dir in $$fr/*; do \
-		name="$${dir##*/}"; \
-		[[ -d $(DEST)/.$$dest ]] && rm -r $(DEST)/.$$name ||:; \
+	@for dir in $(SYNCDIRS); do \
+	    for fr in $$dir/*; do \
+		to=$(DEST)/."$${fr##*/}"; \
+		[[ -d $$to ]] && rm -r $$to || :; \
 	    done; \
 	done
 
 # ZaZ
 
 # check AzA
-check:
-	@for fr in $(DOTDIRS); do \
-	    echo checking $$fr; \
-	    for file in $$fr/*; do \
-	        name="$${file##*/}"; \
-		[[ -e $(DEST)/.$$name ]] || echo missing $$file; \
+check: check-dots check-syncs
+
+check-dots:
+	@for dir in $(DOTDIRS); do \
+	    echo checking $$dir; \
+	    for fr in $$dir/*; do \
+	        to="$${fr##*/}"; \
+		[[ $$to -ef $$fr]] || echo missing $$fr; \
 	    done; \
 	done
-	@for fr in $(SYNCDIRS); do \
-	    echo checking $$fr; \
-	    for dir in $$fr/*; do \
-		name="$${dir##*/}"; \
-		diff -r -q $$dir $(DEST)/.$$name; \
+
+check-syncs:
+	@for dir in $(SYNCDIRS); do \
+	    echo checking $$dir; \
+	    for fr in $$dir/*; do \
+		to="$${fr##*/}"; \
+		[[ -d $$to ]] && diff -r -q $$fr $$to || echo missing $$fr; \
 	    done; \
 	done
-# ZaZ
-
-# tararchive: AzA
-tararchive:
-	@tar -cvzf installed.tar.gz -P --xform='s,dotfiles[^/]*/,.,;s,^,$(DEST)/,' $(FILES)
-#ZaZ
-
-# tarinstall: AzA
-tarinstall:
-	@[[ -d $(DEST) ]] || mkdir -p $(DEST)
-	@tar --create --file=- --xform='s,dotfiles[^/]*/,.,g' $(FILES) | \
-	    tar -C $(DEST) --extract --file=-
-#ZaZ
-
-# tarcheck: AzA
-tarcheck:
-	@for file in $(FILES); do \
-	    [[ -f $$file ]] \
-		|| { echo skipping $$file; continue; }; \
-	    [[ $$file =~ dotfiles ]] \
-		&& xfile=$(DEST)/."$${file#dotfiles*/}" \
-		|| xfile=$(DEST)/$$file; \
-	    if [[ -f "$$xfile" ]]; then \
-		cmp -s "$$xfile" "$$file" || echo -e $$xfile"\t"$$file > differences; \
-	    else \
-		echo skipping $$xfile; \
-		continue; \
-	    fi; \
-	done
-	@if [[ -s differences ]]; then \
-	    echo 'the following dest files are different:'; \
-	    cat differences | cut -f1; \
-	    echo -e "\n"check differences for the above results; \
-	else \
-	    [[ -f differences ]] && rm differences; \
-	fi
 # ZaZ
 
 # gitarchive AzA
@@ -162,26 +121,15 @@ gitarchive:
 	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
 #ZaZ
 
-# preview AzA
-preview:
-	@if [[ $$LINE ]]; then \
-	    echo listing updated files since $(COMMIT); \
-	else \
-	    echo preview file list; \
-	fi
-	@echo $(MASTER) | xargs -n 1 | tee preview
-#ZaZ
-
 # printout AzA
-printout: preview
+printout:
 	@echo printing
-	@for file in $$(cat preview); do \
+	@for file in $$(git ls-files $(DOTDIRS) $(ENVDIRS)); do \
 	    [[ -f $$file ]] || continue; \
 	    echo -e "\n#### $$(md5sum $$file))"; \
 	    cat $$file; \
-	done | \
-	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -P local
-	@rm preview
+	done > review
+#	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -P local
 #ZaZ
 
 #ZaZ
