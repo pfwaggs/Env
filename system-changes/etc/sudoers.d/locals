@@ -1,5 +1,0 @@
-
-User_Alias	DEMIGODS = pfwaggs
-DEMIGODS ALL=(ALL) ALL
-pfwaggs ALL=(root) NOPASSWD: /usr/bin/shutdown -[hr] now , /usr/bin/pacman -[SQ][yui] , /usr/bin/systemctl suspend
-
