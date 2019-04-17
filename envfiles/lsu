@@ -1,8 +1,8 @@
-function lsu () {
-    declare -a np
-    np[0]=${1:-$PWD}
-    while [[ ${np[0]%/*} =~ / ]]; do
-	np=("${np[0]%/*}" "${np[@]}")
-    done
-    ls -ld /"${np[@]}"
+function lsu () 
+{ 
+    declare -a np=(/ ${1:-$PWD});
+    while [[ -n ${np[-1]%/*} ]]; do
+        np+=("${np[-1]%/*}");
+    done;
+    ls -ld "${np[@]}"
 }
