@@ -1,3 +1,11 @@
-function L () {
-    ls -lAd ${1:-.}/.??* 2> /dev/null
+function L () { 
+    declare opts=lAd
+    declare -a files=()
+    for x in $@; do
+	case $x in
+	    -?*) opts+=${x/#-} ;;
+	    *) files+=("$x") ;;
+	esac
+    done
+    ls -$opts ${files[@]:-.??*} 2> /dev/null
 }
