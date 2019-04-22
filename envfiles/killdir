@@ -2,6 +2,6 @@ function killdir () {
     pushd .. >/dev/null
     eval declare path="~1"
     read -p "remove <$path> ? "
-    [[ $REPLY =~ ^[yY] ]] && eval rm -r ${path@Q}
+    [[ $REPLY =~ ^[yY] ]] && eval rm -r ~1
     popd +1 >/dev/null
 }

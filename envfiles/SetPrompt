@@ -5,7 +5,7 @@ function _SetPrompt () {
 
     declare valids
     for x in xtra tag $@; do
-	read key color <<< ${x/[^[:alpha:]]/ }
+	read key color < <(echo -n $x | sed -n 's/[^[:alpha:]]/ /p')
 	[[ ${!_PromptColor[@]} =~ $key ]] || continue
 	valids+=:$key
 	[[ $color ]] || continue
@@ -19,7 +19,7 @@ function _SetPrompt () {
     for x in $po; do
 	[[ ${!x} ]] || continue
 	val=$'\[\e['${_ColorNum[${_PromptColor[$x]}]}m$'\]'
-	eval "$x=${val@Q}${!x@Q}"
+	eval "$x=\${val}\${!x}"
 	[[ $key =~ :$x ]] && continue
 	key+=:$x
     done
