@@ -1,0 +1,16 @@
+
+function typer () {
+    for x in $(type -a -t $1); do
+	case $x in
+	    file)
+		x="$(type -P -p $1)"
+		ls -l "$x"
+		file "$x"
+		;;
+	    alias)
+		alias $1
+		;;
+	esac
+    done
+}
+

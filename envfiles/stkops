@@ -1,0 +1,67 @@
+
+function stk () {
+    declare n line cmd=$1
+    shift
+    case $cmd in
+	l)
+	    [[ -f $STKFILE ]] && cat $STKFILE
+	    ;;
+	s)
+	    dirs -p | tee $STKFILE
+	    ;;
+	k)
+	    push ..
+	    rm -r ~1
+	    pop +1
+	    ;;
+	c)
+	    if [[ $# -gt 1 ]]; then
+		for n in $(echo ${@:2} | xargs -n 1 | sort -rn); do
+		    pop +$n
+		done
+	    else
+		dirs -c
+	    fi
+	    ;;
+	R)
+	    for line in $(tac $STKFILE); do
+		[[ -d $line ]] || continue
+		push -n "$line"
+	    done
+	    ;;
+	r)
+	    stk c
+	    stk R
+	    ;;
+    esac
+    dirs -l -v
+}
+
+function pop () {
+    popd $@ > /dev/null
+    dirs -l -v
+}
+
+function push () {
+    declare op
+    case $1 in
+	-n|-*|+*)
+	    op=$1
+	    shift;;
+	'')
+	    :
+	    ;;
+	*)
+	    if [[ ! -d $1 ]]; then
+		read -p 'new dir:' -e -i "$1"
+		[[ -n $REPLY ]] && mkdir -p "$REPLY"
+		set - "$REPLY"
+	    fi
+	    ;;
+    esac
+    pushd $op $1 > /dev/null
+    dirs -l -v
+}
+
+#complete -o filenames -C '_ParseArg' stk
+

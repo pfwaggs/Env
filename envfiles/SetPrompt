@@ -1,7 +1,7 @@
+
 function _SetPrompt () {
     declare OPTIND field color attrib x key val
-    declare -A _ColorNum _PromptColor
-    for x in ${ENVFILES//:/ }; do . ${x%/*}/prompt.conf; done
+    for x in ${ENVFILES//:/ }; do . ${x%/*}/prompt_conf; done
 
     declare valids
     for x in xtra tag $@; do
@@ -31,3 +31,4 @@ function _SetPrompt () {
     done
     PS1+=$'\[\e[m\]'
 }
+

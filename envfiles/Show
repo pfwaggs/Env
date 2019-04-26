@@ -1,7 +1,23 @@
+
 function _Show () {
-    declare -x x
-    [[ -v COMP_LINE ]] && x=$2 || x=$1
-    declare -a list
-    list=($(compgen -v | perl -nl -E 'push @f, grep {/^_?$ENV{x}/i} $_;END{say for @f}'))
-    for x in ${list[@]}; do echo $x; done
+    declare x
+    [[ -n $COMP_LINE ]] && x=$2 || x=$1
+    compgen -v | grep -i "^$x"
 }
+
+function show () {
+    declare x j
+    read j x j < <(declare -p $1)
+    var=${j%%=*}
+    if [[ $x =~ [aA] ]]; then
+        echo array: $var
+        for z in $(eval "echo \${!$var[@]}"); do
+            eval "echo $z = \${$var[$z]}"
+        done
+    else
+        echo $var = ${!var}
+    fi
+}
+
+complete -C '_Show' show
+

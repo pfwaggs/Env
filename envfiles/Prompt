@@ -1,0 +1,49 @@
+
+function _SetPrompt () {
+    declare user=$'\u' host=$'\h' spath=$'\W' lpath=$'\w'
+
+    declare OPTIND opt key color text
+    while getopts ':k:c:t:' opt; do
+        case $opt in
+            k)
+                [[ ${!_PromptColor[@]} =~ $OPTARG ]] && key=$OPTARG
+                ;;
+            c)
+                [[ ${!_ColorNum[@]} =~ $OPTARG ]] && color=$OPTARG
+                ;;
+            t)
+                text=$OPTARG
+                ;;
+            :)
+                echo $OPTARG is missing an arg
+                return
+                ;;
+            *)
+                echo opt is $opt, optarg is $OPTARG
+                return
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+
+    [[ -n $color ]] && _PromptColor[$key]=$color
+    [[ -n $key && -n $text ]] && eval "$key=\$text"
+    valids=$(_FixList -u $key ${tag:+tag} ${xtra:+xtra} host prompt)
+    declare promptOrder='xtra tag host user spath lpath'
+    PS1=
+    for x in $promptOrder; do
+        [[ $valids =~ $x ]] || continue
+        color=${_PromptColor[$x]}
+        num=${_ColorNum[$color]}
+        PS1+=$'\[\e['${num}m$'\]'${!x}' '
+    done
+    PS1+=$'\[\e['${promptc}m$'\]\$ \[\e[m\]'
+}
+
+function prompt () {
+    declare key color
+    [[ $1 =~ : ]] && read key color < <(echo ${1/:/ }) || key=$1
+    shift
+    _SetPrompt ${key:+-k $key} ${color:+-c $color} ${@:+-t "$*"}
+}
+

@@ -1,14 +1,24 @@
+
 function load () {
-    declare f
-    case $1 in
-	'') . ~/.envpurge
-	    . ~/.bloader $ENVFILES/_${USER^^}
-	    ;;
-	/*) echo loading $1; . $1 ;;
-	*) for f in $*; do
-		echo loading $f
-		. $ENVFILES/$f
-	    done
-	    ;;
-    esac
+    declare x env
+    declare -a list=()
+    if [[ $# -eq 0 ]]; then
+	envpurge
+	bloader
+    else
+	for x in $*; do
+	    if [[ $x =~ / ]]; then
+		[[ -f $x ]] && list+=($x) || :
+	    else
+		for env in ${ENVFILES//:/ }; do
+		    [[ -f ${env%/*}/$x ]] && list+=(${env%/*}/$x) || :
+		done
+	    fi
+	done
+	for x in ${list[@]}; do
+	    . $x
+	    echo loaded $x
+	done
+    fi
 }
+

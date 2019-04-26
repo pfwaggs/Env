@@ -125,14 +125,23 @@ gitarchive:
 #ZaZ
 
 # printout AzA
-printout:
-	@echo printing
+printx:
 	@for file in $$(git ls-files $(DOTDIRS) $(ENVDIRS)); do \
 	    [[ -f $$file ]] || continue; \
-	    echo -e "\n#### $$(md5sum $$file))"; \
+	    echo -e "\n#### $$(expand $$file | md5sum $$file)) $$file"; \
 	    cat $$file; \
-	done > review
-	@enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -p localview review
+	done | tee updates | \
+	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o updates.ps
+
+print:
+	@[[ -f filelist ]] || { echo missing filelist; exit -1; }
+	@-rm -r output.txt output.ps 2>/dev/null
+	@for file in $$(cat filelist); do \
+	    echo -e "\n#### $$(expand $$file | md5sum)) $$file"; \
+	    expand $$file | while read x; do echo "$$x" | sum; done | \
+	    column -t | paste - <(cat -n $$file); \
+	done | tee output.txt | \
+	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps
 #ZaZ
 
 #ZaZ

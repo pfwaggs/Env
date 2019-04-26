@@ -1,7 +1,15 @@
+
 function killdir () {
-    pushd .. >/dev/null
-    eval declare path="~1"
-    read -p "remove <$path> ? "
-    [[ $REPLY =~ ^[yY] ]] && eval rm -r ~1
-    popd +1 >/dev/null
+    if [[ -n ${PWD%/*} ]]; then
+	read -p "remove < $PWD > ? "
+	[[ $REPLY =~ ^[yY] ]] || return 0
+	pushd .. >/dev/null
+	echo deleting: ~1
+	rm -r ~1
+	popd +1 >/dev/null
+    else
+	echo parent is /
+    fi
+    dirs -v
 }
+

@@ -1,3 +1,5 @@
+
 function commas () {
-    rev | perl -nl -E 's/(\d{3})/$1,/g;print s/,(\s|$)//gr' | rev
+    rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
 }
+

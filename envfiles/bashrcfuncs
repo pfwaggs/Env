@@ -1,23 +1,22 @@
 
-
-function bloader () {
-    declare file dir line
-    for file in ${ENVFILES//:/ }; do
-	dir=${file%/*}
-	for line in $(grep -o -P '^\w+' $file); do
-	    load=$dir/$line
-	    [[ -f ~/.quiet ]] && echo -n . || echo $load
-	    [[ -f $load ]] && . "$load" || continue
-	done
-	echo done with $file
-    done
-}
-
 function envpurge () {
     complete -r
     unalias -a
-    unset -f $(compgen -A function) 2>/dev/null
-    unset ${!LC_*}
+    unset -f $(compgen -A function) &>/dev/null
 }
+#declare -f -r envpurge
 
-declare -f -r -x bloader envpurge
+function bloader () {
+    declare line file dir load loaded
+    for file in ${*:-${ENVFILES//:/ }}; do
+	[[ -f $file ]] && dir=${file%/*} || { echo missing $file; continue; }
+	for line in $(grep -o -P '^\w+' $file); do
+	    load=$dir/$line
+	    [[ -f $load ]] && source $load || continue
+	    [[ -f ~/.quiet ]] && echo -n . || echo $load
+	done
+	echo loaded $dir
+    done
+}
+#declare -f -r -x bloader
+

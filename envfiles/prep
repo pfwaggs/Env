@@ -1,15 +1,16 @@
+
 function prep () {
-    declare name type dir=${ENVDIR}/prep_files
-    [[ -s $dir/map ]] || return 0
-    source $dir/map
-    for name in $@; do
-	read name type <<< ${name/./ }
-	declare list=$(compgen -d -f $name)
-	[[ -z $list ]] || eval "echo $name exists: skipping; continue"
-	cp $dir/${map[$type]} $name
-	[[ 0 -eq $? ]] || eval "echo copy failed; continue"
-	[[ $type =~ fn|pm ]] && sed -i -e "s/zZz/$name/" $name
-	[[ $type =~ sh|pl|py ]] && chmod 755 $name
-	echo prepped $name as ${map[$type]}
+    declare dest base file type PREPDIR=${ENVFILES%%:*}
+    PREPDIR=${PREPDIR%/*}/prep_files
+    source ${PREPDIR}/map
+    for file in $@; do
+	read base type < <(echo ${file/./ })
+	[[ $type =~ fn ]] && dest=$base || dest=$file
+	[[ -s $dest ]] && echo $dest exists: skipping && continue
+	sed -e "s/zZz/$base/" $PREPDIR/${map[$type]} > $dest
+	[[ -s $dest ]] || { echo sed failed; continue; }
+	[[ $type =~ (sh|pl|py) ]] && chmod 755 $dest
+	echo prepped $dest as ${map[$type]}
     done
 }
+

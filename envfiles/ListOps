@@ -1,0 +1,54 @@
+
+function _FixList () {
+    declare p opt=$1
+    shift
+    declare -a nlist list
+    if [[ $# -gt 0 ]]; then
+        list=("$@")
+    else
+        while read x; do
+            list+=("$x")
+        done < <(cat -- -)
+    fi
+    case $opt in
+        -s)
+            printf "%s\n" ${list[@]}
+            ;;
+        -e)
+            for x in ${list[@]}; do
+                [[ -e $x ]] && echo $x
+            done
+            ;;
+        -r)
+            printf "%s\n" ${list[@]} | tac
+            ;;
+        -l)
+            for x in ${list[@]}; do
+                [[ -L $x ]] && readlink -e $x || echo $x
+            done
+            ;;
+        -c)
+            compgen -W "${list[*]:1}" -X${list[0]}*
+            ;;
+        -u)
+            for p in ${list[@]}; do
+                [[ ${nlist[@]} =~ :$p ]] || nlist+=(":$p")
+            done
+            echo "${nlist[@]/:}"
+            ;;
+    esac
+}
+
+function _List2Var () {
+    declare sep=${SEP:-:}
+    declare -a input
+    if [[ $# -gt 0 ]]; then
+        input=("$@")
+    else
+        while read x; do
+            input+=("$x")
+        done < <(cat -- -)
+    fi
+    [[ ${#input[@]} -gt 1 ]] && ( IFS=$sep; echo "${input[*]}" ) || echo ${input// /$sep}
+}
+

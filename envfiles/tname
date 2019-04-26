@@ -1,3 +1,5 @@
+
 function tname () {
-    printf "\033k%s\033\\" $1;
+    printf "\033k%s\033\\" ${1:-bash}
 }
+

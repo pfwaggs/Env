@@ -1,11 +1,20 @@
-function L () { 
+
+function L () {
+    declare -a args
     declare opts=lAd
-    declare -a files=()
-    for x in $@; do
-	case $x in
-	    -?*) opts+=${x/#-} ;;
-	    *) files+=("$x") ;;
-	esac
+    for x in $*; do
+        case $x in
+            -?)
+                opts+=${x/-}
+                ;;
+            *)
+                args+=("$x")
+                ;;
+        esac
     done
-    ls -$opts ${files[@]:-.??*} 2> /dev/null
+    [[ ${#args[@]} -gt 0 ]] || args+=(.)
+    for x in "${args[@]}"; do
+        ls -$opts "$x"/.??* 2> /dev/null
+    done
 }
+

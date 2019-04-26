@@ -1,3 +1,4 @@
+
 _ColorNum[black]=30
 _ColorNum[red]=31
 _ColorNum[green]=32
@@ -11,17 +12,10 @@ _PromptColor[user]=blue
 _PromptColor[host]=cyan
 _PromptColor[spath]=green
 _PromptColor[lpath]=green
-_PromptColor[prompt]=green
 _PromptColor[xtra]=red
 _PromptColor[tag]=magenta
 if [[ $UID -eq 0 ]]; then
     _PromptColor[host]=red
 fi
+promptc=${_ColorNum[green]}
 
-declare user=$'\u'
-declare host=$'\h'
-declare spath=$'\W'
-declare lpath=$'\w'
-declare prompt=$'\$'
-declare xtra="$xtra"
-declare tag="$tag"
