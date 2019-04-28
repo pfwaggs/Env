@@ -126,20 +126,22 @@ gitarchive:
 
 # printout AzA
 printx:
-	@for file in $$(git ls-files $(DOTDIRS) $(ENVDIRS)); do \
+	@-rm -r update.txt update.ps 2>/dev/null
+	@source envfiles/xmn; \
+	for file in Makefile $$(git ls-files $(DOTDIRS) $(ENVDIRS)); do \
 	    [[ -f $$file ]] || continue; \
-	    echo -e "\n#### $$(expand $$file | md5sum $$file)) $$file"; \
-	    cat $$file; \
-	done | tee updates | \
+	    echo -e "\n#### $${file##*/}"; \
+	    xmn ax $$file; \
+	done | tee updates.txt | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o updates.ps
 
 print:
 	@[[ -f filelist ]] || { echo missing filelist; exit -1; }
 	@-rm -r output.txt output.ps 2>/dev/null
-	@for file in $$(cat filelist); do \
-	    echo -e "\n#### $$(expand $$file | md5sum)) $$file"; \
-	    expand $$file | while read x; do echo "$$x" | sum; done | \
-	    column -t | paste - <(cat -n $$file); \
+	@source envfiles/xmn; \
+	for file in $$(cat filelist); do \
+	    echo -e "\n#### $${file##*/}"; \
+	    xmn ax $$file; \
 	done | tee output.txt | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps
 #ZaZ
