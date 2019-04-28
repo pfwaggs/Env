@@ -1,22 +1,132 @@
 
+function _FixList () {
+    declare p opt=$1
+    shift
+    declare -a nlist list
+    if [[ $# -gt 0 ]]; then
+        list=("$@")
+    else
+        while read x; do
+            list+=("$x")
+        done < <(cat -- -)
+    fi
+    case $opt in
+        -s)
+            printf "%s\n" ${list[@]}
+            ;;
+        -e)
+            for x in ${list[@]}; do
+                [[ -e $x ]] && echo $x
+            done
+            ;;
+        -r)
+            printf "%s\n" ${list[@]} | tac
+            ;;
+        -l)
+            for x in ${list[@]}; do
+                [[ -L $x ]] && readlink -e $x || echo $x
+            done
+            ;;
+        -c)
+            compgen -W "${list[*]:1}" -X${list[0]}*
+            ;;
+        -u)
+            for p in ${list[@]}; do
+                [[ ${nlist[@]} =~ :$p ]] || nlist+=(":$p")
+            done
+            echo "${nlist[@]/:}"
+            ;;
+    esac
+}
+declare -f -r _FixList
+
+function _List2Var () {
+    declare sep=${SEP:-:}
+    declare -a input
+    if [[ $# -gt 0 ]]; then
+        input=("$@")
+    else
+        while read x; do
+            input+=("$x")
+        done < <(cat -- -)
+    fi
+    [[ ${#input[@]} -gt 1 ]] && ( IFS=$sep; echo "${input[*]}" ) || echo ${input// /$sep}
+}
+declare -f -r _List2Var
+
 function envpurge () {
     complete -r
     unalias -a
     unset -f $(compgen -A function) &>/dev/null
 }
-#declare -f -r envpurge
+declare -f -r envpurge
 
-function bloader () {
-    declare line file dir load loaded
-    for file in ${*:-${ENVFILES//:/ }}; do
-	[[ -f $file ]] && dir=${file%/*} || { echo missing $file; continue; }
-	for line in $(grep -o -P '^\w+' $file); do
-	    load=$dir/$line
-	    [[ -f $load ]] && source $load || continue
-	    [[ -f ~/.quiet ]] && echo -n . || echo $load
+function envfxp () {
+    declare file
+    declare -a list
+    for file in $(mname $@); do
+	if [[ $file =~ ! ]]; then
+	    dir=${file%/*}
+	    for line in $(grep -o -P '^\w+' ${file/!}); do
+		list+=($dir/$line)
+	    done
+	else
+	    list+=($file)
+	fi
+    done
+    echo "${list[@]}"
+}
+declare -f -r envfxp
+
+function load () {
+    declare x
+    [[ $# -gt 0 ]] || envpurge
+    for x in $(envfxp $@); do
+	[[ -f $x ]] && . $x || continue
+	[[ -f ~/.quiet ]] && echo -n . || echo $x
+    done
+    echo ' done'
+}
+declare -f -r load
+
+function bname () {
+    declare x
+    for x in $@; do echo ${x##*/}; done
+}
+declare -f -r dname
+
+function dname () {
+    declare x
+    declare -a files list
+    for x in $@; do
+	[[ $x =~ / ]] && list+=($x) || files+=($x)
+    done
+    for x in ${files[@]}; do
+	X=${x^^}
+	for y in ${!x} $X ${!X}; do
+	    [[ $y =~ / ]] && { list+=(${y//:/ }); break; }
 	done
-	echo loaded $dir
+    done
+    for x in ${list[@]}; do
+	[[ -d $x ]] && echo $x || echo ${x%/*}
     done
 }
-#declare -f -r -x bloader
+declare -f -r dname
+
+function mname () {
+    declare -a bases dirs
+    declare x base dir
+    for x in $@; do
+	[[ $x =~ '/' ]] && dirs+=($x) || bases+=($x)
+    done
+    [[ ${#dirs[@]} -gt 0 ]] || dirs=(${ENVFILES//:/ })
+    [[ ${#bases[@]} -gt 0 ]] || { bases=(${dirs[@]##*/}); bases=(${bases[@]/%/\!}); }
+    for dir in $(dname ${dirs[@]}); do
+	for base in ${bases[@]} ${bases[@]^^}; do
+	    file=$dir/$base
+	    [[ -f ${file/!} ]] && echo $file || continue
+	done
+    done | _FixList -u
+}
+declare -f -r mname
 

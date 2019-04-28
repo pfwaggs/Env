@@ -1,3 +1,4 @@
+
 function gigify () {
     declare u=BKMGT b=1024 v=$(echo ${@//[^0-9.+-]}) s=${v//[0-9.]}
     v=${v//[+-]}
@@ -6,3 +7,4 @@ function gigify () {
     v=$(dc -e "4 k $v $f $m ^ / p")
     printf "%s%7.3f%s\n" "${s: }" $v ${u:$m:1}
 }
+

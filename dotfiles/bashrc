@@ -11,12 +11,15 @@ umask 0022
 export HISTFILE=~/.history
 export ENVDIR=~/Env
 export ENVFILES=$ENVDIR/envfiles/FLIST
-. $ENVDIR/envfiles/bashrcfuncs
-declare -f -r envpurge bloader
-declare -A _PromptColor _ColorNum
 
+compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
 envpurge
-bloader
+for x in $(envfxp); do
+    [[ -f $x ]] && . $x || continue
+    [[ -f ~/.quiet ]] && echo -n . || echo $x
+done
+echo ' done'
+unset x
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :

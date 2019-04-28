@@ -1,7 +1,8 @@
 
+declare -x PREPDIR=$(dname ${ENVFILES%%:*})/prep_files
+
 function prep () {
-    declare dest base file type PREPDIR=${ENVFILES%%:*}
-    PREPDIR=${PREPDIR%/*}/prep_files
+    declare dest base file type
     source ${PREPDIR}/map
     for file in $@; do
 	read base type < <(echo ${file/./ })

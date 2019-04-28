@@ -1,8 +1,7 @@
 
 function ffix () {
-    declare x=/tmp/$1
-    type $1 | sed -n '2,$p' > $x
+    declare x=/tmp/${1}2
+    type $1 | sed -n "2,$ s/${1}/${1}2/;p" > $x
     vim $x
     . $x
 }
-

@@ -1,8 +1,0 @@
-function prompt () {
-    declare spec=$1 text="${@:2}"
-    [[ $text ]] && eval ${spec%:*}="\${text}"
-    _SetPrompt $spec
-}
-
-alias tag="prompt tag "
-alias xtra="prompt xtra "

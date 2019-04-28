@@ -1,4 +1,0 @@
-function lister () {
-    declare n
-    for n in $(~/helpers/bin/pickme.pl $@); do echo $n; done
-}

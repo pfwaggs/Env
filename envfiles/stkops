@@ -63,5 +63,5 @@ function push () {
     dirs -l -v
 }
 
-#complete -o filenames -C '_ParseArg' stk
+complete -o filenames -C '_ArgParser' stk
 

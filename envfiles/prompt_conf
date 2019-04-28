@@ -1,4 +1,6 @@
 
+declare -A _ColorNum _PromptColor
+
 _ColorNum[black]=30
 _ColorNum[red]=31
 _ColorNum[green]=32
@@ -18,4 +20,5 @@ if [[ $UID -eq 0 ]]; then
     _PromptColor[host]=red
 fi
 promptc=${_ColorNum[green]}
+declare -r promptc
 

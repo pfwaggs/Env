@@ -1,15 +1,12 @@
 
 function killdir () {
-    if [[ -n ${PWD%/*} ]]; then
-	read -p "remove < $PWD > ? "
-	[[ $REPLY =~ ^[yY] ]] || return 0
-	pushd .. >/dev/null
-	echo deleting: ~1
-	rm -r ~1
-	popd +1 >/dev/null
-    else
-	echo parent is /
-    fi
+    [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
+    read -p "remove < $PWD > ? "
+    [[ $REPLY =~ ^[yY] ]] || return 0
+    pushd .. >/dev/null
+    echo deleting: ~1
+    rm -r ~1
+    popd +1 >/dev/null
     dirs -v
 }
 

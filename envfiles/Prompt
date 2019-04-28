@@ -47,3 +47,6 @@ function prompt () {
     _SetPrompt ${key:+-k $key} ${color:+-c $color} ${@:+-t "$*"}
 }
 
+alias tag="prompt tag "
+alias xtra="prompt xtra "
+

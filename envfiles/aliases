@@ -1,3 +1,4 @@
+
 alias ..='cd ..'
 alias ...='cd ../..'
 alias c='clear'
@@ -24,3 +25,4 @@ alias Cat='clear; cat '
 alias gitbr='b=play-$(date +%Y.%j); git branch $b; git checkout $b'
 alias sshFingerPrint='ssh-keygen -E md5 -lf ~/.ssh/id_rsa'
 alias xme='ssh-agent startxfce4'
+

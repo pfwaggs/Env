@@ -1,3 +1,4 @@
+
 [[ $LA   ]] || declare -xr LA=~/.ssh/smap/$host.load
 [[ $SA   ]] || declare -xr SA=~/.ssh/smap/$host.socket
 [[ $SECS ]] || declare -xr SECS=$(date +%s)
@@ -8,3 +9,4 @@ function agent+ () {
     ssh-add -l -E md5 || ssh-add ~/.ssh/*_rsa
     [[ $LA -ef $SMAP ]] || ln $LA $SMAP
 }
+

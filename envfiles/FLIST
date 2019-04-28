@@ -1,7 +1,7 @@
 
-ListOps
 Prompt
 Show
+ArgParser
 
 basevars
 final
@@ -13,8 +13,6 @@ ffix
 ffunc
 julian
 killdir
-lister
-load
 lsu
 mkwdir
 mydd
