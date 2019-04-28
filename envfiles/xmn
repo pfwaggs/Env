@@ -1,0 +1,33 @@
+
+function xmn () {
+    declare opt
+    [[ $# -eq 1 ]] || { opt=$1; shift; }
+    [[ $opt = a ]] && opt=${opt/a/mwc} || :
+    declare infile=$1 file=/tmp/$1
+    [[ $opt =~ X ]] && [[ -f $file ]] && rm $file
+    if [[ $(file $infile | grep -q ASCII) ]]; then
+	[[ -f $file ]] || expand $infile | sed -r -n 's/ +$//;p' > $file
+    fi
+    case $opt in
+	*c*)
+	    [[ -f $file ]] && while read n; do
+		chk=$(echo "$n" | sum | cut -c1-5)
+		printf '%s %3d\n' $chk ${#n}
+	    done < <(cat $file) | paste - <(sed -r 's/$/@/' $file | cat -n)
+	    ;;&
+	*w*)
+	    [[ -f $file ]] && wc $file
+	    ;;&
+	t)
+	    ls -l $infile
+	    file $infile
+	    stat $infile
+	    ;;
+	*m*|'')
+	    [[ -f $file ]] && md5sum $file
+	    ;;&
+	*x*)
+	    rm $file
+	    ;;
+    esac
+}
