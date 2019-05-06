@@ -1,5 +1,6 @@
 
-function L () {
+function L ()
+{
     declare -a args
     declare opts=lAd
     for x in $*; do

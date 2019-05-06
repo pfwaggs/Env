@@ -1,5 +1,6 @@
 
-function stk () {
+function stk ()
+{
     declare n line cmd=$1
     shift
     case $cmd in

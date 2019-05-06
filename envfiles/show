@@ -1,5 +1,6 @@
 
-function show () {
+function show ()
+{
     declare x=$(declare -p $1 | awk '{print $2}')
     if [[ $x =~ [aA] ]]; then
 	echo array $1:

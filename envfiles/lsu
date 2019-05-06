@@ -1,5 +1,6 @@
 
-function lsu () { 
+function lsu ()
+{
     declare -a np=(/ "${1:-$PWD}")
     while [[ -n ${np[-1]%/*} ]]; do
         np+=(${np[-1]%/*})

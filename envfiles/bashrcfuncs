@@ -1,5 +1,13 @@
 
-function _FixList () {
+# some basic list operations
+# -s sort
+# -e exists
+# -r reverse
+# -l resolve links
+# -c clear items
+# -u unique items
+function _FixList ()
+{
     declare p opt=$1
     shift
     declare -a nlist list
@@ -40,7 +48,10 @@ function _FixList () {
 }
 declare -f -r _FixList
 
-function _List2Var () {
+# converts a list to a SEPerated list suitable for assignment
+# not for now but this could fit into _FixList with little problems
+function _List2Var ()
+{
     declare sep=${SEP:-:}
     declare -a input
     if [[ $# -gt 0 ]]; then
@@ -54,17 +65,23 @@ function _List2Var () {
 }
 declare -f -r _List2Var
 
-function envpurge () {
+# clear the environment of crap
+function envpurge ()
+{
     complete -r
     unalias -a
     unset -f $(compgen -A function) &>/dev/null
 }
 declare -f -r envpurge
 
-function envfxp () {
+# produces a list of paths for source-ing
+# paths shoudl specify a filename or filename@ if the filename contains files
+# to load relative to it's parent
+function envfxp ()
+{
     declare file
     declare -a list
-    for file in $(mname $@); do
+    for file in $@; do
 	if [[ $file =~ ! ]]; then
 	    dir=${file%/*}
 	    for line in $(grep -o -P '^\w+' ${file/!}); do
@@ -78,7 +95,9 @@ function envfxp () {
 }
 declare -f -r envfxp
 
-function load () {
+# source a provided list of files
+function load ()
+{
     declare x
     [[ $# -gt 0 ]] || envpurge
     for x in $(envfxp $@); do
@@ -89,13 +108,17 @@ function load () {
 }
 declare -f -r load
 
-function bname () {
+# returns the basename of given paths
+function bname ()
+{
     declare x
     for x in $@; do echo ${x##*/}; done
 }
-declare -f -r dname
+declare -f -r bname
 
-function dname () {
+# returns the dirname of given paths and variable expansions
+function dname ()
+{
     declare x
     declare -a files list
     for x in $@; do
@@ -113,20 +136,43 @@ function dname () {
 }
 declare -f -r dname
 
-function mname () {
-    declare -a bases dirs
-    declare x base dir
+# merges names and dirs into a set. names are checked against parents to
+# ENVFILES and parents of given dirs. if the path is to be used as a file
+# containing other files to source the use name@ or path@ the default return
+# is the ENVFILES separated by ':'
+function mname ()
+{
+    declare -a names list tmp dirs=($(dname ${ENVFILES//:/ }))
+    declare x name dir
     for x in $@; do
-	[[ $x =~ '/' ]] && dirs+=($x) || bases+=($x)
+	[[ $x =~ '/' ]] && { list+=($x); dirs+=(${x%/*}); } || names+=($x)
     done
-    [[ ${#dirs[@]} -gt 0 ]] || dirs=(${ENVFILES//:/ })
-    [[ ${#bases[@]} -gt 0 ]] || { bases=(${dirs[@]##*/}); bases=(${bases[@]/%/\!}); }
-    for dir in $(dname ${dirs[@]}); do
-	for base in ${bases[@]} ${bases[@]^^}; do
-	    file=$dir/$base
-	    [[ -f ${file/!} ]] && echo $file || continue
+    for name in ${names[@]}; do
+	for x in ${dirs[@]}; do
+	    tmp+=("$x/$name")
 	done
-    done | _FixList -u
+    done
+    [[ ${#tmp[@]} -gt 0 ]] && list+=($(_FixList -e "${tmp[@]}")) || :
+    [[ ${#list[@]} -gt 0 ]] || list=(${ENVFILES//:/ })
+    _FixList -u "${list[@]}"
 }
 declare -f -r mname
+
+#function mname ()
+#{
+#    declare -a bases dirs
+#    declare x base dir
+#    for x in $@; do
+#	[[ $x =~ '/' ]] && dirs+=($x) || bases+=($x)
+#    done
+#    [[ ${#dirs[@]} -gt 0 ]] || dirs=(${ENVFILES//:/ })
+#    [[ ${#bases[@]} -gt 0 ]] || { bases=(${dirs[@]##*/}); bases=(${bases[@]/%/\!}); }
+#    for dir in $(dname ${dirs[@]}); do
+#	for base in ${bases[@]} ${bases[@]^^}; do
+#	    file=$dir/$base
+#	    [[ -f ${file/!} ]] && echo $file || continue
+#	done
+#    done | _FixList -u
+#}
+#declare -f -r mname
 

@@ -1,11 +1,13 @@
 
-function _Show () {
+function _Show ()
+{
     declare x
     [[ -n $COMP_LINE ]] && x=$2 || x=$1
     compgen -v | grep -i "^$x"
 }
 
-function show () {
+function show ()
+{
     declare x j
     read j x j < <(declare -p $1)
     var=${j%%=*}

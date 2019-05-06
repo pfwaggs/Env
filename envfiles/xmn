@@ -1,20 +1,21 @@
 
-function xmn () {
+function xmn ()
+{
     declare opt
-    [[ $# -eq 1 ]] || { opt=$1; shift; }
-    [[ $opt =~ a ]] && opt=${opt/a/cwm} || :
+    [[ $# -eq 1 ]] || { opt=${1/a/cwm}; shift; }
     declare infile=$1 file=/tmp/${1##*/}
-    [[ $opt =~ X ]] && [[ -f $file ]] && rm $file
+    [[ $opt =~ X ]] && [[ -f $file ]] && rm $file || :
     file $infile | grep -q ASCII
     if [[ $? -eq 0 ]]; then
 	[[ -f $file ]] || expand $infile | sed -r -n 's/ +$//;p' > $file
     fi
     case $opt in
 	*c*)
-	    [[ -f $file ]] && while read n; do
+	    [[ -f $file ]] && while read -r n; do
+		n=${n:1}
 		chk=$(echo "$n" | sum | cut -c1-5)
-		printf '%s %3d\n' $chk ${#n}
-	    done < <(cat $file) | paste - <(sed -r 's/$/@/' $file | cat -n)
+		printf '%3d %s %s\n' ${#n} $chk "${n}"
+	    done < <(sed 's/^/|/;s/$/./' $file) | sed 's/ .$/./' | cat -n
 	    ;;&
 	*w*)
 	    [[ -f $file ]] && wc $file
@@ -32,3 +33,4 @@ function xmn () {
 	    ;;
     esac
 }
+

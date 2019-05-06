@@ -1,5 +1,6 @@
 
-function typer () {
+function typer ()
+{
     declare mtype x
     declare -a list=($type -at $1)
     if [[ ${#list[@]} -gt 0 ]]; then

@@ -1,7 +1,8 @@
 
 declare -x PREPDIR=$(dname ${ENVFILES%%:*})/prep_files
 
-function prep () {
+function prep ()
+{
     declare dest base file type
     source ${PREPDIR}/map
     for file in $@; do

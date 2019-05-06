@@ -1,5 +1,6 @@
 
-function _ArgParser () {
+function _ArgParser ()
+{
     declare x dir DIR
     [[ -v COMP_LINE ]] && x=$2 || x=$1
     declare -a list

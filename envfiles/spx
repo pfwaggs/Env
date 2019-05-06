@@ -1,5 +1,6 @@
 
-function spx () {
+function spx ()
+{
     echo $@ | aspell -a
 }
 

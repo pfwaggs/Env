@@ -1,5 +1,6 @@
 
-function psfu () {
+function psfu ()
+{
     ps -f -u ${1:-$(id -un)}
 }
 
