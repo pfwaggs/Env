@@ -1,36 +1,40 @@
 
 function xmn ()
 {
-    declare opt
-    [[ $# -eq 1 ]] || { opt=${1/a/cwm}; shift; }
+    declare opt keep=0
+    [[ $# -eq 1 ]] || { opt=${1/a/mcw}; shift; }
+    opt=$(echo ${opt:-m} | perl -a -F'' -E 'say join(" ",@F)')
     declare infile=$1 file=/tmp/${1##*/}
-    [[ $opt =~ X ]] && [[ -f $file ]] && rm $file || :
     file $infile | grep -q ASCII
     if [[ $? -eq 0 ]]; then
 	[[ -f $file ]] || expand $infile | sed -r -n 's/ +$//;p' > $file
     fi
-    case $opt in
-	*c*)
-	    [[ -f $file ]] && while read -r n; do
-		n=${n:1}
-		chk=$(echo "$n" | sum | cut -c1-5)
-		printf '%3d %s %s\n' ${#n} $chk "${n}"
-	    done < <(sed 's/^/|/;s/$/./' $file) | sed 's/ .$/./' | cat -n
-	    ;;&
-	*w*)
-	    [[ -f $file ]] && wc $file
-	    ;;&
-	*m*|'')
-	    [[ -f $file ]] && md5sum $file
-	    ;;&
-	*x*)
-	    rm $file
-	    ;;
-	t)
-	    ls -l $infile
-	    file $infile
-	    stat $infile
-	    ;;
-    esac
+    if [[ $opt =~ [cw] ]]; then
+	[[ -f $file ]] || return
+    fi
+    for opt in $opt; do
+	case $opt in
+	    c)
+		while read -r n; do
+		    printf '%3d %s\n' ${#n} $(echo -E "$n" | sum | cut -c1-5)
+		done < $file | paste -d ' ' - <(sed 's/^/^/;s/$/$/' $file) | cat -n
+		;;
+	    w)
+		wc $file
+		;;
+	    m)
+		md5sum $infile
+		;;
+	    t)
+		ls -l $infile
+		file $infile
+		stat $infile
+		;;
+	    K)
+		((keep=1-keep))
+		;;
+	esac
+    done
+    ((keep)) || rm $file >/dev/null
 }
 

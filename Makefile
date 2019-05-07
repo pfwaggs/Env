@@ -81,7 +81,7 @@ check:
 gitarchive:
 	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
 
-printx:
+updates:
 	@-rm -r update.txt update.ps 2>/dev/null
 	@source envfiles/xmn; \
 	for file in Makefile $$(git ls-files $(DOTDIRS) $(ENVDIRS)); do \
@@ -91,7 +91,7 @@ printx:
 	done | tee updates.txt | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o updates.ps
 
-print:
+outputs:
 	@[[ -f filelist ]] || { echo missing filelist; exit -1; }
 	@-rm -r output.txt output.ps 2>/dev/null
 	@source envfiles/xmn; \
@@ -99,4 +99,5 @@ print:
 	    echo -e "\n#### $${file##*/}"; \
 	    xmn ax $$file; \
 	done | tee output.txt | \
-	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps
+	enscript -f Courier8 -DDuplex:true -DTumble:true -o output.ps
+#	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps
