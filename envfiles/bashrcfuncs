@@ -6,76 +6,65 @@
 # -l resolve links
 # -c clear items
 # -u unique items
+# -S output a single string
 function _FixList ()
 {
-    declare p opt x
-    declare -a nlist list opts args
-    for p in "$@"; do
-	[[ $p =~ -.* ]] && opts+=($p) || list+=("$p")
+    declare p opt
+    declare -a nlist list opts
+    for p in $*; do
+        [[ $p =~ ^-.* ]] && opts+=($p) || list+=("$p")
     done
     if [[ ${#list[@]} -eq 0 ]]; then
-        while read x; do
-            list+=("$x")
+        while read p; do
+            list+=("$p")
         done < <(cat -- -)
     fi
     for opt in ${opts[@]}; do
-	nlist=()
-	case $opt in
-	    -s)
-		nlist=("${list[@]}")
-		;;
-	    -e)
-		for x in "${list[@]}"; do
-		    [[ -e $x ]] && nlist+=("$x") || continue
-		done
-		;;
-	    -r)
-		for x in $(printf '%s\n' ${list[@]} | tac); do
-		    nlist+=("$x")
-		done
-		;;
-	    -l)
-		for x in ${list[@]}; do
-		    [[ -L $x ]] && x=$(readlink -e $x) || :
-		    nlist+=("$x")
-		done
-		;;
-	    -c)
-		nlist=($(compgen -W "${list[*]:1}" -X${list[0]}*))
-		;;
-	    -u)
-		for p in "${list[@]}"; do
-		    [[ ${nlist[@]} =~ :$p ]] || nlist+=(":$p")
-		done
-		nlist=("${nlist[@]/:}")
-		;;
-	    -S)
-		declare IFS=${SEP:-:}$IFS
-		nlist+=("${list[*]}")
-		IFS=$' \t\n'
-	esac
-	list=("${nlist[@]}")
+        nlist=()
+        case $opt in
+            -s)
+                for p in $(printf '%s\n' "${list[@]}" | sort); do
+                    nlist+=("$p")
+                done
+                ;;
+            -e)
+                for p in "${list[@]}"; do
+                    [[ -e "$p" ]] && nlist+=("$p") || continue
+                done
+                ;;
+            -r)
+                for p in $(printf '%s\n' "${list[@]}" | tac); do
+                    nlist+=("$p")
+                done
+                ;;
+            -l)
+                for p in "${list[@]}"; do
+                    [[ -L "$p" ]] && p=$(readlink -e "$p") || :
+                    nlist+=("$p")
+                done
+                ;;
+            -c)
+                for p in $(compgen -W "${list[*]:1}" -X${list[0]}*); do
+                    nlist+=("$p")
+                done
+                ;;
+            -u)
+                for p in "${list[@]}"; do
+                    [[ ${nlist[@]} =~ :$p ]] || nlist+=(":$p")
+                done
+                nlist=(${nlist[*]/#:})
+                ;;
+            -S|*)
+                declare IFS=${SEP:-:}$IFS
+                nlist=("${list[*]}")
+                IFS=$' \t\n'
+                ;;
+        esac
+        list=("${nlist[@]}")
     done
     printf '%s\n' "${list[@]}"
 }
 declare -f -r _FixList
-
-## converts a list to a SEPerated list suitable for assignment
-## not for now but this could fit into _FixList with little problems
-#function _List2Var ()
-#{
-#    declare sep=${SEP:-:}
-#    declare -a input
-#    if [[ $# -gt 0 ]]; then
-#        input=("$@")
-#    else
-#        while read x; do
-#            input+=("$x")
-#        done < <(cat -- -)
-#    fi
-#    [[ ${#input[@]} -gt 1 ]] && ( IFS=$sep; echo "${input[*]}" ) || echo ${input// /$sep}
-#}
-#declare -f -r _List2Var
 
 # clear the environment of crap
 function envpurge ()
@@ -87,34 +76,34 @@ function envpurge ()
 declare -f -r envpurge
 
 # produces a list of paths for source-ing
-# paths shoudl specify a filename or filename@ if the filename contains files
+# paths should specify a filename or filename@ if the filename contains files
 # to load relative to it's parent
 function envfxp ()
 {
     declare file
     declare -a list
-    for file in $(mname $@); do
-	if [[ $file =~ ! ]]; then
-	    dir=${file%/*}
-	    for line in $(grep -o -P '^\w+' ${file/!}); do
-		list+=($dir/$line)
-	    done
-	else
-	    list+=($file)
-	fi
+    for file in $@; do
+        if [[ $file =~ @ ]]; then
+            dir=${file%/*}
+            for line in $(grep -o -P '^\w+' ${file/@}); do
+                list+=($dir/$line)
+            done
+        else
+            list+=($file)
+        fi
     done
     echo "${list[@]}"
 }
 declare -f -r envfxp
 
-# source a provided list of files
+# sources a provided list of files
 function load ()
 {
     declare x
     [[ $# -gt 0 ]] || envpurge
-    for x in $(envfxp $@); do
-	[[ -f $x ]] && . $x || continue
-	[[ -f ~/.quiet ]] && echo -n . || echo $x
+    for x in $(envfxp $(mname $@)); do
+        [[ -f $x ]] && . $x || continue
+        [[ -f ~/.quiet ]] && echo -n . || echo $x
     done
     echo ' done'
 }
@@ -134,37 +123,37 @@ function dname ()
     declare x
     declare -a files list
     for x in $@; do
-	[[ $x =~ / ]] && list+=($x) || files+=($x)
+        [[ $x =~ / ]] && list+=($x) || files+=($x)
     done
     for x in ${files[@]}; do
-	X=${x^^}
-	for y in ${!x} $X ${!X}; do
-	    [[ $y =~ / ]] && { list+=(${y//:/ }); break; }
-	done
+        X=${x^^}
+        for y in ${!x} $X ${!X}; do
+            [[ $y =~ / ]] && { list+=(${y//:/ }); break; }
+        done
     done
     for x in ${list[@]}; do
-	[[ -d $x ]] && echo $x || echo ${x%/*}
+        [[ -d $x ]] && echo $x || echo ${x%/*}
     done
 }
 declare -f -r dname
 
 # merges names and dirs into a set. names are checked against parents to
 # ENVFILES and parents of given dirs. if the path is to be used as a file
-# containing other files to source then use name@ or path@ the default return
+# containing other files to source the use name@ or path@ the default return
 # is the ENVFILES separated by ':'
 function mname ()
 {
     declare -a names list tmp dirs=($(dname ${ENVFILES//:/ }))
     declare x name dir
     for x in $@; do
-	[[ $x =~ '/' ]] && { list+=($x); dirs+=(${x%/*}); } || names+=($x)
+        [[ $x =~ '/' ]] && { list+=($x); dirs+=(${x%/*}); } || names+=($x)
     done
     for name in ${names[@]}; do
-	for path in "${dirs[@]/%//${name/!}}"; do
-	    [[ -e $path ]] && list+=("${path%/*}/$name") || continue
-	done
+        for path in $(_FixList -e "${dirs[@]/%//${name/@}}"); do
+            list+=("${path%/*}/$name") || continue
+        done
     done
-    [[ ${#list[@]} -gt 0 ]] || list=(${ENVFILES//:/ })
+    [[ ${#list[*]} -gt 0 ]] || list=(${ENVFILES//:/ })
     _FixList -u ${list[@]}
 }
 declare -f -r mname

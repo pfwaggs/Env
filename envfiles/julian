@@ -2,20 +2,20 @@
 function julian ()
 {
     case ${1//[0-9]/x} in
-	'')
-	    date +%Y.%j
-	    ;;
-	xxxx-xx-xx)
-	    date -u -d $1 +%Y.%j
-	    ;;
-	xxxx.xxx)
-	    declare y d
-	    read y d < <(echo ${1/./ })
-	    date -u -d "$y-01-01 $((d-1)) days" +%F
-	    ;;
-	*)
-	    echo 'unknown request'
-	    ;;
+        '')
+            date +%Y.%j
+            ;;
+        xxxx-xx-xx)
+            date -u -d $1 +%Y.%j
+            ;;
+        xxxx.xxx)
+            declare y d
+            read y d < <(echo ${1/./ })
+            date -u -d "$y-01-01 $((d-1)) days" +%F
+            ;;
+        *)
+            echo 'unknown request'
+            ;;
     esac
 }
 

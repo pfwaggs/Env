@@ -95,9 +95,10 @@ outputs:
 	@[[ -f filelist ]] || { echo missing filelist; exit -1; }
 	@-rm -r output.txt output.ps 2>/dev/null
 	@source envfiles/xmn; \
+	source envfiles/bashrcfuncs; \
 	for file in $$(cat filelist); do \
 	    echo -e "\n#### $${file##*/}"; \
-	    xmn ax $$file; \
+	    xmn -a $$file; \
 	done | tee output.txt | \
 	enscript -f Courier8 -DDuplex:true -DTumble:true -o output.ps
 #	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps

@@ -10,7 +10,7 @@ shopt -s extglob
 umask 0022
 export HISTFILE=~/.history
 export ENVDIR=~/Env
-export ENVFILES=$ENVDIR/envfiles/FLIST!
+export ENVFILES=$ENVDIR/envfiles/FLIST@
 
 compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
 envpurge

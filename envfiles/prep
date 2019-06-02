@@ -6,13 +6,13 @@ function prep ()
     declare dest base file type
     source ${PREPDIR}/map
     for file in $@; do
-	read base type < <(echo ${file/./ })
-	[[ $type =~ fn ]] && dest=$base || dest=$file
-	[[ -s $dest ]] && echo $dest exists: skipping && continue
-	sed -e "s/zZz/$base/" $PREPDIR/${map[$type]} > $dest
-	[[ -s $dest ]] || { echo sed failed; continue; }
-	[[ $type =~ (sh|pl|py) ]] && chmod 755 $dest
-	echo prepped $dest as ${map[$type]}
+        read base type < <(echo ${file/./ })
+        [[ $type =~ fn ]] && dest=$base || dest=$file
+        [[ -s $dest ]] && echo $dest exists: skipping && continue
+        sed -e "s/zZz/$base/" $PREPDIR/${map[$type]} > $dest
+        [[ -s $dest ]] || { echo sed failed; continue; }
+        [[ $type =~ (sh|pl|py) ]] && chmod 755 $dest
+        echo prepped $dest as ${map[$type]}
     done
 }
 
