@@ -1,15 +1,21 @@
 
 function _ArgParser ()
 {
-    declare x dir DIR
-    [[ -n $COMP_LINE ]] && x=$2 || x=$1
+    declare x y file dir DIR
+    [[ -n $COMP_LINE ]] && x="$2" || x="$1"
     declare -a list
-    dir=${x%/*}
     file=${x##*/}
-    list=($(compgen -d -W "${dir:=/}*" -X!$file*))
-    [[ ${#list[@]} -gt 0 ]] || list=($(compgen -d -W "${DIRSTACK[@]/%//$dir*}" -X!$file*))
-    [[ ${#list[@]} -gt 0 ]] || list=($(compgen -d -W "${CDPATH//://$dir* }" -X!$file*))
-    list=($(_FixList -u "${list[@]}"))
-    printf '%s\n' "${list[@]}"
+    if [[ $x =~ / ]]; then
+	while read -r x; do
+	    [[ -d "$x" ]] && list+=("$x") || continue
+	done < <(compgen -G "$x*")
+    fi
+    for x in "${DIRSTACK[@]:1}" ${CDPATH//:/ }; do
+	[[ ${#list[@]} -eq 0 ]] || break
+	while read -r y; do
+	    [[ -d "$y" ]] && list+=("$y") || continue
+	done < <(compgen -G "$x/$file*")
+    done
+    [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
 }
 

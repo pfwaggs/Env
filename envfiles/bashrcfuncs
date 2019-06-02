@@ -11,7 +11,7 @@ function _FixList ()
 {
     declare p opt
     declare -a nlist list opts
-    for p in $*; do
+    for p in "$@"; do
         [[ $p =~ ^-.* ]] && opts+=($p) || list+=("$p")
     done
     if [[ ${#list[@]} -eq 0 ]]; then
@@ -23,9 +23,9 @@ function _FixList ()
         nlist=()
         case $opt in
             -s)
-                for p in $(printf '%s\n' "${list[@]}" | sort); do
+		while read -r p; do
                     nlist+=("$p")
-                done
+                done < <(printf '%s\n' "${list[@]}" | sort)
                 ;;
             -e)
                 for p in "${list[@]}"; do
@@ -33,9 +33,9 @@ function _FixList ()
                 done
                 ;;
             -r)
-                for p in $(printf '%s\n' "${list[@]}" | tac); do
+		while read -r p; do
                     nlist+=("$p")
-                done
+                done < <(printf '%s\n' "${list[@]}" | tac)
                 ;;
             -l)
                 for p in "${list[@]}"; do
@@ -44,20 +44,20 @@ function _FixList ()
                 done
                 ;;
             -c)
-                for p in $(compgen -W "${list[*]:1}" -X${list[0]}*); do
-                    nlist+=("$p")
+		for p in "${list[@]:1}"; do
+		    [[ $p =~ ${list[0]}.* ]] || nlist+=("$p")
                 done
                 ;;
             -u)
                 for p in "${list[@]}"; do
                     [[ ${nlist[@]} =~ :$p ]] || nlist+=(":$p")
                 done
-                nlist=(${nlist[*]/#:})
+                nlist=("${nlist[@]/#:}")
                 ;;
             -S|*)
                 declare IFS=${SEP:-:}$IFS
-                nlist=("${list[*]}")
-                IFS=$' \t\n'
+                echo "${list[*]}"
+		return
                 ;;
         esac
         list=("${nlist[@]}")
