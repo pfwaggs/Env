@@ -5,7 +5,7 @@ ifndef ENV_HOME
     ENV_HOME = $(HOME)
 endif
 
-ROOT = $(dir $(shell pwd -P))
+ROOT = $(shell pwd -P)
 
 ifndef DIRS
     DOTDIRS  := $(sort $(wildcard dotfiles*))
