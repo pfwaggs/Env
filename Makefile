@@ -1,10 +1,11 @@
 
-# initializing system AzA
 SHELL = /bin/bash
 
-ifndef DEST
-    DEST = $(HOME)
+ifndef ENV_HOME
+    ENV_HOME = $(HOME)
 endif
+
+ROOT = $(shell pwd -P)
 
 ifndef DIRS
     DOTDIRS  := $(sort $(wildcard dotfiles*))
@@ -24,20 +25,15 @@ NAME = $(notdir $(PWD))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-STATUS = PWD DOTDIRS ENVDIRS SYNCDIRS NAME BRANCH VER TAR
+STATUS = PWD ROOT ENV_HOME DOTDIRS ENVDIRS SYNCDIRS NAME BRANCH VER TAR
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
 
-#ZaZ
-
-# targets AzA
-
-# help: AzA
 help:
 	@echo 'status   : shows current variables'
 	@echo 'list     : shows current files to be installed'
-	@echo 'tarinstall  : will install files in designated DEST'
+	@echo 'tarinstall  : will install files in designated ENV_HOME'
 	@echo 'tararchive : create an arcive of the installed files'
 	@echo 'check    : will show what has changed wrt Git structure'
 	@echo 'clean    : will uninstall the current environment'
@@ -45,87 +41,47 @@ help:
 	@echo 'preview  : show a list of files to be printed'
 	@echo 'printout : print the files shown from preview'
 
-#ZaZ
-
-# status AzA
 status:
 	@for v in $(STATUS); do eval "echo $$v = $${!v}"; done
-#ZaZ
 
-# install AzA
-install: install-dots install-sync
-
-install-dots:
-	@for dir in $(DOTDIRS); do \
-	    echo adding dots: $$dir; \
+install:
+	@for dir in $(DOTDIRS) $(SYNCDIRS); do \
+	    echo installing $$dir; \
 	    for fr in $$dir/*; do \
-	        to=$(DEST)/."$${fr##*/}"; \
-		[[ -e $$to ]] || ln $$fr $$to; \
+		to=$(ENV_HOME)/."$${fr#*/}"; \
+		[[ -e $$to ]] && continue || : ;\
+		[[ -d $$fr ]] && rsync -a $$fr/ $$to || ln $$fr $$to; \
 	    done; \
-	done
+	done; \
+	ln -T -s -f $(ROOT) $(ENV_HOME)/Env
 
-install-sync:
-	@for dir in $(SYNCDIRS); do \
-	    echo adding syncs: $$dir; \
+uninstall:
+	@for dir in $(DOTDIRS) $(SYNCDIRS); do \
+	    echo uninstalling $$dir; \
 	    for fr in $$dir/*; do \
-		to=$(DEST)/."$${fr##*/}"; \
-		[[ -d $$to ]] || rsync -a $$fr/ $$to; \
+		to=$(ENV_HOME)/."$${fr#*/}"; \
+		[[ -e $$to ]] || continue; \
+		[[ -d $$to ]] && rm -r $$to || rm $$to; \
 	    done; \
-	done
-#ZaZ
+	done; \
+	[[ -L $(ENV_HOME)/Env ]] && rm $(ENV_HOME)/Env || :
 
-# remove AzA
-remove: remove-dots remove-sync
-
-remove-dots:
-	@for dir in $(DOTDIRS); do \
-	    echo clearing dots: $$dir; \
-	    for fr in $$dir/*; do \
-	        to=$(DEST)/."$${fr##*/}"; \
-		[[ $$fr -ef $$to ]] && rm $$to || :; \
-	    done; \
-	done
-
-remove-sync:
-	@for dir in $(SYNCDIRS); do \
-	    echo clearing sync: $$dir; \
-	    for fr in $$dir/*; do \
-		to=$(DEST)/."$${fr##*/}"; \
-		[[ -d $$to ]] && rm -r $$to || :; \
-	    done; \
-	done
-
-# ZaZ
-
-# check AzA
-check: check-dots check-syncs
-
-check-dots:
-	@for dir in $(DOTDIRS); do \
+check:
+	@[[ $$(readlink $(ENV_HOME)/Env) =~ $(ROOT) ]] && echo Env link is good || { echo Env link is broken; exit 1; }
+	@for dir in $(DOTDIRS) $(SYNCDIRS); do \
 	    echo checking $$dir; \
 	    for fr in $$dir/*; do \
-	        to=$(DEST)/."$${fr##*/}"; \
-		[[ $$to -ef $$fr ]] || echo missing $$fr; \
+		to=$(ENV_HOME)/."$${fr#*/}"; \
+		[[ -e $$to ]] || { echo $$to does not exist; continue; }; \
+		[[ $$to -ef $$fr ]] && continue || :; \
+		[[ -d $$to ]] && diff -q -r $$to $$fr || diff $$to $$fr; \
 	    done; \
 	done
 
-check-syncs:
-	@for dir in $(SYNCDIRS); do \
-	    echo checking $$dir; \
-	    for fr in $$dir/*; do \
-		to=$(DEST)/."$${fr##*/}"; \
-		[[ -d $$to ]] && diff -r -q $$fr $$to || echo missing $$fr; \
-	    done; \
-	done
-# ZaZ
-
-# gitarchive AzA
 gitarchive:
 	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
-#ZaZ
 
-# printout AzA
-printx:
+updates:
 	@-rm -r update.txt update.ps 2>/dev/null
 	@source envfiles/xmn; \
 	for file in Makefile $$(git ls-files $(DOTDIRS) $(ENVDIRS)); do \
@@ -135,15 +91,14 @@ printx:
 	done | tee updates.txt | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o updates.ps
 
-print:
+outputs:
 	@[[ -f filelist ]] || { echo missing filelist; exit -1; }
 	@-rm -r output.txt output.ps 2>/dev/null
 	@source envfiles/xmn; \
+	source envfiles/bashrcfuncs; \
 	for file in $$(cat filelist); do \
 	    echo -e "\n#### $${file##*/}"; \
-	    xmn ax $$file; \
+	    xmn -a $$file; \
 	done | tee output.txt | \
-	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps
-#ZaZ
-
-#ZaZ
+	enscript -f Courier8 -DDuplex:true -DTumble:true -o output.ps
+#	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps

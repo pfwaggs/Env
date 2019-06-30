@@ -1,5 +1,6 @@
 
-function gigify () {
+function gigify ()
+{
     declare u=BKMGT b=1024 v=$(echo ${@//[^0-9.+-]}) s=${v//[0-9.]}
     v=${v//[+-]}
     [[ $@ =~ [bB] ]] || b=1000

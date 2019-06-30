@@ -1,34 +1,51 @@
 
-function xmn () {
-    declare opt
-    [[ $# -eq 1 ]] || { opt=$1; shift; }
-    [[ $opt =~ a ]] && opt=${opt/a/cwm} || :
-    declare infile=$1 file=/tmp/${1##*/}
-    [[ $opt =~ X ]] && [[ -f $file ]] && rm $file
-    file $infile | grep -q ASCII
-    if [[ $? -eq 0 ]]; then
-	[[ -f $file ]] || expand $infile | sed -r -n 's/ +$//;p' > $file
-    fi
-    case $opt in
-	*c*)
-	    [[ -f $file ]] && while read n; do
-		chk=$(echo "$n" | sum | cut -c1-5)
-		printf '%s %3d\n' $chk ${#n}
-	    done < <(cat $file) | paste - <(sed -r 's/$/@/' $file | cat -n)
-	    ;;&
-	*w*)
-	    [[ -f $file ]] && wc $file
-	    ;;&
-	*m*|'')
-	    [[ -f $file ]] && md5sum $file
-	    ;;&
-	*x*)
-	    rm $file
-	    ;;
-	t)
-	    ls -l $infile
-	    file $infile
-	    stat $infile
-	    ;;
-    esac
+function xmn ()
+{
+    declare x opt infile file keep=0
+    declare -a opts files
+    for x in $@; do
+        [[ $x =~ ^-. ]] && opts+=(${x/a/mcw}) || files+=($x)
+    done
+    [[ ${#opts[@]} -eq 0 ]] && opts=(m) || opts=($( echo ${opts[@]/-} | perl -a -F'' -E 'push @all, @F; END{say join(" ",@all)}'))
+    opts=($(_FixList -u ${opts[@]/-}))
+    for infile in ${files[@]}; do
+        [[ -f $infile ]] || continue
+        file=/tmp/${infile##*/}
+        file $infile | grep -q ASCII
+        if [[ $? -eq 0 ]]; then
+            [[ -f $file ]] || expand $infile | sed -r 's/ +$//' > $file
+        fi
+        for opt in ${opts[@]}; do
+            case $opt in
+                c)
+                    [[ -f $file ]] || continue
+                    while read -r n; do
+                        printf '%3d %s\n' ${#n} $(echo -E "$n" | sum | cut -c1-5)
+                    done < $file | paste -d ' ' - <(sed 's/^/^/;s/$/$/' $file) | cat -n
+                    ;;
+                w)
+                    [[ -f $file ]] || continue
+                    wc $file
+                    ;;
+                m)
+                    [[ -f $file ]] || continue
+                    md5sum $file
+                    ;;
+                M)
+                    md5sum $infile
+                    ;;
+                t)
+                    ls -l $infile
+                    file $infile
+                    stat $infile
+                    ;;
+                K)
+                    ((keep=1-keep))
+                    ;;
+            esac
+        done
+        ((keep)) || rm $file >/dev/null
+        echo ''
+    done
 }
+

@@ -1,5 +1,6 @@
 
-function killdir () {
+function killdir ()
+{
     [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
     read -p "remove < $PWD > ? "
     [[ $REPLY =~ ^[yY] ]] || return 0

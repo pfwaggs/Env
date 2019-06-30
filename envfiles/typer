@@ -1,30 +1,31 @@
 
-function typer () {
+function typer ()
+{
     declare mtype x
     declare -a list=($type -at $1)
     if [[ ${#list[@]} -gt 0 ]]; then
-	for x in $(dname ${ENVFILES//:/ }); do
-	    [[ -f $x/$1 ]] && list+=($x/$1) || continue
-	done
+        for x in $(dname ${ENVFILES//:/ }); do
+            [[ -f $x/$1 ]] && list+=($x/$1) || continue
+        done
     fi
     for mtype in $(type -at $1); do
-	case $mtype in
-	    function)
-		read name num loc < <(ffunc $1)
-		xmn a $loc
-		;;
-	    file)
-		for n in $(type -aP $1); do
-		    xmn t "$n"
-		done
-		;;
-	    alias)
-		alias $1
-		;;
-	    *)
-		continue;
-		;;
-	esac
+        case $mtype in
+            function)
+                read name num loc < <(ffunc $1)
+                xmn a $loc
+                ;;
+            file)
+                for n in $(type -aP $1); do
+                    xmn t "$n"
+                done
+                ;;
+            alias)
+                alias $1
+                ;;
+            *)
+                continue;
+                ;;
+        esac
     done
 }
 

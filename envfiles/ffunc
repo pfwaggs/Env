@@ -1,7 +1,8 @@
 
-function ffunc () {
-    declare -a list=(${1:-$(compgen -A function)})
+function ffunc ()
+{
     shopt -s extdebug
-    declare -F ${list[@]} | column -t
+    declare -F ${@:-$(compgen -A function)} | column -t
     shopt -u extdebug
 }
+

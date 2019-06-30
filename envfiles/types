@@ -1,13 +1,16 @@
 
-function typef () {
+function typef ()
+{
     file $(type -a -p $@)
 }
 
-function typel () {
+function typel ()
+{
     ls -l $(type -a -p $@)
 }
 
-function typeL () {
+function typeL ()
+{
     less $(type -a -p $@)
 }
 

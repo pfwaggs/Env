@@ -19,3 +19,4 @@ export VIMINIT=":source $VIMDIR/vimrc"
 
 export GS_FONTPATH=~/.fonts
 
+export INPUTRC=~/.inputrc

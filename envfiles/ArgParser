@@ -11,6 +11,4 @@ function _ArgParser () {
 	    [[ -d $path ]] && list+=("$path")
 	done < <(compgen -G "$dir/$file*" | sort)
     done
-    [[ ${#list[@]} > 0 ]] && echo "${list[@]}" | _FixList -u
-}
-
+    [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
