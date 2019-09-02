@@ -5,14 +5,21 @@ trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 set -C -b -o vi
 shopt -s extglob
 
-# set some basic items
+bashwant=$(. ~/Env/dotfiles/getbash)
+bashhave="${BASH_VERSION%(*} $BASH"
+#echo SHELL=$SHELL SHLVL=$SHLVL bashwant=$bashwant bashhave=$bashhave
 
+# set some basic items
+[[ "$bashwant" = "$bashhave" ]] && echo bash is good || exec ${bashwant#* } # we want to test the new stuff.
+
+#echo no further
 umask 0022
 export HISTFILE=~/.history
 export ENVDIR=~/Env
 export ENVFILES=$ENVDIR/envfiles/FLIST@
 
 compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
+declare -fr _FixList envfxp bname dname mname
 envpurge
 for x in $(envfxp ${ENVFILES//:/ }); do
     [[ -f $x ]] && . $x || continue

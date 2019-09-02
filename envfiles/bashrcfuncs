@@ -64,7 +64,6 @@ function _FixList ()
     done
     printf '%s\n' "${list[@]}"
 }
-declare -f -r _FixList
 
 # clear the environment of crap
 function envpurge ()
@@ -73,7 +72,7 @@ function envpurge ()
     unalias -a
     unset -f $(compgen -A function) &>/dev/null
 }
-declare -f -r envpurge
+declare -fr envpurge
 
 # produces a list of paths for source-ing
 # paths should specify a filename or filename@ if the filename contains files
@@ -94,7 +93,6 @@ function envfxp ()
     done
     echo "${list[@]}"
 }
-declare -f -r envfxp
 
 # sources a provided list of files
 function load ()
@@ -107,7 +105,7 @@ function load ()
     done
     echo ' done'
 }
-declare -f -r load
+declare -fr load
 
 # returns the basename of given paths
 function bname ()
@@ -115,7 +113,6 @@ function bname ()
     declare x
     for x in $@; do echo ${x##*/}; done
 }
-declare -f -r bname
 
 # returns the dirname of given paths and variable expansions
 function dname ()
@@ -135,7 +132,6 @@ function dname ()
         [[ -d $x ]] && echo $x || echo ${x%/*}
     done
 }
-declare -f -r dname
 
 # merges names and dirs into a set. names are checked against parents to
 # ENVFILES and parents of given dirs. if the path is to be used as a file
@@ -156,5 +152,4 @@ function mname ()
     [[ ${#list[*]} -gt 0 ]] || list=(${ENVFILES//:/ })
     _FixList -u ${list[@]}
 }
-declare -f -r mname
 

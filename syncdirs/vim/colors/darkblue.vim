@@ -32,7 +32,7 @@ hi MoreMsg			ctermfg=darkgreen	ctermfg=darkgreen
 hi Question			guifg=green gui=none ctermfg=green cterm=none
 hi NonText			guifg=#0030ff		ctermfg=darkblue
 
-hi StatusLine	guifg=blue guibg=darkgray gui=none		ctermfg=blue ctermbg=gray term=none cterm=none
+hi StatusLine	guifg=blue guibg=darkgray gui=none		ctermfg=blue ctermbg=black term=none cterm=none
 hi StatusLineNC	guifg=black guibg=darkgray gui=none		ctermfg=black ctermbg=gray term=none cterm=none
 hi VertSplit	guifg=black guibg=darkgray gui=none		ctermfg=black ctermbg=gray term=none cterm=none
 

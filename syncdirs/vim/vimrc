@@ -1,9 +1,14 @@
 : source $VIMDIR/exrc
 
+:colorscheme darkblue
+:hi MatchParen cterm=none ctermbg=none ctermfg=none
+:hi StatusLine ctermbg=black
+:set statusline=%f\ %m%=%l\ %c,%V\ %p%%
+:set laststatus=2
 :set t_Co=256
 :syntax on
 :set nohls
-:colorscheme darkblue
+":colorscheme darkblue
 :set formatoptions=2coqr
 :set comments=s1:/*,mb:*,xe:*/,://,n:#,:%,:XCOMM,n:>,fb:-
 :set smarttab
@@ -14,7 +19,6 @@
 :set ruler
 :filetype plugin indent on
 :set iskeyword+=:
-:hi MatchParen cterm=none ctermbg=none ctermfg=none
 " this turns off the matchparen annoyance
 :let g:loaded_matchparen=1
 ":let g:is_bash=1 "should not be needed with filetype plugin 
