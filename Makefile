@@ -14,11 +14,7 @@ DIRS := $(DOTDIRS) $(ENVDIRS)
 
 export DIRS DOTDIRS ENVDIRS
 
-NAME = $(notdir $(PWD))
-BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
-VER = $(shell git tag | sed -n '$$p')
-TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-STATUS = PWD ROOT ENV_HOME DOTDIRS ENVDIRS NAME BRANCH VER TAR
+STATUS = PWD ROOT ENV_HOME DOTDIRS ENVDIRS
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
@@ -26,11 +22,8 @@ export STATUS $(STATUS)
 help:
 	@echo 'status   : shows current variables'
 	@echo 'list     : shows current files to be installed'
-	@echo 'tarinstall  : will install files in designated ENV_HOME'
-	@echo 'tararchive : create an arcive of the installed files'
 	@echo 'check    : will show what has changed wrt Git structure'
 	@echo 'clean    : will uninstall the current environment'
-	@echo 'tgz      : generate a complete tar file of Git structure'
 	@echo 'preview  : show a list of files to be printed'
 	@echo 'printout : print the files shown from preview'
 
@@ -67,9 +60,6 @@ check:
 		[[ $$to -ef $$fr ]] || { echo missing hardlink for $$fr to $$to; continue; }; \
 	    done; \
 	done
-
-gitarchive:
-	@git archive --format=tgz --prefix=$(NAME)/ --output=$(TAR) HEAD
 
 updates:
 	@-rm -r update.txt update.ps 2>/dev/null
