@@ -74,32 +74,35 @@ function envpurge ()
 }
 declare -fr envpurge
 
-# produces a list of paths for source-ing
-# paths should specify a filename or filename@ if the filename contains files
-# to load relative to it's parent
+# produces a list of paths for source-ing input paths should specify a
+# directory or filename of a list of files in the parent directory to
+# load relative to it's parent
 function envfxp ()
 {
-    declare file
+    declare arg
     declare -a list
-    for file in $@; do
-        if [[ $file =~ @ ]]; then
-            dir=${file%/*}
-            for line in $(grep -o -P '^\w+' ${file/@}); do
-                list+=($dir/$line)
-            done
-        else
-            list+=($file)
-        fi
+    for arg in $@; do
+	if [[ -f $arg ]]; then
+            dir=${arg%/*};
+            for line in $(grep -o -P '^\w+' $arg); do
+		list+=($dir/$line);
+            done;
+	else
+	    for line in ${arg}/*; do
+		list+=($line)
+	    done
+	fi
     done
     echo "${list[@]}"
 }
+declare -frx envfxp
 
 # sources a provided list of files
 function load ()
 {
     declare x
     [[ $# -gt 0 ]] || envpurge
-    for x in $(envfxp $(mname $@)); do
+    for x in $(mname $@); do
         [[ -f $x ]] && . $x || continue
         [[ -f ~/.quiet ]] && echo -n . || echo $x
     done
@@ -134,22 +137,28 @@ function dname ()
 }
 
 # merges names and dirs into a set. names are checked against parents to
-# ENVFILES and parents of given dirs. if the path is to be used as a file
-# containing other files to source the use name@ or path@ the default return
-# is the ENVFILES separated by ':'
+# ENVFILES and parents of given dirs. nil input returns files to be sourced
+# when the shell was started.
 function mname ()
-{
-    declare -a names list tmp dirs=($(dname ${ENVFILES//:/ }))
-    declare x name dir
+{ 
+    declare x name dir path
+    declare -a names list tmp dirs
+    for path in ${ENVFILES//:/ }; do
+	[[ -d $path ]] && dirs+=($path) || dirs+=(${path%/*})
+    done
     for x in $@; do
-        [[ $x =~ '/' ]] && { list+=($x); dirs+=(${x%/*}); } || names+=($x)
+        if [[ $x =~ '/' ]]; then
+            [[ -f $x ]] && list+=($x) || :
+            [[ -d $x ]] && dirs+=($x) || dirs+=(${x%/*})
+        else
+	    names+=($x)
+	fi
     done
     for name in ${names[@]}; do
-        for path in $(_FixList -e "${dirs[@]/%//${name/@}}"); do
-            list+=("${path%/*}/$name") || continue
-        done
-    done
-    [[ ${#list[*]} -gt 0 ]] || list=(${ENVFILES//:/ })
+	for path in $(_FixList -e "${dirs[@]/%//$name}"); do
+	    list+=("$path")
+	done;
+    done;
+    [[ ${#list[@]} -gt 0 ]] || list=($(envfxp ${ENVFILES//:/ }))
     _FixList -u ${list[@]}
 }
-

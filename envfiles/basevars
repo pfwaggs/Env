@@ -13,10 +13,6 @@ export TZ=America/New_York
 export LC_COLLATE=C
 export CDPATH=".:..:../..:~:~/Git"
 
-export VIMHOME=~
-export VIMDIR=$VIMHOME/.vim
-export VIMINIT=":source $VIMDIR/vimrc"
-
 export GS_FONTPATH=~/.fonts
 
 export INPUTRC=~/.inputrc

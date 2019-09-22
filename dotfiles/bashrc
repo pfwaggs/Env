@@ -2,7 +2,7 @@
 
 trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 
-set -C -b -o vi
+set -C -b
 shopt -s extglob
 
 bashwant=$(. ~/Env/dotfiles/getbash)
@@ -14,14 +14,16 @@ bashhave="${BASH_VERSION%(*} $BASH"
 
 #echo no further
 umask 0022
-export HISTFILE=~/.history
-export ENVDIR=~/Env
-export ENVFILES=$ENVDIR/envfiles/FLIST@
+declare -x  HISTFILE=~/.history
+declare -rx ENVDIR=~/Env
+[[ -f $ENVDIR/envfiles/FLIST ]] && ENVFILES=$ENVDIR/envfiles/FLIST || :
+[[ -f ~/.priv/FLIST ]] && ENVFILES+=:~/.priv/FLIST || :
+declare -rx ENVFILES
 
 compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
-declare -fr _FixList envfxp bname dname mname
+[[ -f ~/.no_lock_funcs ]] || declare -fr _FixList bname dname mname
 envpurge
-for x in $(envfxp ${ENVFILES//:/ }); do
+for x in $(mname); do
     [[ -f $x ]] && . $x || continue
     [[ -f ~/.quiet ]] && echo -n . || echo $x
 done

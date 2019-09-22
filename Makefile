@@ -7,25 +7,18 @@ endif
 
 ROOT = $(shell pwd -P)
 
-ifndef DIRS
-    DOTDIRS  := $(sort $(wildcard dotfiles*))
-    ENVDIRS  := $(sort $(wildcard envfiles*))
-    SYNCDIRS := $(sort $(wildcard syncdirs*))
-else
-    DOTDIRS  := $(filter dotfiles, $(DIRS))
-    ENVDIRS  := $(filter envfiles, $(DIRS))
-    SYNCDIRS := $(filter syncdirs, $(DIRS))
-endif
-DIRS := $(DOTDIRS) $(ENVDIRS) $(SYNCDIRS)
+DOTDIRS  := $(sort $(wildcard dotfiles*))
+ENVDIRS  := $(sort $(wildcard envfiles*))
 
-#DOTFILES := $(sort $(filter dotfiles%, $(FILES)))
-export DIRS DOTDIRS ENVDIRS SYNCDIRS
+DIRS := $(DOTDIRS) $(ENVDIRS)
+
+export DIRS DOTDIRS ENVDIRS
 
 NAME = $(notdir $(PWD))
 BRANCH = $(shell git branch | sed -n '/*/p' | cut -c3-)
 VER = $(shell git tag | sed -n '$$p')
 TAR = $(NAME)_$(BRANCH)_$(VER).tgz
-STATUS = PWD ROOT ENV_HOME DOTDIRS ENVDIRS SYNCDIRS NAME BRANCH VER TAR
+STATUS = PWD ROOT ENV_HOME DOTDIRS ENVDIRS NAME BRANCH VER TAR
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
@@ -45,36 +38,33 @@ status:
 	@for v in $(STATUS); do eval "echo $$v = $${!v}"; done
 
 install:
-	@for dir in $(DOTDIRS) $(SYNCDIRS); do \
+	@for dir in $(DOTDIRS); do \
 	    echo installing $$dir; \
 	    for fr in $$dir/*; do \
 		to=$(ENV_HOME)/."$${fr#*/}"; \
-		[[ -e $$to ]] && continue || : ;\
-		[[ -d $$fr ]] && rsync -a $$fr/ $$to || ln $$fr $$to; \
+		[[ -e $$to ]] || ln $$fr $$to;\
 	    done; \
 	done; \
-	ln -T -s -f $(ROOT) $(ENV_HOME)/Env
+	[[ -L $(ENV_HOME)/Env ]] || ln -T -s -f $(ROOT) $(ENV_HOME)/Env
 
 uninstall:
-	@for dir in $(DOTDIRS) $(SYNCDIRS); do \
+	@for dir in $(DOTDIRS); do \
 	    echo uninstalling $$dir; \
 	    for fr in $$dir/*; do \
 		to=$(ENV_HOME)/."$${fr#*/}"; \
-		[[ -e $$to ]] || continue; \
-		[[ -d $$to ]] && rm -r $$to || rm $$to; \
+		[[ -e $$to ]] && rm $$to; \
 	    done; \
 	done; \
 	[[ -L $(ENV_HOME)/Env ]] && rm $(ENV_HOME)/Env || :
 
 check:
 	@[[ $$(readlink $(ENV_HOME)/Env) =~ $(ROOT) ]] && echo Env link is good || { echo Env link is broken; exit 1; }
-	@for dir in $(DOTDIRS) $(SYNCDIRS); do \
+	@for dir in $(DOTDIRS); do \
 	    echo checking $$dir; \
 	    for fr in $$dir/*; do \
 		to=$(ENV_HOME)/."$${fr#*/}"; \
 		[[ -e $$to ]] || { echo $$to does not exist; continue; }; \
-		[[ $$to -ef $$fr ]] && continue || :; \
-		[[ -d $$to ]] && diff -q -r $$to $$fr || diff $$to $$fr; \
+		[[ $$to -ef $$fr ]] || { echo missing hardlink for $$fr to $$to; continue; }; \
 	    done; \
 	done
 

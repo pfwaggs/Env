@@ -6,7 +6,7 @@ export PREPFILES=$ENVDIR/envfiles/prep_files
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
 [[ $PAGER =~ less ]] && export LESS='-RCMqsu~' || :
-export EDITOR=$(type -p vim vi | head -n 1)
+export EDITOR=$(type -p emacs | head -n 1)
 export VISUAL=$EDITOR
 
 complete -o filenames -C '_ArgParser' cd
