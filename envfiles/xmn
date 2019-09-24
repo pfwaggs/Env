@@ -1,51 +1,60 @@
 
-function xmn ()
+function parso ()
 {
-    declare x opt infile file keep=0
-    declare -a opts files
-    for x in $@; do
-        [[ $x =~ ^-. ]] && opts+=(${x/a/mcw}) || files+=($x)
+    declare opt infile tmp n arg file OPTIND=1 keep=0
+    declare -a opts flist
+    while getopts 'acf:KmMtw' arg; do
+	case $arg in
+	    a)
+		opts+=(m c w)
+		;;
+	    [cKmMtw])
+		opts+=($arg)
+		;;
+	    f)
+		file=$OPTARG
+		;;
+	esac
     done
-    [[ ${#opts[@]} -eq 0 ]] && opts=(m) || opts=($( echo ${opts[@]/-} | perl -a -F'' -E 'push @all, @F; END{say join(" ",@all)}'))
-    opts=($(_FixList -u ${opts[@]/-}))
-    for infile in ${files[@]}; do
-        [[ -f $infile ]] || continue
-        file=/tmp/${infile##*/}
-        file $infile | grep -q ASCII
-        if [[ $? -eq 0 ]]; then
-            [[ -f $file ]] || expand $infile | sed -r 's/ +$//' > $file
-        fi
-        for opt in ${opts[@]}; do
-            case $opt in
-                c)
-                    [[ -f $file ]] || continue
-                    while read -r n; do
-                        printf '%3d %s\n' ${#n} $(echo -E "$n" | sum | cut -c1-5)
-                    done < $file | paste -d ' ' - <(sed 's/^/^/;s/$/$/' $file) | cat -n
-                    ;;
-                w)
-                    [[ -f $file ]] || continue
-                    wc $file
-                    ;;
-                m)
-                    [[ -f $file ]] || continue
-                    md5sum $file
-                    ;;
-                M)
-                    md5sum $infile
-                    ;;
-                t)
-                    ls -l $infile
-                    file $infile
-                    stat $infile
-                    ;;
-                K)
-                    ((keep=1-keep))
-                    ;;
-            esac
-        done
-        ((keep)) || rm $file >/dev/null
-        echo ''
+    opts=($(_FixList -u ${opts[@]}))
+    shift $((OPTIND-1))
+    [[ -n $file ]] && flist=($(cat $file | xargs)) || :
+    for infile in ${flist[@]} $@; do
+	echo -e "\n#### ${infile##*/}"
+	tmp=/tmp/${infile##*/}
+	expand $infile | sed -r 's/ +$//' > $tmp
+	for opt in ${opts[@]}; do
+	    case $opt in
+		c)
+		    [[ -f $tmp ]] || continue
+		    while read -r n; do
+			printf "%3d %s\n" ${#n} $(echo -E "$n" | sum | cut -c1-5)
+		    done < $tmp | paste -d ' ' - <(sed 's/^/^/;s/$/$/' $tmp) | cat -n
+		    ;;
+		w)
+		    [[ -f $tmp ]] || continue
+		    wc $tmp
+		    ;;
+		m)
+		    md5sum $infile
+		    ;;
+		M)
+		    [[ -f $tmp ]] || continue
+		    md5sum $tmp
+		    ;;
+		t)
+		    ls -l $infile
+		    file $infile
+		    stat $infile
+		    ;;
+		K)
+		    ((keep=1-keep))
+		    ;;
+	    esac
+	done
+	((keep)) || rm $tmp >/dev/null
+	echo ''
     done
 }
+
 

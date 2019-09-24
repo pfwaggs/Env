@@ -21,7 +21,7 @@ declare -rx ENVDIR=~/Env
 declare -rx ENVFILES
 
 compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
-[[ -f ~/.no_lock_funcs ]] || declare -fr _FixList bname dname mname
+[[ -f ~/.no_lock_funcs ]] || declare -frx _FixList bname dname mname
 envpurge
 for x in $(mname); do
     [[ -f $x ]] && . $x || continue

@@ -62,23 +62,15 @@ check:
 	done
 
 updates:
-	@-rm -r update.txt update.ps 2>/dev/null
-	@source envfiles/xmn; \
-	for file in Makefile $$(git ls-files $(DOTDIRS) $(ENVDIRS)); do \
-	    [[ -f $$file ]] || continue; \
-	    echo -e "\n#### $${file##*/}"; \
-	    xmn ax $$file; \
-	done | tee updates.txt | \
-	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o updates.ps
+	-@rm -r update.txt update.ps 2>/dev/null
+	@source envfiles/xmn; source envfiles/bashrcfuncs; \
+	xmn -a Makefile $$(find $(DOTDIRS) $(ENVDIRS) -type f) | tee update.txt | \
+	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o update.ps
 
 outputs:
 	@[[ -f filelist ]] || { echo missing filelist; exit -1; }
-	@-rm -r output.txt output.ps 2>/dev/null
-	@source envfiles/xmn; \
-	source envfiles/bashrcfuncs; \
-	for file in $$(cat filelist); do \
-	    echo -e "\n#### $${file##*/}"; \
-	    xmn -a $$file; \
-	done | tee output.txt | \
+	-@rm -r output.txt output.ps 2>/dev/null
+	@source envfiles/xmn; source envfiles/bashrcfuncs; \
+	xmn -a -f $$file | tee output.txt | \
 	enscript -f Courier8 -DDuplex:true -DTumble:true -o output.ps
 #	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps
