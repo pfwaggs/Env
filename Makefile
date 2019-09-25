@@ -4,8 +4,11 @@ SHELL = /bin/bash
 ifndef ENV_HOME
     ENV_HOME = $(HOME)
 endif
+DEST = $(ENV_HOME)/Env
 
-ROOT = $(shell pwd -P)
+CURRENT = $(shell pwd -P)
+
+SNAPDIR := $(shell . dotfiles/mkwdir $(DEST))
 
 DOTDIRS  := $(sort $(wildcard dotfiles*))
 ENVDIRS  := $(sort $(wildcard envfiles*))
@@ -14,7 +17,7 @@ DIRS := $(DOTDIRS) $(ENVDIRS)
 
 export DIRS DOTDIRS ENVDIRS
 
-STATUS = PWD ROOT ENV_HOME DOTDIRS ENVDIRS
+STATUS = PWD CURRENT ENV_HOME DEST SNAPDIR DOTDIRS ENVDIRS
 export STATUS $(STATUS)
 
 .PHONY: clean check $(DIRS)
@@ -22,13 +25,22 @@ export STATUS $(STATUS)
 help:
 	@echo 'status   : shows current variables'
 	@echo 'list     : shows current files to be installed'
+	@echo 'snapshot : takes a snapshot into a derived dir'
 	@echo 'check    : will show what has changed wrt Git structure'
 	@echo 'clean    : will uninstall the current environment'
-	@echo 'preview  : show a list of files to be printed'
-	@echo 'printout : print the files shown from preview'
+	@echo 'output-long : output in portrait, duplex'
+	@echo 'output-short : output in landscape, 2-up, duplex'
 
 status:
 	@for v in $(STATUS); do eval "echo $$v = $${!v}"; done
+
+list:
+	@ls -l $(DOTDIRS)
+
+snapshot:
+	@[[ -d $(SNAPDIR) ]] || mkdir $(SNAPDIR)
+	@cp -r Makefile $(DOTDIRS) $(ENVDIRS) $(SNAPDIR)
+	@echo $(SNAPDIR)
 
 install:
 	@for dir in $(DOTDIRS); do \
@@ -38,7 +50,7 @@ install:
 		[[ -e $$to ]] || ln $$fr $$to;\
 	    done; \
 	done; \
-	[[ -L $(ENV_HOME)/Env ]] || ln -T -s -f $(ROOT) $(ENV_HOME)/Env
+	ln -T -s -f $(CURRENT) $(DEST)
 
 uninstall:
 	@for dir in $(DOTDIRS); do \
@@ -48,10 +60,12 @@ uninstall:
 		[[ -e $$to ]] && rm $$to; \
 	    done; \
 	done; \
-	[[ -L $(ENV_HOME)/Env ]] && rm $(ENV_HOME)/Env || :
+	[[ -L $(DEST) ]] && rm $(DEST) || :
+
+
 
 check:
-	@[[ $$(readlink $(ENV_HOME)/Env) =~ $(ROOT) ]] && echo Env link is good || { echo Env link is broken; exit 1; }
+	@cd $(DEST); [[ $$(pwd -P) =~ $(CURRENT) ]] && echo Env link is good || { echo Env link is broken; exit 1; }
 	@for dir in $(DOTDIRS); do \
 	    echo checking $$dir; \
 	    for fr in $$dir/*; do \
@@ -61,16 +75,18 @@ check:
 	    done; \
 	done
 
-updates:
+filelist:
+	@echo Makefile > filelist
+	@find $(DOTDIRS) $(ENVDIRS) -type f >> filelist
 	-@rm -r update.txt update.ps 2>/dev/null
+
+output-short: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -a Makefile $$(find $(DOTDIRS) $(ENVDIRS) -type f) | tee update.txt | \
+	xmn -a -f filelist | tee update.txt | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o update.ps
 
-outputs:
-	@[[ -f filelist ]] || { echo missing filelist; exit -1; }
-	-@rm -r output.txt output.ps 2>/dev/null
+output-long: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -a -f $$file | tee output.txt | \
+	xmn -a -f filelist  | tee output.txt | \
 	enscript -f Courier8 -DDuplex:true -DTumble:true -o output.ps
 #	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps

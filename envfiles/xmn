@@ -1,5 +1,5 @@
 
-function parso ()
+function xmn ()
 {
     declare opt infile tmp n arg file OPTIND=1 keep=0
     declare -a opts flist
