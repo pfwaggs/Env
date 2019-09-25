@@ -1,9 +1,8 @@
 
 function mkwdir ()
 {
-    declare d="${1:-$(date +%F)}";
-    declare x=$(ls -d $d* 2>/dev/null | wc -l);
-    printf -v d '%s.%02d' $d $((1+x));
-    mkdir $d;
+    declare dir=$(. ~/.mkwdir $1)
+    [[ -d $dir ]] || mkdir $dir
+    echo $dir
 }
 
