@@ -82,7 +82,7 @@ filelist:
 
 output-short: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -a -f filelist | tee update.txt | \
+	xmn -pm -f filelist | tee update.txt | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o update.ps
 
 output-long: filelist

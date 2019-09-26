@@ -3,12 +3,12 @@ function xmn ()
 {
     declare opt infile tmp n arg file OPTIND=1 keep=0
     declare -a opts flist
-    while getopts 'acf:KmMtw' arg; do
+    while getopts 'acf:KmMptw' arg; do
 	case $arg in
 	    a)
 		opts+=(m c w)
 		;;
-	    [cKmMtw])
+	    [cKmMptw])
 		opts+=($arg)
 		;;
 	    f)
@@ -25,6 +25,9 @@ function xmn ()
 	expand $infile | sed -r 's/ +$//' > $tmp
 	for opt in ${opts[@]}; do
 	    case $opt in
+		p)
+		    cat -n $tmp
+		    ;;
 		c)
 		    [[ -f $tmp ]] || continue
 		    while read -r n; do
