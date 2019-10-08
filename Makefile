@@ -28,8 +28,8 @@ help:
 	@echo 'snapshot : takes a snapshot into a derived dir'
 	@echo 'check    : will show what has changed wrt Git structure'
 	@echo 'clean    : will uninstall the current environment'
-	@echo 'output-long : output in portrait, duplex'
-	@echo 'output-short : output in landscape, 2-up, duplex'
+	@echo 'long     : output in portrait, duplex'
+	@echo 'short    : output in landscape, 2-up, duplex'
 
 status:
 	@for v in $(STATUS); do eval "echo $$v = $${!v}"; done
@@ -80,12 +80,12 @@ filelist:
 	@find $(DOTDIRS) $(ENVDIRS) -type f >> filelist
 	-@rm -r update.txt update.ps 2>/dev/null
 
-output-short: filelist
+short: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
 	xmn -pm -f filelist | tee update.txt | \
 	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o update.ps
 
-output-long: filelist
+long: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
 	xmn -a -f filelist  | tee output.txt | \
 	enscript -f Courier8 -DDuplex:true -DTumble:true -o output.ps
