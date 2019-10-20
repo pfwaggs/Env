@@ -1,5 +1,4 @@
 
-declare date=$(date +%F | sed 's/-/_/g')
-declare prefix=${1}
-declare count=$(ls -d $prefix$date* 2>/dev/null | wc -l)
-printf "%s.%02d" $prefix/$date $((1+count))
+declare date=$(date +%F | tr '-' '_')
+declare count=$(ls -d ${1:+$1/}$date* 2>/dev/null | wc -l)
+printf "%s.%02d" $date $((1+count))
