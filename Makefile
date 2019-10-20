@@ -11,7 +11,7 @@ ifdef TUMBLE
 endif
 CURRENT = $(shell pwd -P)
 
-SNAPDIR := $(shell . dotfiles/mkwdir ~/Env/$(DEST))
+SNAPDIR := $(shell . dotfiles/mkwdir $(DEST))
 
 DOTDIRS  := $(sort $(wildcard dotfiles*))
 ENVDIRS  := $(sort $(wildcard envfiles*))
