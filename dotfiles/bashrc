@@ -5,7 +5,7 @@ trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 set -C -b
 shopt -s extglob
 
-bashwant=$(. ~/Env/dotfiles/getbash)
+bashwant=$(. ~/Env/current/dotfiles/getbash)
 bashhave="${BASH_VERSION%(*} $BASH"
 #echo SHELL=$SHELL SHLVL=$SHLVL bashwant=$bashwant bashhave=$bashhave
 
@@ -15,7 +15,7 @@ bashhave="${BASH_VERSION%(*} $BASH"
 #echo no further
 umask 0022
 declare -x  HISTFILE=~/.history
-declare -rx ENVDIR=~/Env
+declare -rx ENVDIR=~/Env/current
 [[ -f $ENVDIR/envfiles/FLIST ]] && ENVFILES=$ENVDIR/envfiles/FLIST || :
 [[ -f ~/.priv/FLIST ]] && ENVFILES+=:~/.priv/FLIST || :
 declare -rx ENVFILES

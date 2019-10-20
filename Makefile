@@ -6,9 +6,12 @@ ifndef ENV_HOME
 endif
 DEST = $(ENV_HOME)/Env
 
+ifdef TUMBLE
+    TUMBLE = -DTumble:true
+endif
 CURRENT = $(shell pwd -P)
 
-SNAPDIR := $(shell . dotfiles/mkwdir $(DEST))
+SNAPDIR := $(shell . dotfiles/mkwdir ~/Env/$(DEST))
 
 DOTDIRS  := $(sort $(wildcard dotfiles*))
 ENVDIRS  := $(sort $(wildcard envfiles*))
@@ -78,15 +81,14 @@ check:
 filelist:
 	@echo Makefile > filelist
 	@find $(DOTDIRS) $(ENVDIRS) -type f >> filelist
-	-@rm -r update.txt update.ps 2>/dev/null
+	-@rm -r *.txt *.ps 2>/dev/null
 
 short: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -pm -f filelist | tee update.txt | \
-	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o update.ps
+	xmn -pm -f filelist | tee short.txt | \
+	enscript -2 -r -f Courier8 -DDuplex:true $(TUMBLE) -o short.ps
 
 long: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -a -f filelist  | tee output.txt | \
-	enscript -f Courier8 -DDuplex:true -DTumble:true -o output.ps
-#	enscript -2 -r -f Courier8 -DDuplex:true -DTumble:true -o output.ps
+	xmn -a -f filelist  | tee long.txt | \
+	enscript -f Courier8 -DDuplex:true $(TUMBLE) -o long.ps
