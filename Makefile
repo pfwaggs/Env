@@ -18,15 +18,11 @@ LAST = $(notdir $(call LINKS,last))
 DATE = $(shell . dotfiles/mkwdir $(DEST))
 REV = $(shell git rev-parse --short HEAD)
 
-ifeq ($(REV), $(findstring $(REV), $(LIST)))
-    UPDATE := 0
-else
-    UPDATE := 1
-endif
+UPDATE = $(if $(findstring $(REV),$(LIST)),0,1)
 
 SNAPDIR = $(DATE)-$(REV)
 
-STATUS = PWD ENV_HOME DEST CURRENT LAST DATE REV SNAPDIR
+STATUS = PWD ENV_HOME DEST CURRENT LAST DATE REV SNAPDIR UPDATE
 export $(STATUS) STATUS
 
 all:
@@ -69,7 +65,7 @@ check-%:
 
 filelist:
 	@echo Makefile > filelist
-	@find dotfile* envfile* -type f >> filelist
+	@find dotfile* envfile* -type f | grep -v '~' >> filelist
 	-@rm -r *.txt *.ps 2>/dev/null
 
 short: filelist
