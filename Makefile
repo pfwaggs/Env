@@ -6,20 +6,18 @@ endif
 
 DEST = $(ENV_HOME)/Env
 
-LIST = $(shell cd $(DEST); ls -r | grep -E '^[0-9_.-]+' | sed -n $(1)p)
+LIST = $(shell ls -r $(DEST) | grep -E '^[0-9_.-]+' | sed -n $(1)p)
 LINKS = $(shell cd $(DEST)/$(1) 2>/dev/null && pwd -P || echo none)
 
 ifdef TUMBLE
     TUMBLE = -DTumble:true
 endif
 
-#CURRENT = $(shell cd $(DEST)/current && pwd -P || echo none)
-CURRENT = $(call LINKS,current)
-#LAST = $(shell cd $(DEST)/last && pwd -P || echo none)
-LAST = $(call LINKS,last)
+CURRENT = $(notdir $(call LINKS,current))
+LAST = $(notdir $(call LINKS,last))
 DATE = $(shell . dotfiles/mkwdir $(DEST))
 REV = $(shell git rev-parse --short HEAD)
-LIST = $(shell cd $(DEST); ls | grep -E '^[0-9_.-]+')
+
 ifeq ($(REV), $(findstring $(REV), $(LIST)))
     UPDATE := 0
 else
@@ -50,24 +48,24 @@ list:
 	@ls -r $(DEST) | grep -E '^[0-9_.-]+' | cat -n
 
 update :
-	@[[ $(UPDATE) -eq 1 ]] && echo we can update || echo we can not update
+	@[[ $(UPDATE) -eq 1 ]] || { echo we can not update. some dir matches HEAD; exit 1; }
 
-snapshot:
-	@[[ $(UPDATE) -eq 1 ]] || { echo no update: head matches current link; exit 1; }
+snapshot: update
 	@git archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -C $(DEST) -xf -)
-	@echo $(DEST)/$(SNAPDIR)
+	@ls -r $(DEST) | grep -E '^[0-9_.-]+' | cat -n
 
+recent: C-1
+
+save:
+	@ln -n -f -s $(CURRENT) $(DEST)/last
 C-%:
-#	@cd $(DEST); x=$$(ls -r | grep -E '^[0-9_.-]+' | sed -n $*p); ln -n -f -s $$x current
-	@cd $(DEST); x=$(call LIST,$*); ln -n -f -s $$x current
+	@x=$(call LIST,$*); ln -n -f -s $$x $(DEST)/current; ls -ld $(DEST)/current
 L-%:
-#	@cd $(DEST); x=$$(ls -r | grep -E '^[0-9_.-]+' | sed -n $*p); ln -n -f -s $$x last
-	@cd $(DEST); x=$(call LIST,$*); ln -n -f -s $$x last
+	@x=$(call LIST,$*); ln -n -f -s $$x $(DEST)/last; ls -ld $(DEST)/last
 
 check-%:
-	@[[ $(UPDATE) -eq 1 ]] || { echo no update: head matches current link; exit 1; }
 	@[[ -d /tmp/${REV} ]] || git archive --format=tar --prefix=$(REV)/ HEAD | (tar -C /tmp -xf -)
-	@cd $(DEST); z=$*; [[ -n $$z ]] && x=$(call LIST,$*) || x=$(REV); diff -q -r $(CURRENT) /tmp/$$x
+	-@z=$*; [[ -n $$z ]] && x=$(call LIST,$*) || x=$(REV); [[ $$x =~ $(REV) ]] || diff -q -r $(DEST)/$$x /tmp/$(REV)
 
 # check:
 # 	@cd $(DEST); [[ $$(pwd -P) =~ $(CURRENT) ]] && echo Env link is good || { echo Env link is broken; exit 1; }
