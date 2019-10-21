@@ -67,17 +67,6 @@ check-%:
 	@[[ -d /tmp/${REV} ]] || git archive --format=tar --prefix=$(REV)/ HEAD | (tar -C /tmp -xf -)
 	-@z=$*; [[ -n $$z ]] && x=$(call LIST,$*) || x=$(REV); [[ $$x =~ $(REV) ]] || diff -q -r $(DEST)/$$x /tmp/$(REV)
 
-# check:
-# 	@cd $(DEST); [[ $$(pwd -P) =~ $(CURRENT) ]] && echo Env link is good || { echo Env link is broken; exit 1; }
-# 	@for dir in $(DOTDIRS); do \
-# 	    echo checking $$dir; \
-# 	    for fr in $$dir/*; do \
-# 		to=$(ENV_HOME)/."$${fr#*/}"; \
-# 		[[ -e $$to ]] || { echo $$to does not exist; continue; }; \
-# 		[[ $$to -ef $$fr ]] || { echo missing hardlink for $$fr to $$to; continue; }; \
-# 	    done; \
-# 	done
-
 filelist:
 	@echo Makefile > filelist
 	@find dotfile* envfile* -type f >> filelist
