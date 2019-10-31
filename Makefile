@@ -3,31 +3,39 @@ SHELL = /bin/bash
 ifndef ENV_HOME
     ENV_HOME = $(HOME)
 endif
+ifeq (current,$(findstring current,$(MAKECMDGOALS)))
+    LINK=$(DEST)/current
+endif
+ifeq (save,$(findstring save,$(MAKECMDGOALS)))
+    LINK=$(DEST)/save
+endif
 
 DEST = $(ENV_HOME)/Env
-
-LIST = $(shell ls -r $(DEST) | grep -E '^[0-9_.-]+' | sed -n $(1)p)
-LINKS = $(shell cd $(DEST)/$(1) 2>/dev/null && pwd -P || echo none)
+LIST = $(shell ls -r $(DEST) | grep -E '^[0-9_.-]+')
+LIST_PICK = $(shell echo $(LIST) | xargs -n 1 | sed -n $(1)p || echo none)
+LIST_LINE = $(shell echo $(LIST) | xargs -n 1 | awk '/$(1)/ {print NR}')
+FOLLOW_LINK = $(shell cd $(DEST)/$(1) 2>/dev/null && pwd -P || echo none)
 
 ifdef TUMBLE
     TUMBLE = -DTumble:true
 endif
 
-CURRENT = $(notdir $(call LINKS,current))
-LAST = $(notdir $(call LINKS,last))
+FIRST = $(call LIST_PICK,1)
+CURRENT = $(notdir $(call FOLLOW_LINK,current))
+CURRENT_LINE = $(call LIST_LINE,$(CURRENT))
+SAVE = $(notdir $(call FOLLOW_LINK,save))
+SAVE_LINE = $(call LIST_LINE,$(SAVE))
 DATE = $(shell . dotfiles/mkwdir $(DEST))
 REV = $(shell git rev-parse --short HEAD)
 
-UPDATE = $(if $(findstring $(REV),$(LIST)),0,1)
+UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
 
 SNAPDIR = $(DATE)-$(REV)
 
-STATUS = PWD ENV_HOME DEST CURRENT LAST DATE REV SNAPDIR UPDATE
+STATUS = PWD ENV_HOME DEST FIRST CURRENT CURRENT_LINE SAVE SAVE_LINE LINK DATE REV SNAPDIR UPDATE``
 export $(STATUS) STATUS
 
 all:
-
-.PHONY: help status list shanpshot filelist long short
 
 help:
 	@echo 'status   : shows current variables'
@@ -39,29 +47,30 @@ help:
 
 status:
 	@for v in $(STATUS); do echo $$v = $${!v}; done
+	@exit 1
 
 list:
-	@ls -r $(DEST) | grep -E '^[0-9_.-]+' | cat -n
+	@echo $(LIST) | xargs -n 1 | nl
 
-update :
-	@[[ $(UPDATE) -eq 1 ]] || { echo we can not update. some dir matches HEAD; exit 1; }
-
-snapshot: update
+snapshot:
+	-@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
 	@git archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -C $(DEST) -xf -)
-	@ls -r $(DEST) | grep -E '^[0-9_.-]+' | cat -n
+	@f=$(DEST)/$(FIRST); n=$(DEST)/$(SNAPDIR); \
+	  [[ -d $$n ]] || {echo oops, no $$n; exit 1; }; \
+	  diff -qr $$n $$f &>/dev/null && { echo nothing to keep; rm -r $$n; } || :
 
-recent: C-1
+current: 1current
 
-save:
-	@ln -n -f -s $(CURRENT) $(DEST)/last
-C-%:
-	@x=$(call LIST,$*); ln -n -f -s $$x $(DEST)/current; ls -ld $(DEST)/current
-L-%:
-	@x=$(call LIST,$*); ln -n -f -s $$x $(DEST)/last; ls -ld $(DEST)/last
+save: $(CURRENT_LINE)save
 
-check-%:
+%current %save:
+	@x=$(call LIST_PICK,$*); ln -n -f -s $$x $(LINK); echo ls -ld $(LINK)
+
+check: 1check
+
+%check:
 	@[[ -d /tmp/${REV} ]] || git archive --format=tar --prefix=$(REV)/ HEAD | (tar -C /tmp -xf -)
-	-@z=$*; [[ -n $$z ]] && x=$(call LIST,$*) || x=$(REV); [[ $$x =~ $(REV) ]] || diff -q -r $(DEST)/$$x /tmp/$(REV)
+	-@x=$(call LIST_PICK,$*); [[ $$x =~ $(REV) ]] && rm -r /tmp/$(REV) || diff -q -r $(DEST)/$$x /tmp/$(REV)
 
 filelist:
 	@echo Makefile > filelist

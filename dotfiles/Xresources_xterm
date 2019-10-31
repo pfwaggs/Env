@@ -10,13 +10,15 @@ Xft.rgba: rgb
 xterm*faceName: Hack
 xterm*faceSize: 12
 xterm*renderFont: true
-xterm.*font: -*-hack-medium-r-*-*-*-120-*-*-*-*-*-u
-xterm.vt100.locale: true
-xterm.vt100.metaSendsEscape: true
-xterm.vt100.backarrowKey: false
-xterm.ttyModes: erase 
-xterm.vt100.classMode: true
-xterm.vt100.foreground: grey75
-xterm.vt100.background: black
-xterm.vt100.keyboardType: tcapFunctionKeys
-xterm.vt100.pointerMode: 1
+xterm*font: -*-hack-medium-r-*-*-*-120-*-*-*-*-*-u
+xterm*vt100.locale: true
+xterm*vt100.metaSendsEscape: true
+xterm*vt100.backarrowKey: false
+xterm*ttyModes: erase 
+xterm*vt100.classMode: true
+xterm*vt100.keyboardType: tcapFunctionKeys
+xterm*vt100.pointerMode: 1
+xtermblack.vt100.foreground: grey75
+xtermblack.vt100.background: black
+xtermalt.vt100.foreground: grey50
+xtermalt.vt100.background: navyblue
