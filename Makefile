@@ -7,7 +7,10 @@ ifeq (current,$(findstring current,$(MAKECMDGOALS)))
     LINK=$(DEST)/current
 endif
 ifeq (save,$(findstring save,$(MAKECMDGOALS)))
-    LINK=$(DEST)/save
+      LINK=$(DEST)/save
+endif
+ifeq (testing,$(findstring testing,$(MAKECMDGOALS)))
+      LINK=$(DEST)/testing
 endif
 
 DEST = $(ENV_HOME)/Env
@@ -53,20 +56,19 @@ list:
 	@echo $(LIST) | xargs -n 1 | nl
 
 snapshot:
-	-@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
+	@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
 	@git archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -C $(DEST) -xf -)
 	@f=$(DEST)/$(FIRST); n=$(DEST)/$(SNAPDIR); \
-	  [[ -d $$n ]] || {echo oops, no $$n; exit 1; }; \
+	  [[ -d $$n ]] || { echo oops, no $$n; exit 1; }; \
 	  diff -qr $$n $$f &>/dev/null && { echo nothing to keep; rm -r $$n; } || :
 
-current: 1current
+.SECONDEXPANSION:
+current testing check: 1$$@
 
 save: $(CURRENT_LINE)save
 
-%current %save:
-	@x=$(call LIST_PICK,$*); ln -n -f -s $$x $(LINK); echo ls -ld $(LINK)
-
-check: 1check
+%current %save %testing:
+	@x=$(call LIST_PICK,$*); ln -n -f -s $$x $(LINK); ls -ld $(LINK)
 
 %check:
 	@[[ -d /tmp/${REV} ]] || git archive --format=tar --prefix=$(REV)/ HEAD | (tar -C /tmp -xf -)
