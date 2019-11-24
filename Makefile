@@ -1,16 +1,19 @@
 SHELL = /bin/bash
 
 ifndef ENV_HOME
-    ENV_HOME = $(HOME)
+  ENV_HOME = $(HOME)
 endif
 ifeq (current,$(findstring current,$(MAKECMDGOALS)))
-    LINK=$(DEST)/current
+  LINK=$(DEST)/current
 endif
 ifeq (save,$(findstring save,$(MAKECMDGOALS)))
-      LINK=$(DEST)/save
+  LINK=$(DEST)/save
 endif
 ifeq (testing,$(findstring testing,$(MAKECMDGOALS)))
-      LINK=$(DEST)/testing
+  LINK=$(DEST)/testing
+endif
+ifeq (short,$(findstring short,$(MAKECMDGOALS)))
+  ENSCRIPT = -2 -r -f Courier8
 endif
 
 DEST = $(ENV_HOME)/Env
@@ -35,7 +38,7 @@ UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
 
 SNAPDIR = $(DATE)-$(REV)
 
-STATUS = PWD ENV_HOME DEST FIRST CURRENT CURRENT_LINE SAVE SAVE_LINE LINK DATE REV SNAPDIR UPDATE``
+STATUS = PWD ENV_HOME DEST FIRST CURRENT CURRENT_LINE SAVE SAVE_LINE LINK DATE REV SNAPDIR UPDATE
 export $(STATUS) STATUS
 
 all:
@@ -71,7 +74,7 @@ save: $(CURRENT_LINE)save
 	@x=$(call LIST_PICK,$*); ln -n -f -s $$x $(LINK); ls -ld $(LINK)
 
 %check:
-	@[[ -d /tmp/${REV} ]] || git archive --format=tar --prefix=$(REV)/ HEAD | (tar -C /tmp -xf -)
+	@[[ -d /tmp/$(REV) ]] || git archive --format=tar --prefix=$(REV)/ HEAD | tar -C /tmp -xf -
 	-@x=$(call LIST_PICK,$*); [[ $$x =~ $(REV) ]] && rm -r /tmp/$(REV) || diff -q -r $(DEST)/$$x /tmp/$(REV)
 
 filelist:
@@ -79,12 +82,12 @@ filelist:
 	@find dotfile* envfile* -type f | grep -v '~' >> filelist
 	-@rm -r *.txt *.ps 2>/dev/null
 
-short: filelist
+short long: filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -pm -f filelist | tee short.txt | \
-	enscript -2 -r -f Courier8 -DDuplex:true $(TUMBLE) -o short.ps
+	xmn -pm -f filelist | tee $*.txt | \
+	enscript -2 -r -f Courier8 -DDuplex:true $(TUMBLE) -o $*.ps
 
-long: filelist
-	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -a -f filelist  | tee long.txt | \
-	enscript -f Courier8 -DDuplex:true $(TUMBLE) -o long.ps
+# long: filelist
+# 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
+# 	xmn -a -f filelist  | tee long.txt | \
+# 	enscript -f Courier8 -DDuplex:true $(TUMBLE) -o long.ps
