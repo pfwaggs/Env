@@ -33,12 +33,13 @@ SAVE = $(notdir $(call FOLLOW_LINK,save))
 SAVE_LINE = $(call LIST_LINE,$(SAVE))
 DATE = $(shell . dotfiles/mkwdir $(DEST))
 REV = $(shell git rev-parse --short HEAD)
-
+TESTING = $(notdir $(call FOLLOW_LINK,testing))
+TESTING_LINE = $(call LIST_LINE,$(TESTING))
 UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
-
+ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
 SNAPDIR = $(DATE)-$(REV)
 
-STATUS = PWD ENV_HOME DEST FIRST CURRENT CURRENT_LINE SAVE SAVE_LINE LINK DATE REV SNAPDIR UPDATE
+STATUS = PWD ENV_HOME DEST FIRST CURRENT CURRENT_LINE SAVE SAVE_LINE TESTING TESTING_LINE LINK DATE REV SNAPDIR UPDATE
 export $(STATUS) STATUS
 
 all:
@@ -53,8 +54,10 @@ help:
 
 status:
 	@for v in $(STATUS); do echo $$v = $${!v}; done
-	@exit 1
+	@echo archive:; for v in $(ARCHIVE); do echo $$v; done
 
+archive:
+	@cd $(DEST); [[ -d archive ]] || mkdir archive; mv -v $(ARCHIVE) archive
 list:
 	@echo $(LIST) | xargs -n 1 | nl
 
