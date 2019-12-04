@@ -85,10 +85,10 @@ filelist:
 	@find dotfile* envfile* -type f | grep -v '~' >> filelist
 	-@rm -r *.txt *.ps 2>/dev/null
 
-short long: filelist
+long short : filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -pm -f filelist | tee $*.txt | \
-	enscript -2 -r -f Courier8 -DDuplex:true $(TUMBLE) -o $*.ps
+	xmn -pm -f filelist | tee $@.txt | \
+	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
 
 # long: filelist
 # 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
