@@ -10,5 +10,6 @@ export EDITOR=$(type -p emacsclient | head -n 1)
 export VISUAL=$EDITOR
 export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
 
+ps -f -C emacs | grep -q daemon || emacs --daemon
 complete -o filenames -C '_ArgParser' cd
 
