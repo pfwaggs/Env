@@ -2,7 +2,6 @@
 PATH=$(_FixList -u -S /usr/local/bin ${PATH//:/ }) # | _List2Var)
 PATH=$(_FixList -c -S /usr/local/sbin ${PATH//:/ }) # | _List2Var) # /usr/local/sbin is empty for now
 
-export PREPFILES=$ENVDIR/envfiles/prep_files
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
 [[ $PAGER =~ less ]] && export LESS='-RCMqsu~' || :

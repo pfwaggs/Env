@@ -15,19 +15,28 @@ bashhave="${BASH_VERSION%(*} $BASH"
 #echo no further
 umask 0022
 declare -x  HISTFILE=~/.history
-declare -rx ENVDIR=~/Env/current
-[[ -f $ENVDIR/envfiles/FLIST ]] && ENVFILES=$ENVDIR/envfiles/FLIST || :
-[[ -f ~/.priv/FLIST ]] && ENVFILES+=:~/.priv/FLIST || :
-declare -rx ENVFILES
+declare -rx ENVDIR=$(push ~/Env/$ENVTAG; pwd -P)
+
+ENVDIRS=$ENVDIR/envfiles
+[[ -f ~/.priv/FLIST ]] && ENVDIRS+=:~/.priv
+declare -rx ENVDIRS
+
+# general idea is to clean this up. xpnd should replace envfxp. clean up mname
+# and dname gets replaced with something smaller. dname just returns dir names
+# for list of files. the code after the following envpurge should just be load.
+# move support for testing into private FLIST with a special function that uses
+# the testing dir if present. great function rename (proper camelcase or _). want
+# to drop un-needed functions and to make what is left more single purpose.
 
 compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
 [[ -f ~/.no_lock_funcs ]] || declare -frx _FixList bname dname mname
-envpurge
-for x in $(mname); do
-    [[ -f $x ]] && . $x || continue
-    [[ -f ~/.quiet ]] && echo -n . || echo $x
-done
-echo ' done'
+load
+# envpurge
+# for x in $(mname); do
+#     [[ -f $x ]] && . $x || continue
+#     [[ -f ~/.quiet ]] && echo -n . || echo $x
+# done
+#echo ' done'
 unset x
 
 # because LXDE has vte?

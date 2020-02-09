@@ -1,5 +1,5 @@
 
-declare -x PREPDIR=$(dname ${ENVFILES%%:*})/prep_files
+declare -x PREPDIR=${ENVDIR%%:*}/envfiles/prep_files
 
 function prep ()
 {

@@ -6,7 +6,7 @@ host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
 export LOCAL=/usr/local
 #export PRINTER=HP_LaserJet_400_M401dn_912E6E_ # need a less fsckd name
 export PRINTER=tombstone #lpadmin -p tombstone -E -v socket://tombstone.wanted.net
-export Prompt=$ENVFILES
+export Prompt=${ENVFILES%%:*}
 
 export LANG=en_US.UTF-8
 export TZ=America/New_York
