@@ -15,11 +15,11 @@ bashhave="${BASH_VERSION%(*} $BASH"
 #echo no further
 umask 0022
 declare -x  HISTFILE=~/.history
-declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG; pwd -P)
+declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG >&/dev/null; pwd -P)
 
-ENVDIRS=$ENVDIR/envfiles
-[[ -f ~/.priv/FLIST ]] && ENVDIRS+=:~/.priv
-declare -rx ENVDIRS
+FLISTDIRS=$ENVDIR/envfiles
+[[ -f ~/.priv/FLIST ]] && FLISTDIRS+=:~/.priv
+declare -rx FLISTDIRS
 
 # general idea is to clean this up. xpnd should replace envfxp. clean up mname
 # and dname gets replaced with something smaller. dname just returns dir names
@@ -29,15 +29,14 @@ declare -rx ENVDIRS
 # to drop un-needed functions and to make what is left more single purpose.
 
 compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
-[[ -f ~/.no_lock_funcs ]] || declare -frx _FixList bname dname mname
-load
-# envpurge
-# for x in $(mname); do
-#     [[ -f $x ]] && . $x || continue
-#     [[ -f ~/.quiet ]] && echo -n . || echo $x
-# done
-#echo ' done'
-#unset x
+[[ -f ~/.no_lock_funcs ]] || declare -frx _FixList bname dname
+envpurge
+for x in $(_xpndFLIST ${FLISTDIRS//:/ }); do
+    . $x
+    [[ -f ~/.quiet ]] && echo -n . || echo $x
+done
+echo ' done'
+unset x
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
