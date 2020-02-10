@@ -81,47 +81,26 @@ declare -fr envpurge
 function _xpndFLIST ()
 {
     declare x
-    for x in ${ENVDIRS//:/ }; do
+    for x in $@; do
 	[[ -f $x/FLIST ]] || continue
 	grep -o -P '^\w+' $x/FLIST | sed "s|^|$x/|"
     done
 }
 declare -frx _xpndFLIST
 
-# function envfxp ()
-# {
-#     declare arg
-#     declare -a list
-#     for arg in $@; do
-# 	if [[ -f $arg ]]; then
-#             dir=${arg%/*};
-#             for line in $(grep -o -P '^\w+' $arg); do
-#  		list+=($dir/$line);
-#             done;
-# 	else
-# 	    for line in ${arg}/*; do
-# 		list+=($line)
-# 	    done
-# 	fi
-#     done
-#     echo "${list[@]}"
-# }
-#declare -frx envfxp
-
-function findFlist ()
+function _flistFind ()
 {
     declare x dir
     for x in $@; do
-	for dir in ${ENVDIRS//:/ } .; do
-	    [[ -f $$dir/$x ]] || continue
-	    echo $dir/$x
+	for dir in ${FLISTDIRS//:/ }; do
+	    [[ -f $$dir/$x ]] && echo $dir/$x || continue
 	done
     done
 }
-declare -frx findFlist
+declare -frx _flistFind
 
 # sources a provided list of files
-function load ()
+function _genFuncPaths ()
 {
     declare x
     declare -a mainList recheck
@@ -131,15 +110,17 @@ function load ()
     if [[ ${#recheck[@]} -gt 0 ]]; then
 	while read x; do
 	    mainList+=($x)
-	done < <($(findFlist ${recheck[@]}))
-    fi
-    if [[ ${#mainList[@]} -eq 0 ]]; then
-	envpurge
-	while read x; do
-	    mainList+=($x)
-	done < <($(_xnpdFLIST))
+	done < <($(_flistFind ${recheck[@]}))
     fi
     for x in ${mainList[@]}; do
+	echo $x
+    done
+}
+declare -frx _genFuncPaths
+
+function load () {
+    [[ $# -gt 0 ]] || envpurge
+    for x in ${@:-$(_xpndFlist)}; do
 	. $x
 	[[ -f ~/.quiet ]] && echo -n . || echo $x
     done
@@ -147,63 +128,3 @@ function load ()
 }
 declare -frx load
 
-# returns the basename of given paths
-function bname ()
-{
-    declare x
-    for x in $@; do echo ${x##*/}; done
-}
-
-function dname ()
-{
-    declare x
-    for x in $@; do
-	[[ -d $x ]] && echo $x || echo ${x%/*}
-    done
-}
-
-# # returns the dirname of given paths and variable expansions
-# function dname ()
-# {
-#     declare x
-#     declare -a files list
-#     for x in $@; do
-#         [[ $x =~ / ]] && list+=($x) || files+=($x)
-#     done
-#     for x in ${files[@]}; do
-#         X=${x^^}
-#         for y in ${!x} $X ${!X}; do
-#             [[ $y =~ / ]] && { list+=(${y//:/ }); break; }
-#         done
-#     done
-#     for x in ${list[@]}; do
-#         [[ -d $x ]] && echo $x || echo ${x%/*}
-#     done
-# }
-
-# # merges names and dirs into a set. names are checked against parents to
-# # ENVFILES and parents of given dirs. nil input returns files to be sourced
-# # when the shell was started.
-# function mname ()
-# { 
-#     declare x name dir path
-#     declare -a names list tmp dirs
-#     for path in ${ENVFILES//:/ }; do
-# 	[[ -d $path ]] && dirs+=($path) || dirs+=(${path%/*})
-#     done
-#     for x in $@; do
-#         if [[ $x =~ '/' ]]; then
-#             [[ -f $x ]] && list+=($x) || :
-#             [[ -d $x ]] && dirs+=($x) || dirs+=(${x%/*})
-#         else
-# 	    names+=($x)
-# 	fi
-#     done
-#     for name in ${names[@]}; do
-# 	for path in $(_FixList -e "${dirs[@]/%//$name}"); do
-# 	    list+=("$path")
-# 	done;
-#     done;
-#     [[ ${#list[@]} -gt 0 ]] || list=($(envfxp ${ENVFILES//:/ }))
-#     _FixList -u ${list[@]}
-# }

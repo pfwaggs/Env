@@ -11,7 +11,7 @@ load
 lsu
 mkwdir
 mydd
-prompt
+cprompt
 show
 stk
 

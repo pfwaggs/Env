@@ -41,7 +41,7 @@ function _SetPrompt ()
     PS1+=$'\[\e['${promptc}m$'\]\$ \[\e[m\]'
 }
 
-function prompt ()
+function cprompt ()
 {
     declare key color
     [[ $1 =~ : ]] && read key color < <(echo ${1/:/ }) || key=$1
@@ -49,6 +49,6 @@ function prompt ()
     _SetPrompt ${key:+-k $key} ${color:+-c $color} ${@:+-t "$*"}
 }
 
-alias tag='prompt tag '
-alias xtra='prompt xtra '
+alias tag='cprompt tag '
+alias xtra='cprompt xtra '
 

@@ -1,0 +1,8 @@
+
+function dname ()
+{
+    declare x
+    for x in $@; do
+	[[ -d $x ]] && echo $x || echo ${x%/*}
+    done
+}

@@ -15,7 +15,7 @@ bashhave="${BASH_VERSION%(*} $BASH"
 #echo no further
 umask 0022
 declare -x  HISTFILE=~/.history
-declare -rx ENVDIR=$(push ~/Env/$ENVTAG; pwd -P)
+declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG; pwd -P)
 
 ENVDIRS=$ENVDIR/envfiles
 [[ -f ~/.priv/FLIST ]] && ENVDIRS+=:~/.priv
@@ -37,9 +37,9 @@ load
 #     [[ -f ~/.quiet ]] && echo -n . || echo $x
 # done
 #echo ' done'
-unset x
+#unset x
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
 
-prompt
+cprompt
