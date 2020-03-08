@@ -41,4 +41,7 @@ unset x
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
 
+while read n; do
+    eval "$n"
+done < <($(configEd emacs))
 cprompt

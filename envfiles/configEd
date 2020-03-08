@@ -1,0 +1,22 @@
+# -*-sh-*-
+
+export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
+export VIMHOME=~/Env/$ENVTAG/syncdirs
+export VIMDIR=$VIMHOME/vim
+export VIMINIT=":source $VIMDIR/vimrc"
+
+function configEd () {
+    case $1 in
+	emacs)
+	    echo 'export EDITOR=$(type -p emacsclient | head -n 1)'
+	    echo 'export VISUAL=$EDITOR'
+	    echo 'set -o emacs'
+	    ;;
+	vim)
+	    echo 'export EDITOR=$(type -p vim vi | head -n 1)'
+	    echo 'export VISUAL=$EDITOR'
+	    echo 'set -o vi'
+	    ;;
+    esac
+}
+

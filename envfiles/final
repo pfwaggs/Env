@@ -5,10 +5,6 @@ PATH=$(_FixList -c -S /usr/local/sbin ${PATH//:/ }) # | _List2Var) # /usr/local/
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
 [[ $PAGER =~ less ]] && export LESS='-RCMqsu~' || :
-export EDITOR=$(type -p emacsclient | head -n 1)
-export VISUAL=$EDITOR
-export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
-
 ps -f -C emacs | grep -q daemon || emacs --daemon
 complete -o filenames -C '_ArgParser' cd
 
