@@ -43,5 +43,5 @@ unset x
 
 while read n; do
     eval "$n"
-done < <($(configEd emacs))
+done < <(configEd emacs)
 cprompt
