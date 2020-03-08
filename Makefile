@@ -60,7 +60,7 @@ current testing check : $(LAST)-$$@
 save : $(CURRENT)-save
 
 %-current %-save %-testing :
-	@dir=$*; tmp=$@; link=$${tmp#*-}; ln -n -f -s $$dir $$link; ls -ld $$link
+	@dir=$*; tmp=$@; link=$${tmp##*-}; ln -n -f -s $$dir $$link; ls -ld $$link
 
 # %-check :
 # 	@[[ -d /tmp/$(REV) ]] || git archive --format=tar --prefix=$(REV)/ HEAD | tar -C /tmp -xf -
