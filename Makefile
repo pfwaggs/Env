@@ -63,10 +63,10 @@ list:
 
 snapshot:
 	@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
-	@git archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -C $(DEST) -xf -)
+	@git archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -C $(DEST) -xvf -)
 	@f=$(DEST)/$(FIRST); n=$(DEST)/$(SNAPDIR); \
 	  [[ -d $$n ]] || { echo oops, no $$n; exit 1; }; \
-	  diff -qr $$n $$f &>/dev/null && { echo nothing to keep; rm -r $$n; } || :
+	  diff -qr $$n $$f 2>/dev/null && { echo nothing to keep; rm -r $$n; } || : 
 
 .SECONDEXPANSION:
 current testing check: 1$$@
