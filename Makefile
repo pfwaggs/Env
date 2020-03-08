@@ -27,6 +27,8 @@ SNAPDIR = $(DATE).$(SEQ)-$(REV)
 STATUS = PWD LAST CURRENT SAVE TESTING DATE SEQ REV SNAPDIR UPDATE
 export $(STATUS) STATUS
 
+.PHONY: archive
+
 all:
 
 help:
@@ -67,7 +69,7 @@ save : $(CURRENT)-save
 # 	-@x=$(call LIST_PICK,$*); [[ $$x =~ $(REV) ]] && rm -r /tmp/$(REV) || diff -q -r $(DEST)/$$x /tmp/$(REV)
 
 roll : save current
-	-@rm testing @>/dev/null
+	-@rm testing &>/dev/null
 
 filelist :
 	@echo Makefile > filelist
