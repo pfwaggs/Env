@@ -52,7 +52,7 @@ snapshot:
 	@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
 	@git $(GITPREFIX) archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -xvf -)
 	@[[ -d $(SNAPDIR) ]] || { echo oops, no $(SNAPDIR); exit 1; }; \
-	  diff -qr $(SNAPDIR) $(LIST) 2>/dev/null && { echo nothing to keep; rm -r $(SNAPDIR); } || : 
+	  diff -qr $(SNAPDIR) $(LAST) 2>/dev/null && { echo nothing to keep; rm -r $(SNAPDIR); } || : 
 
 .SECONDEXPANSION:
 current testing check : $(LAST)-$$@
