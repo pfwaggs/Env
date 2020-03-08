@@ -1,15 +1,11 @@
 SHELL = /bin/bash
 GITHOME = /home/wapembe/Git/Env
 GITPREFIX = --git-dir=$(GITHOME)/.git --work-tree=$(GITHOME)
-ifndef ENV_HOME
-  ENV_HOME = $(HOME)
-endif
 
 ifeq (short,$(findstring short,$(MAKECMDGOALS)))
   ENSCRIPT = -2 -r -f Courier8
 endif
 
-DEST = $(ENV_HOME)/Env
 LIST = $(shell ls | grep -E '^[0-9_.-]+' | sort -r)
 FOLLOW_LINK = $(shell cd $(1) 2>/dev/null && pwd -P || echo none)
 
@@ -28,7 +24,7 @@ UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
 SNAPDIR = $(DATE)-$(SEQ)-$(REV)
 
-STATUS = PWD ENV_HOME DEST LAST CURRENT SAVE TESTING DATE SEQ REV SNAPDIR UPDATE
+STATUS = PWD LAST CURRENT SAVE TESTING DATE SEQ REV SNAPDIR UPDATE
 export $(STATUS) STATUS
 
 all:
@@ -48,16 +44,15 @@ status:
 	@echo archive:; for v in $(ARCHIVE); do echo $$v; done
 
 archive:
-	@cd $(DEST); [[ -d archive ]] || mkdir archive; mv -v $(ARCHIVE) archive
+	@[[ -d archive ]] || mkdir archive; mv -v $(ARCHIVE) archive
 list:
 	@echo $(LIST) | xargs -n 1 | nl
 
 snapshot:
 	@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
-	@git $(GITPREFIX) archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -C $(DEST) -xvf -)
-	@f=$(DEST)/$(FIRST); n=$(DEST)/$(SNAPDIR); \
-	  [[ -d $$n ]] || { echo oops, no $$n; exit 1; }; \
-	  diff -qr $$n $$f 2>/dev/null && { echo nothing to keep; rm -r $$n; } || : 
+	@git $(GITPREFIX) archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -xvf -)
+	@[[ -d $(SNAPDIR) ]] || { echo oops, no $(SNAPDIR); exit 1; }; \
+	  diff -qr $(SNAPDIR) $(LIST) 2>/dev/null && { echo nothing to keep; rm -r $(SNAPDIR); } || : 
 
 .SECONDEXPANSION:
 current testing check : $(LAST)-$$@
