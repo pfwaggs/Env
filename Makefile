@@ -22,7 +22,7 @@ SEQ = $(shell c=$$(ls -d $(DATE)* | wc -l); printf "%02d" $$((c+1)))
 REV = $(shell git $(GITPREFIX) rev-parse --short HEAD)
 UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
-SNAPDIR = $(DATE)-$(SEQ)-$(REV)
+SNAPDIR = $(DATE).$(SEQ)-$(REV)
 
 STATUS = PWD LAST CURRENT SAVE TESTING DATE SEQ REV SNAPDIR UPDATE
 export $(STATUS) STATUS
