@@ -1,4 +1,4 @@
-[[ $- =~ i ]] || return 0
+[[ $- =~ i ]] || return 0 # -*-sh-*-
 
 trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 
@@ -41,7 +41,5 @@ unset x
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
 
-while read n; do
-    eval "$n"
-done < <(configEd emacs)
+configEd emacs
 cprompt

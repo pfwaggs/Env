@@ -8,14 +8,14 @@ export VIMINIT=":source $VIMDIR/vimrc"
 function configEd () {
     case $1 in
 	emacs)
-	    echo 'export EDITOR=$(type -p emacsclient | head -n 1)'
-	    echo 'export VISUAL=$EDITOR'
-	    echo 'set -o emacs'
+	    EDITOR=$(type -p emacsclient | head -n 1)
+	    VISUAL=$EDITOR
+	    set -o emacs
 	    ;;
 	vim)
-	    echo 'export EDITOR=$(type -p vim vi | head -n 1)'
-	    echo 'export VISUAL=$EDITOR'
-	    echo 'set -o vi'
+	    export EDITOR=$(type -p vim vi | head -n 1)
+	    export VISUAL=$EDITOR
+	    set -o vi
 	    ;;
     esac
 }
