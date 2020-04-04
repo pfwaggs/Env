@@ -1,10 +1,12 @@
 #!/usr/bin/perl
 
-# normal junk #AzA
+# normal junk
 use warnings;
 use strict;
 use v5.22;
 use experimental qw(postderef signatures smartmatch);
+use Path::Tiny;
+use Data::Printer;
 
 #use Getopt::Long qw( :config no_ignore_case auto_help );
 #my %opts;
@@ -17,9 +19,4 @@ use experimental qw(postderef signatures smartmatch);
 #use Term::ReadLine;
 #use Term::UI;
 
-use Path::Tiny;
-use YAML::Tiny qw(LoadFile DumpFile);
-use Data::Printer;
-
-#ZaZ
 
