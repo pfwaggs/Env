@@ -1,7 +1,8 @@
+#-*-sh-*-
 clear
 [[ $SHLVL -eq 1 ]] || return 0
-[[ -f $LA ]] && { ssh-agent -k; rm $LA $SA; }
-[[ -f $SMAP ]] && rm $SMAP
+[[ $SSH_AGENT_PID ]] && ssh-agent -k
+rm $AGENTFILE
 printf "%s closing subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
 fortune=$(type -p fortune)
 [[ $fortune ]] || return 0

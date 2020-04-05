@@ -20,6 +20,7 @@ mydd
 prep
 show
 spx
+sshAgentPrep
 stkops
 typer
 prompt_conf
