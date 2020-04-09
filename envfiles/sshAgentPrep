@@ -1,0 +1,8 @@
+#-*-sh-*-
+
+export AGENTFILE="/tmp/agentInit-$PPID"
+pid=$(grep AGENT $AGENTFILE 2>/dev/null | cut -f2 -d=)
+[[ -n $pid ]] && [[ -n $(ps -ef -q $pid 2>/dev/null) ]] || eval "$(ssh-agent | tee $AGENTFILE)"
+. $AGENTFILE
+export SSH_AGENT_PID SSH_AUTH_SOCK
+
