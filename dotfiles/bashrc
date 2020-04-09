@@ -5,7 +5,7 @@ trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 set -C -b
 shopt -s extglob
 
-bashwant=$(. ~/Env/current/dotfiles/getbash)
+bashwant=$(. ~/Env/$ENVTAG/dotfiles/getbash)
 bashhave="${BASH_VERSION%(*} $BASH"
 #echo SHELL=$SHELL SHLVL=$SHLVL bashwant=$bashwant bashhave=$bashhave
 
