@@ -1,8 +1,8 @@
 # -*-sh-*-
 
 export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
-export VIMHOME=~/Env/$ENVTAG/syncdirs
-export VIMDIR=$VIMHOME/vim
+export VIMHOME=~
+export VIMDIR=$VIMHOME/.vim
 export VIMINIT=":source $VIMDIR/vimrc"
 
 function configEd () {
