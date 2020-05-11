@@ -1,5 +1,5 @@
 SHELL = /bin/bash
-GITHOME = /home/wapembe/Git/Env
+GITHOME = $(HOME)/Git/Env
 GITPREFIX = --git-dir=$(GITHOME)/.git --work-tree=$(GITHOME)
 
 ifeq (short,$(findstring short,$(MAKECMDGOALS)))
