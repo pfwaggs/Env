@@ -9,7 +9,7 @@ function _ArgParser () {
 	[[ ${#list[@]} -eq 0 ]] || break
 	while read -r path; do
 	    [[ -d $path ]] && list+=("$path")
-	done < <(compgen -G "$dir/$file*" | sort)
+	done < <(compgen -G "${dir:-.}/$file*" | sort)
     done
     [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
 }
