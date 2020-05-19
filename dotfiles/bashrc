@@ -41,5 +41,5 @@ unset x
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
 
-configEd emacs
+configEd vim
 cprompt
