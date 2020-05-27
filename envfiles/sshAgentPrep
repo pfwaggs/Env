@@ -7,6 +7,6 @@ else
     pid=$(grep AGENT $AGENTFILE 2>/dev/null | perl -n -E 'say /=(\d+)/')
     eval "$(ssh-agent | tee $AGENTFILE)"
 fi
-export -r AGENTFILE
+declare -xr AGENTFILE
 . $AGENTFILE
 export SSH_AGENT_PID SSH_AUTH_SOCK
