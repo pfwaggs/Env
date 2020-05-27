@@ -2,7 +2,7 @@
 clear
 [[ $SHLVL -eq 1 ]] || return 0
 [[ $SSH_AGENT_PID ]] && ssh-agent -k
-rm $AGENTFILE
+rm $AGENTFILE ~/.agentfile
 printf "%s closing subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
 fortune=$(type -p fortune)
 [[ $fortune ]] || return 0
