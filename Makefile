@@ -18,7 +18,7 @@ CURRENT = $(notdir $(call FOLLOW_LINK,current))
 SAVE = $(notdir $(call FOLLOW_LINK,save))
 TESTING = $(notdir $(call FOLLOW_LINK,testing))
 DATE = $(shell date +%F | tr '-' '_')
-SEQ = $(shell c=$$(ls -d $(DATE)* | wc -l); printf "%02d" $$((c+1)))
+SEQ = $(shell c=$$(ls -d $(DATE)* 2>/dev/null | wc -l); printf "%02d" $$((c+1)))
 REV = $(shell git $(GITPREFIX) rev-parse --short HEAD)
 UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
@@ -73,7 +73,7 @@ roll : save current
 
 filelist :
 	@echo Makefile > filelist
-	@find dotfile* envfile* -type f | grep -v '~' >> filelist
+	@find dotfile* envfile* priv* syncdirs* -type f | grep -v '~' >> filelist
 	-@rm -r *.txt *.ps 2>/dev/null
 
 long short : filelist
