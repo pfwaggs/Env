@@ -31,7 +31,7 @@ declare -rx FLISTDIRS
 compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
 [[ -f ~/.no_lock_funcs ]] || declare -frx _FixList bname dname
 envpurge
-for x in $(_xpndFLIST ${FLISTDIRS//:/ }); do
+for x in $(_flistXpnd ${FLISTDIRS//:/ }); do
     . $x
     [[ -f ~/.quiet ]] && echo -n . || echo $x
 done

@@ -28,23 +28,23 @@
 ":source $VIM/vim-tmux
 
 "put all swap files together in one place
-if isdirectory($VIMHOME . '.swaps') == 0
-    :silent !mkdir -p $VIMHOME/.swaps >/dev/null 2>&1
+if isdirectory($VIMHOME . '.vimrec/swaps') == 0
+    :silent !mkdir -p $VIMHOME/.vimrec/swaps >/dev/null 2>&1
 endif
-set dir=$VIMHOME/.swaps//
+set dir=$VIMHOME/.vimrec/swaps//
 
 "put all backup files together in one place
-if isdirectory($VIMHOME . '.backups') == 0
-    :silent !mkdir -p $VIMHOME/.backups >/dev/null 2>&1
+if isdirectory($VIMHOME . '.vimrec/backups') == 0
+    :silent !mkdir -p $VIMHOME/.vimrec/backups >/dev/null 2>&1
 endif
-set backupdir=$VIMHOME/.backups//
+set backupdir=$VIMHOME/.vimrec/backups//
 set backup
 
 "put all undo files together in one place
-if isdirectory($VIMHOME . '.undos') == 0
-    :silent !mkdir -p $VIMHOME/.undos >/dev/null 2>&1
+if isdirectory($VIMHOME . '.vimrec/undos') == 0
+    :silent !mkdir -p $VIMHOME/.vimrec/undos >/dev/null 2>&1
 endif
-set undodir=$VIMHOME/.undos//
+set undodir=$VIMHOME/.vimrec/undos//
 set undofile
 
 " yes, folding is good

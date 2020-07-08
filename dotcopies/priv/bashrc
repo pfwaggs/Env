@@ -4,6 +4,4 @@ if [[ -L ~/Env/testing ]]; then
 else
     declare -rx ENVTAG=current
 fi
-ln -s -f ~/Env/$ENVTAG/dotfiles/tmux.conf ~/.tmux.conf
-ln -s -f ~/Env/$ENVTAG/syncdirs/vim ~/.vim
 . ~/Env/$ENVTAG/dotfiles/bashrc

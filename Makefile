@@ -77,7 +77,7 @@ filelist :
 	-@rm -r *.txt *.ps 2>/dev/null
 
 long short : filelist
-	@source envfiles/xmn; source envfiles/bashrcfuncs; \
+	source envfiles/xmn; source envfiles/bashrcfuncs; \
 	xmn -pm -f filelist | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
 

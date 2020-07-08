@@ -78,7 +78,7 @@ declare -fr envpurge
 # directory or filename of a list of files in the parent directory to
 # load relative to it's parent
 
-function _xpndFLIST ()
+function _flistXpnd ()
 {
     declare x
     for x in $@; do
@@ -86,7 +86,7 @@ function _xpndFLIST ()
 	grep -o -P '^\w+' $x/FLIST | sed "s|^|$x/|"
     done
 }
-declare -frx _xpndFLIST
+declare -frx _flistXpnd
 
 function _flistFind ()
 {
