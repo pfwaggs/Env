@@ -1,23 +1,21 @@
 
-function _SetPrompt ()
-{
-    declare user=$'\u' host=$'\h' spath=$'\W' lpath=$'\w'
-
-    declare OPTIND opt key color text
-    while getopts ':k:c:t:' opt; do
+function _SetPrompt () {
+    declare OPTIND x opt key value
+    declare -A promptMap
+    for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
+    while getopts ':n:u:h:s:l:t:x:' opt; do
+	[[ $opt = : ]] && x=${promptMap[$OPTARG]} || x=${promptMap[$opt]}
         case $opt in
-            k)
-                [[ ${!_PromptColor[@]} =~ $OPTARG ]] && key=$OPTARG
-                ;;
-            c)
-                [[ ${!_ColorNum[@]} =~ $OPTARG ]] && color=$OPTARG
-                ;;
-            t)
-                text=$OPTARG
-                ;;
+	    [tx])
+		[[ $OPTARG =~ = ]] && _PromptColor[$x]=${OPTARG%=*}
+		_PromptCfg[$x]=${OPTARG#*=}
+		_PromptShow[$x]=1
+		;;
+	    [hlnsu])
+		_PromptColor[$x]=${OPTARG%=*}
+		;;
             :)
-                echo $OPTARG is missing an arg
-                return
+		((_PromptShow[$x]=1-${_PromptShow[$x]}))
                 ;;
             *)
                 echo opt is $opt, optarg is $OPTARG
@@ -26,29 +24,39 @@ function _SetPrompt ()
         esac
     done
     shift $((OPTIND-1))
-
-    [[ -n $color ]] && _PromptColor[$key]=$color
-    [[ -n $key && -n $text ]] && eval "$key=\$text"
-    valids=$(_FixList -u $key ${tag:+tag} ${xtra:+xtra} host prompt)
-    declare promptOrder='xtra tag host user spath lpath'
+    _PromptShow[host]=1
+    _PromptShow[prompt]=1
     PS1=
-    for x in $promptOrder; do
-        [[ $valids =~ $x ]] || continue
+    for x in num xtra tag user host spath lpath prompt; do
+        [[ ${_PromptShow[$x]} = 0 ]] && continue
+	[[ ${_PromptCfg[$x]} = '' ]] && continue
         color=${_PromptColor[$x]}
         num=${_ColorNum[$color]}
-        PS1+=$'\[\e['${num}m$'\]'${!x}' '
+        PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
     done
-    PS1+=$'\[\e['${promptc}m$'\]\$ \[\e[m\]'
+    PS1+=$'\[\e[m\]'
 }
 
-function cprompt ()
-{
-    declare key color
-    [[ $1 =~ : ]] && read key color < <(echo ${1/:/ }) || key=$1
-    shift
-    _SetPrompt ${key:+-k $key} ${color:+-c $color} ${@:+-t "$*"}
+function cprompt () {
+    declare key value x cmd
+    if [[ $1 = help ]]; then
+	cat <<-end
+	args are: key[=color][=text]
+	keys are: num xtra tag user host spath lpath prompt
+	a bare key toggles that item
+	end
+	return
+    fi
+    for x in "$@"; do
+	read key value <<-end
+	${x/=/ }
+	end
+	cmd="-${key:0:1} "
+	[[ $value != '' ]] && cmd+="'$value' "
+	eval "_SetPrompt $cmd"
+    done
 }
 
-alias tag='cprompt tag '
-alias xtra='cprompt xtra '
+function  tag () { cprompt tag="$*"; }
+function xtra () { cprompt xtra="$*"; }
 

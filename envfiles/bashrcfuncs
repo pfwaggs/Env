@@ -120,7 +120,7 @@ declare -frx _genFuncPaths
 
 function load () {
     [[ $# -gt 0 ]] || envpurge
-    for x in ${@:-$(_xpndFlist)}; do
+    for x in ${@:-$(_flistXpnd)}; do
 	. $x
 	[[ -f ~/.quiet ]] && echo -n . || echo $x
     done
