@@ -5,14 +5,6 @@ trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
 set -C -b
 shopt -s extglob
 
-bashwant=$(. ~/Env/$ENVTAG/dotfiles/getbash)
-bashhave="${BASH_VERSION%(*} $BASH"
-#echo SHELL=$SHELL SHLVL=$SHLVL bashwant=$bashwant bashhave=$bashhave
-
-# set some basic items
-[[ "$bashwant" = "$bashhave" ]] && echo bash is good || exec ${bashwant#* } # we want to test the new stuff.
-
-#echo no further
 umask 0022
 declare -x  HISTFILE=~/.history
 declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG >&/dev/null; pwd -P)
@@ -20,13 +12,6 @@ declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG >&/dev/null; pwd -P)
 FLISTDIRS=$ENVDIR/envfiles
 [[ -f ~/.priv/FLIST ]] && FLISTDIRS+=:~/.priv
 declare -rx FLISTDIRS
-
-# general idea is to clean this up. xpnd should replace envfxp. clean up mname
-# and dname gets replaced with something smaller. dname just returns dir names
-# for list of files. the code after the following envpurge should just be load.
-# move support for testing into private FLIST with a special function that uses
-# the testing dir if present. great function rename (proper camelcase or _). want
-# to drop un-needed functions and to make what is left more single purpose.
 
 srcfile=$ENVDIR/envfiles/bashrcfuncs
 compgen -A function | grep -q envpurge || source $srcfile
