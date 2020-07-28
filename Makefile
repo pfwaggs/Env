@@ -11,7 +11,7 @@ ifeq (short,$(findstring short,$(MAKECMDGOALS)))
   ENSCRIPT = -2 -r -f Courier8
 endif
 
-LIST = $(shell ls | grep -E '^[0-9_.-]+' | sort)
+LIST := $(shell ls | grep -E '^[0-9_.-]+-[[:alnum:]]+$$' | sort)
 FOLLOW_LINK = $(shell cd $(1) &>/dev/null && pwd -P || echo none)
 
 ifndef TUMBLE
@@ -28,7 +28,6 @@ REV = $(shell git $(GITPREFIX) rev-parse --short HEAD)
 UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
 SNAPDIR = $(DATE).$(SEQ)-$(REV)
-
 STATUS = PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV SNAPDIR UPDATE
 export $(STATUS)
 
@@ -39,10 +38,14 @@ all :
 help :
 	@grep '^#help: ' Makefile | cut -f2- -d: | column -s: -t
 
-help-% :
-	@grep '^#help: $*' Makefile | cut -f2- -d: | column -s: -t
+#help: %-x{info,recover,tar,targz} : the 'x' commands let you specify a line
+#help: : number in archive.txt to use for the git
+#help: : reference and runs a new make instance
+#help: : with the altered command.
+%-xinfo %-xrecover %-xtar %-xtargz : 
+	@ref=$$(perl -n -E '$*==$$. && say /-(\w+)$$/' archive.txt); cmd=$@; cmd="$${cmd#*x}"; make $$ref-$$cmd
 
-info-% :
+%-info :
 	@x=$$(grep $* archive.txt); [[ -n $$x ]] || { echo $* not found in archive.txt; exit 1; }; \
 	    read date seq rev < <(echo $${x//[.-]/ }); git $(GITPREFIX) log $$rev -1; 
 	
@@ -62,32 +65,31 @@ archive :
 	@printf "%s\n" $(ARCHIVE) >> archive.txt; rm -r $(ARCHIVE)
 
 #help: recover-% : recover an entry. use the log tag at end of the dir name
-recover-% :
+%-recover :
 	@x=$$(grep $* archive.txt); [[ -n $$x ]] || { echo $* not found in archive.txt; exit 1; }; \
 	    read date seq rev < <(echo $${x//[.-]/ }); \
 	    git $(GITPREFIX) archive --format=tar --prefix=$$x/ $$rev | (tar -xf -)
+
+#help: %-tar : create a tar of the repo
+%-tar %-targz:
+	@[[ $@ =~ targz ]] && format=targz || format=tar; \
+	    echo git $(GITPREFIX) archive --format=$$format --prefix=$*/ $* > $*.$$format
 
 #help: snapshot : takes a snapshot into a derived dir
 snapshot :
 	@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
 	@git $(GITPREFIX) archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -xf -)
 
-.SECONDEXPANSION :
-current testing check : $(LAST)-$$@
-
+#help: (%-)current : makes the named (latest) version current
+#help: (%-)save    : makes the named (current) version save
 save : $(CURRENT)-save
 
-#help: (%-)current : makes the named (latest) version current
-#help: (%-)testing : makes the named (latest) version testing
-#help: (%-)save    : makes the named (current) version save
-%-current %-save %-testing :
-	@dir=$*; tmp=$@; link=$${tmp##*-}; ln -n -f -s $$dir $$link; ls -ld $$link
+current : $(LAST)-current
 
-#help: check : (broken) will show what has changed wrt Git structure
-# %-check :
-# 	@[[ -d /tmp/$(REV) ]] || git archive --format=tar --prefix=$(REV)/ HEAD | tar -C /tmp -xf -
-# 	-@x=$(call LIST_PICK,$*); [[ $$x =~ $(REV) ]] && rm -r /tmp/$(REV) || diff -q -r $(DEST)/$$x /tmp/$(REV)
+%-current %-save :
+	@dir=$*; tmp=$@; link="$${tmp##*-}"; ln -n -f -s $$dir $$link; ls -ld $$link
 
+#help: roll : relinks current to save and links last to current
 roll : save current
 	-@rm testing &>/dev/null
 
@@ -103,7 +105,3 @@ long short : filelist
 	xmn -pm -f filelist | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
 
-# long: filelist
-# 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-# 	xmn -a -f filelist  | tee long.txt | \
-# 	enscript -f Courier8 -DDuplex:true $(TUMBLE) -o long.ps
