@@ -10,7 +10,7 @@ declare -x  HISTFILE=~/.history
 declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG >&/dev/null; pwd -P)
 
 FLISTDIRS=$ENVDIR/envfiles
-[[ -f ~/.priv/FLIST ]] && FLISTDIRS+=:~/.priv
+[[ -s ~/.priv/FLIST ]] && FLISTDIRS+=:~/.priv
 declare -rx FLISTDIRS
 
 srcfile=$ENVDIR/envfiles/bashrcfuncs

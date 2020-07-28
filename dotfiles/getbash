@@ -1,6 +1,0 @@
-
-for x in /usr/local/bin/bash /bin/bash /usr/bin/bash $SHELL; do
-    [[ -f $x ]] || continue
-    echo $($x --version | grep -o -P '\d+\.\d+\.\d+') $x
-done | sort -urn | sed -n '1p'
-unset x
