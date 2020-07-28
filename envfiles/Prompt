@@ -55,6 +55,7 @@ function cprompt () {
 	[[ $value != '' ]] && cmd+="'$value' "
 	eval "_SetPrompt $cmd"
     done
+    ${cmd:-_SetPrompt}
 }
 
 function  tag () { cprompt tag="$*"; }

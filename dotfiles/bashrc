@@ -28,8 +28,9 @@ declare -rx FLISTDIRS
 # the testing dir if present. great function rename (proper camelcase or _). want
 # to drop un-needed functions and to make what is left more single purpose.
 
-compgen -A function | grep -q envpurge || source $ENVDIR/envfiles/bashrcfuncs
-[[ -f ~/.no_lock_funcs ]] || declare -frx _FixList bname dname
+srcfile=$ENVDIR/envfiles/bashrcfuncs
+compgen -A function | grep -q envpurge || source $srcfile
+[[ -f ~/.no_lock_funcs ]] || declare -frx $(awk '/^function/ {print $2}')
 envpurge
 for x in $(_flistXpnd ${FLISTDIRS//:/ }); do
     . $x
