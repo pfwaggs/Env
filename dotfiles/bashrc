@@ -30,14 +30,14 @@ declare -rx FLISTDIRS
 
 srcfile=$ENVDIR/envfiles/bashrcfuncs
 compgen -A function | grep -q envpurge || source $srcfile
-[[ -f ~/.no_lock_funcs ]] || declare -frx $(awk '/^function/ {print $2}')
+[[ -f ~/.no_lock_funcs ]] || declare -frx $(awk '/^function/ {print $2}' $srcfile)
 envpurge
 for x in $(_flistXpnd ${FLISTDIRS//:/ }); do
     . $x
     [[ -f ~/.quiet ]] && echo -n . || echo $x
 done
 echo ' done'
-unset x
+unset x srcfile
 
 # because LXDE has vte?
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
