@@ -73,7 +73,7 @@ archive :
 #help: %-tar : create a tar of the repo
 %-tar %-targz:
 	@[[ $@ =~ targz ]] && format=targz || format=tar; \
-	    echo git $(GITPREFIX) archive --format=$$format --prefix=$*/ $* > $*.$$format
+	    git $(GITPREFIX) archive --format=$$format --prefix=$*/ $* > $*.$$format
 
 #help: snapshot : takes a snapshot into a derived dir
 snapshot :
