@@ -8,6 +8,7 @@ export VIMINIT=":source $VIMDIR/vimrc"
 function configEd () {
     case $1 in
 	emacs)
+	    ps -f -C emacs | grep -q daemon || emacs --daemon
 	    EDITOR=$(type -p emacsclient | head -n 1)
 	    VISUAL=$EDITOR
 	    set -o emacs

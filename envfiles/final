@@ -7,6 +7,5 @@ export FIGNORE='~'
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
 [[ $PAGER =~ less ]] && export LESS='-RCMqsu~' || :
-ps -f -C emacs | grep -q daemon || emacs --daemon
 complete -o filenames -C '_ArgParser' cd
 
