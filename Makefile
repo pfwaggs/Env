@@ -11,7 +11,7 @@ ifeq (short,$(findstring short,$(MAKECMDGOALS)))
   ENSCRIPT = -2 -r -f Courier8
 endif
 
-LIST := $(shell ls | grep -E '^[0-9_.-]+-[[:alnum:]]+$$' | sort)
+LIST := $(shell ls | sed -nr '/^[0-9][0-9_.]+-[[:alnum:]]+$$/p' | sort)
 FOLLOW_LINK = $(shell cd $(1) &>/dev/null && pwd -P || echo none)
 
 ifndef TUMBLE
