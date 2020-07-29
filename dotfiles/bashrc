@@ -28,4 +28,4 @@ unset x srcfile
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
 
 configEd vim
-cprompt
+setPrompt

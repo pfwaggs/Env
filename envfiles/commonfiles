@@ -3,15 +3,14 @@ _AttribParser
 _FixList
 _List2Var
 _ParseArg
-_SetPrompt
 _Show
+setPrompt
 commas
 killdir
 load
 lsu
 mkwdir
 mydd
-cprompt
 show
 stk
 

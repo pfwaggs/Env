@@ -1,29 +1,41 @@
 
-function _SetPrompt () {
-    declare OPTIND x opt key value
+function setPrompt () {
+    declare OPTIND x key value
     declare -A promptMap
     for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
-    while getopts ':n:u:h:s:l:t:x:' opt; do
-	[[ $opt = : ]] && x=${promptMap[$OPTARG]} || x=${promptMap[$opt]}
-        case $opt in
-	    [tx])
-		[[ $OPTARG =~ = ]] && _PromptColor[$x]=${OPTARG%=*}
-		_PromptCfg[$x]=${OPTARG#*=}
-		_PromptShow[$x]=1
+
+    if [[ $1 = help ]]; then
+	cat <<-end
+	args are: key[=color][=text]
+	keys are: num xtra tag user host spath lpath prompt
+	a bare key toggles that item
+	end
+	return
+    fi
+    for x in "$@"; do
+	read key value <<-end
+	${x/=/ }
+	end
+        case $key in
+	    tag|xtra)
+		if [[ -n $value ]]; then
+		    [[ $value =~ = ]] && _PromptColor[$key]=${value%=*}
+		    _PromptCfg[$key]=${value#*=}
+		    _PromptShow[$key]=1 
+		else
+		    ((_PromptShow[$key]=1-${_PromptShow[$key]}))
+		fi
 		;;
-	    [hlnsu])
-		_PromptColor[$x]=${OPTARG%=*}
+	    host|lpath|spath|num|user)
+		if [[ -n $value ]]; then
+		    _PromptColor[$key]=${value%=*}
+		    _PromptShow[$key]=1
+		else
+		    ((_PromptShow[$key]=1-${_PromptShow[$key]}))
+		fi
 		;;
-            :)
-		((_PromptShow[$x]=1-${_PromptShow[$x]}))
-                ;;
-            *)
-                echo opt is $opt, optarg is $OPTARG
-                return
-                ;;
-        esac
+	esac
     done
-    shift $((OPTIND-1))
     _PromptShow[host]=1
     _PromptShow[prompt]=1
     PS1=
@@ -37,27 +49,6 @@ function _SetPrompt () {
     PS1+=$'\[\e[m\]'
 }
 
-function cprompt () {
-    declare key value x cmd
-    if [[ $1 = help ]]; then
-	cat <<-end
-	args are: key[=color][=text]
-	keys are: num xtra tag user host spath lpath prompt
-	a bare key toggles that item
-	end
-	return
-    fi
-    for x in "$@"; do
-	read key value <<-end
-	${x/=/ }
-	end
-	cmd="-${key:0:1} "
-	[[ $value != '' ]] && cmd+="'$value' "
-	eval "_SetPrompt $cmd"
-    done
-    ${cmd:-_SetPrompt}
-}
-
-function  tag () { cprompt tag="$*"; }
-function xtra () { cprompt xtra="$*"; }
+function  tag () { setPrompt tag="$*"; }
+function xtra () { setPrompt xtra="$*"; }
 
