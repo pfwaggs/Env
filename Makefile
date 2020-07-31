@@ -25,10 +25,14 @@ TESTING = $(notdir $(call FOLLOW_LINK,testing))
 DATE = $(shell date +%F | tr '-' '_')
 SEQ = $(shell c=$$(ls -d $(DATE)* 2>/dev/null | wc -l); printf "%02d" $$((c+1)))
 REV = $(shell git $(GITPREFIX) rev-parse --short HEAD)
-UPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
-SNAPDIR = $(DATE).$(SEQ)-$(REV)
-STATUS = PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV SNAPDIR UPDATE
+NEEDUPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
+STATUS = PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV NEEDUPDATE UPDATE
+ifeq (yes,$(NEEDUPDATE))
+    UPDATE = $(DATE).$(SEQ)-$(REV)
+else
+    UPDATE = 
+endif
 export $(STATUS)
 
 .PHONY: archive
@@ -76,9 +80,9 @@ archive :
 	    git $(GITPREFIX) archive --format=$$format --prefix=$*/ $* > $*.$$format
 
 #help: snapshot : takes a snapshot into a derived dir
-snapshot :
-	@[[ $(UPDATE) = yes ]] || { echo no update needed.; exit 1; }
-	@git $(GITPREFIX) archive --format=tar --prefix=$(SNAPDIR)/ HEAD | (tar -xf -)
+update :
+	@[[ $(NEEDUPDATE) = yes ]] || { echo no update needed.; exit 1; }
+	@git $(GITPREFIX) archive --format=tar --prefix=$(UPDATE)/ HEAD | (tar -xf -)
 
 #help: (%-)current : makes the named (latest) version current
 #help: (%-)save    : makes the named (current) version save
