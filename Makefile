@@ -2,7 +2,7 @@ SHELL = /bin/bash
 GITHOME = $(HOME)/Git/Env
 GITPREFIX = -C $(GITHOME)
 
-BRANCH = $(shell git $(GITPREFIX) branch | awk '/\*/ {print $$NF}')
+BRANCH = $(shell git $(GITPREFIX) rev-parse --abbrev-ref HEAD)
 ifeq (,$(findstring $(BRANCH),master))
     $(error branch is not master. please change branches)
 endif

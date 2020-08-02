@@ -14,6 +14,7 @@
 	cod = checkout dev
 	ci = commit
 	bl = branch --list
+	mybr = rev-parse --abbrev-ref HEAD
         myrev = rev-parse --short HEAD
 	hist = log -n 20 --pretty=format:\"%h %ad | %s%d\" --graph --date=short
 [push]
