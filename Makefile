@@ -3,8 +3,8 @@ GITHOME = $(HOME)/Git/Env
 GITPREFIX = -C $(GITHOME)
 
 BRANCH = $(shell git $(GITPREFIX) branch | awk '/\*/ {print $$NF}')
-ifeq (1,$(findstring $(BRANCH),master dev))
-    $(error branch is not master or dev)
+ifeq (,$(findstring $(BRANCH),master))
+    $(error branch is not master. please change branches)
 endif
 
 ifeq (short,$(findstring short,$(MAKECMDGOALS)))
