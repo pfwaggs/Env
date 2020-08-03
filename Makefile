@@ -68,7 +68,7 @@ archive :
 	@[[ -n "$(ARCHIVE)" ]] || { echo nothing to archive; exit 1; }
 	@printf "%s\n" $(ARCHIVE) >> archive.txt; rm -r $(ARCHIVE)
 
-#help: recover-% : recover an entry. use the log tag at end of the dir name
+#help: %-recover : recover an entry. use the log tag at end of the dir name
 %-recover :
 	@x=$$(grep $* archive.txt); [[ -n $$x ]] || { echo $* not found in archive.txt; exit 1; }; \
 	    read date seq rev < <(echo $${x//[.-]/ }); \
