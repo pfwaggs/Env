@@ -99,8 +99,8 @@ roll : save current
 
 filelist :
 	@echo Makefile > filelist
-	@find dotfile* envfile* -type f | grep -v '~' >> filelist
-	-@rm -r *.txt *.ps 2>/dev/null
+	@find dotcopies dotfiles envfiles -maxdepth 2 -type f | grep -v '~' | sort >> filelist
+	-@echo remove old print files; rm -r long* short* 2>/dev/null
 
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
