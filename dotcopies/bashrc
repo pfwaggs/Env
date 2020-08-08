@@ -1,8 +1,0 @@
-
-ENVTAG=current
-if [[ -L ~/Env/testing ]]; then
-    read -p 'found testing branch. use? '
-    [[ ${REPLY:-no} =~ ^[yY] ]] && ENVTAG=testing
-fi
-declare -rx ENVTAG
-. ~/Env/$ENVTAG/dotfiles/bashrc

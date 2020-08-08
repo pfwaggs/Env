@@ -72,7 +72,6 @@ function envpurge ()
     unalias -a
     unset -f $(compgen -A function) &>/dev/null
 }
-declare -fr envpurge
 
 # produces a list of paths for source-ing input paths should specify a
 # directory or filename of a list of files in the parent directory to
@@ -86,18 +85,16 @@ function _flistXpnd ()
 	grep -o -P '^\w+' $x/FLIST | sed "s|^|$x/|"
     done
 }
-declare -frx _flistXpnd
 
 function _flistFind ()
 {
     declare x dir
-    for x in $@; do
-	for dir in ${FLISTDIRS//:/ }; do
-	    [[ -f $$dir/$x ]] && echo $dir/$x || continue
+    for dir in ${FLISTDIRS//:/ }; do
+	for x in $@; do
+	    [[ -f $dir/$x ]] && echo $dir/$x || continue
 	done
     done
 }
-declare -frx _flistFind
 
 # sources a provided list of files
 function _genFuncPaths ()
@@ -116,7 +113,6 @@ function _genFuncPaths ()
 	echo $x
     done
 }
-declare -frx _genFuncPaths
 
 function load () {
     [[ $# -gt 0 ]] || envpurge
@@ -126,5 +122,4 @@ function load () {
     done
     echo ' done'
 }
-declare -frx load
 

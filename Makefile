@@ -26,13 +26,8 @@ DATE = $(shell date +%F | tr '-' '_')
 SEQ = $(shell c=$$(ls -d $(DATE)* 2>/dev/null | wc -l); printf "%02d" $$((c+1)))
 REV = $(shell git $(GITPREFIX) rev-parse --short HEAD)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
-NEEDUPDATE = $(if $(findstring $(REV),$(LIST)),no,yes)
-STATUS = PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV NEEDUPDATE UPDATE
-ifeq (yes,$(NEEDUPDATE))
-    UPDATE = $(DATE).$(SEQ)-$(REV)
-else
-    UPDATE = 
-endif
+NEEDUPDATE = $(if $(findstring $(REV),$(LIST)),,$(DATE).$(SEQ)-$(REV))
+STATUS = PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV NEEDUPDATE 
 export $(STATUS)
 
 .PHONY: archive
@@ -81,8 +76,8 @@ archive :
 
 #help: snapshot : takes a snapshot into a derived dir
 update :
-	@[[ $(NEEDUPDATE) = yes ]] || { echo no update needed.; exit 1; }
-	@git $(GITPREFIX) archive --format=tar --prefix=$(UPDATE)/ HEAD | (tar -xf -)
+	@[[ -n $(NEEDUPDATE) ]] || { echo no update needed.; exit 1; }
+	@git $(GITPREFIX) archive --format=tar --prefix=$(NEEDUPDATE)/ HEAD | (tar -xf -)
 
 #help: (%-)current : makes the named (latest) version current
 #help: (%-)save    : makes the named (current) version save
@@ -109,3 +104,5 @@ long short : filelist
 	xmn -pm -f filelist | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
 
+install-% :
+	@[[ -e dotfiles/$* ]] && cp -r dotfiles/$* ~/.$* || echo dotfiles/$* is missing
