@@ -18,7 +18,7 @@ ifndef TUMBLE
     TUMBLE = -DTumble:true
 endif
 
-DOTSRCDIR = $(ENVTAG)/dotinstalls
+DOTSRCDIR = $(ENVTAG)/dotinstall
 LAST = $(lastword $(LIST))
 CURRENT = $(notdir $(call FOLLOW_LINK,current))
 SAVE = $(notdir $(call FOLLOW_LINK,save))
