@@ -1,8 +1,11 @@
 
 function mkwdir ()
 {
-    declare dir=$(. ~/.mkwdir $1)
-    [[ -d $dir ]] || mkdir $dir
-    echo $dir
+    declare count dir pat date=$(date +%F | tr '-' '_')
+    pat=${1:=$date}
+    count=$(ls -d $pat.?? 2>/dev/null | wc -l)
+    printf -v dir "%s.%02d" $pat $((1+count))
+    mkdir -v $dir
 }
+
 
