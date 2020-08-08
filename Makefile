@@ -18,6 +18,7 @@ ifndef TUMBLE
     TUMBLE = -DTumble:true
 endif
 
+DOTSRCDIR = $(ENVTAG)/dotinstalls
 LAST = $(lastword $(LIST))
 CURRENT = $(notdir $(call FOLLOW_LINK,current))
 SAVE = $(notdir $(call FOLLOW_LINK,save))
@@ -27,7 +28,7 @@ SEQ = $(shell c=$$(ls -d $(DATE)* 2>/dev/null | wc -l); printf "%02d" $$((c+1)))
 REV = $(shell git $(GITPREFIX) rev-parse --short HEAD)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
 NEEDUPDATE = $(if $(findstring $(REV),$(LIST)),,$(DATE).$(SEQ)-$(REV))
-STATUS = PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV NEEDUPDATE 
+STATUS = DOTSRCDIR PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV NEEDUPDATE 
 export $(STATUS)
 
 .PHONY: archive
@@ -92,9 +93,13 @@ current : $(LAST)-current
 roll : save current
 	-@rm testing &>/dev/null
 
+#help: install-% : used to install user dot files like .bashrc
+install-% :
+	@x=$(DOTSRCDIR)/$*; [[ -e $$x ]] && cp -r $$x ~/.$* || echo $$x is missing
+
 filelist :
 	@echo Makefile > filelist
-	@find dotcopies dotfiles envfiles -maxdepth 2 -type f | grep -v '~' | sort >> filelist
+	@find dotinstalls dotfiles envfiles -maxdepth 2 -type f | grep -v '~' | sort >> filelist
 	-@echo remove old print files; rm -r long* short* 2>/dev/null
 
 #help: long : output in portrait, duplex
@@ -103,6 +108,3 @@ long short : filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
 	xmn -pm -f filelist | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
-
-install-% :
-	@[[ -e dotfiles/$* ]] && cp -r dotfiles/$* ~/.$* || echo dotfiles/$* is missing
