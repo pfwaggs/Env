@@ -9,15 +9,13 @@ umask 0022
 declare -x  HISTFILE=~/.history
 declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG >&/dev/null; pwd -P)
 
-FLISTDIRS=$ENVDIR/envfiles
-[[ -s ~/.priv/FLIST ]] && FLISTDIRS+=:~/.priv
-declare -rx FLISTDIRS
+declare -rx FLISTDIR=$ENVDIR/envfiles
 
 srcfile=$ENVDIR/envfiles/bashrcfuncs
 compgen -A function | grep -q envpurge || source $srcfile
 [[ -f ~/.no_lock_funcs ]] || declare -frx $(awk '/^function/ {print $2}' $srcfile)
 envpurge
-for x in $(_flistXpnd ${FLISTDIRS//:/ }); do
+for x in $(_flistXpnd $FLISTDIR); do
     . $x
     [[ -f ~/.quiet ]] && echo -n . || echo $x
 done

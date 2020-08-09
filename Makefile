@@ -19,6 +19,7 @@ ifndef TUMBLE
 endif
 
 DOTSRCDIR = $(ENVTAG)/dotinstall
+DOTINSTALL = $(notdir $(wildcard $(DOTSRCDIR)/*))
 LAST = $(lastword $(LIST))
 CURRENT = $(notdir $(call FOLLOW_LINK,current))
 SAVE = $(notdir $(call FOLLOW_LINK,save))
@@ -33,22 +34,10 @@ export $(STATUS)
 
 .PHONY: archive
 
-all :
-
 help :
 	@grep '^#help: ' Makefile | cut -f2- -d: | column -s: -t
 
-#help: %-x{info,recover,tar,targz} : the 'x' commands let you specify a line
-#help: : number in archive.txt to use for the git
-#help: : reference and runs a new make instance
-#help: : with the altered command.
-%-xinfo %-xrecover %-xtar %-xtargz : 
-	@ref=$$(perl -n -E '$*==$$. && say /-(\w+)$$/' archive.txt); cmd=$@; cmd="$${cmd#*x}"; make $$ref-$$cmd
-
-%-info :
-	@x=$$(grep $* archive.txt); [[ -n $$x ]] || { echo $* not found in archive.txt; exit 1; }; \
-	    read date seq rev < <(echo $${x//[.-]/ }); git $(GITPREFIX) log $$rev -1; 
-	
+#help: info : combines status and list
 info : status list
 
 #help: status : shows current variables
@@ -59,10 +48,12 @@ status :
 list :
 	@echo archive:; for v in $(ARCHIVE); do echo $$v; done
 
-#help: archive : appends archive names to archive.txt then deletes the archive
-archive :
-	@[[ -n "$(ARCHIVE)" ]] || { echo nothing to archive; exit 1; }
-	@printf "%s\n" $(ARCHIVE) >> archive.txt; rm -r $(ARCHIVE)
+#help: %-x{info,recover,tar,targz} : the 'x' commands let you specify a line
+#help: : number in archive.txt to use for the git
+#help: : reference and runs a new make instance
+#help: : with the altered command.
+%-xinfo %-xrecover %-xtar %-xtargz : 
+	@ref=$$(perl -n -E '$*==$$. && say /-(\w+)$$/' archive.txt); cmd=$@; cmd="$${cmd#*x}"; make $$ref-$$cmd
 
 #help: %-recover : recover an entry. use the log tag at end of the dir name
 %-recover :
@@ -74,6 +65,15 @@ archive :
 %-tar %-targz:
 	@[[ $@ =~ targz ]] && format=targz || format=tar; \
 	    git $(GITPREFIX) archive --format=$$format --prefix=$*/ $* > $*.$$format
+
+%-info :
+	@x=$$(grep $* archive.txt); [[ -n $$x ]] || { echo $* not found in archive.txt; exit 1; }; \
+	    read date seq rev < <(echo $${x//[.-]/ }); git $(GITPREFIX) log $$rev -1; 
+
+#help: archive : appends archive names to archive.txt then deletes the archive
+archive :
+	@[[ -n "$(ARCHIVE)" ]] || { echo nothing to archive; exit 1; }
+	@printf "%s\n" $(ARCHIVE) >> archive.txt; rm -r $(ARCHIVE)
 
 #help: snapshot : takes a snapshot into a derived dir
 update :
@@ -93,9 +93,18 @@ current : $(LAST)-current
 roll : save current
 	-@rm testing &>/dev/null
 
-#help: install-% : used to install user dot files like .bashrc
-install-% :
-	@x=$(DOTSRCDIR)/$*; [[ -e $$x ]] && cp -r $$x ~/.$* || echo $$x is missing
+#help: install-% : used to install individual user dotfile like .bashrc
+#help: install : used to install all the dotfiles for the user
+.SECONDEXPANSION:
+install-% : $(DOTSRCDIR)/$$*
+	@echo checking $^; diff -qr $^ ~/.$* || cp -r $^ ~/.$*
+
+install : $(addprefix install-, $(DOTINSTALL));
+
+check :
+	@for x in $(DOTINSTALL); do \
+	    diff -qr $(DOTSRCDIR)/$$x ~/.$$x || echo $$x is not current; \
+	done
 
 filelist :
 	@echo Makefile > filelist
