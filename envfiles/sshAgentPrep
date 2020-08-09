@@ -1,7 +1,7 @@
 
 if [[ -f ~/.agentfile ]]; then
     AGENTFILE=$(cat ~/.agentfile)
-    [[ -e $AGENTFILE ]] || { rm ~/.agentfile; unset AGENTFILE; }
+    [[ -e $AGENTFILE ]] || { ssh-agent -k; rm ~/.agentfile /tmp/agentInit*; unset AGENTFILE; }
 fi
 if [[ ${AGENTFILE:-no} = no ]]; then
     AGENTFILE=$(echo /tmp/agentInit-$PPID | tee ~/.agentfile)
