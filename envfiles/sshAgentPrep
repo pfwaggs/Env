@@ -1,8 +1,9 @@
-#-*-sh-*-
 
 if [[ -f ~/.agentfile ]]; then
     AGENTFILE=$(cat ~/.agentfile)
-else
+    [[ -e $AGENTFILE ]] || { rm ~/.agentfile; unset AGENTFILE; }
+fi
+if [[ ${AGENTFILE:-no} = no ]]; then
     AGENTFILE=$(echo /tmp/agentInit-$PPID | tee ~/.agentfile)
     pid=$(grep AGENT $AGENTFILE 2>/dev/null | perl -n -E 'say /=(\d+)/')
     eval "$(ssh-agent | tee $AGENTFILE)"
