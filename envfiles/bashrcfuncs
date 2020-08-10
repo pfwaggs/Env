@@ -115,10 +115,12 @@ function _genFuncPaths ()
 }
 
 function load () {
+    declare x y
     [[ $# -gt 0 ]] || envpurge
     for x in ${@:-$(_flistXpnd)}; do
-	. $x
-	[[ -f ~/.quiet ]] && echo -n . || echo $x
+	[[ -f ${y:=$x} ]] || y=$(_flistFind $x)
+	[[ -n $y ]] || { echo "can't find $x"; continue; }
+	[[ -f ~/.quiet ]] && echo -n . || echo $y
     done
     echo ' done'
 }
