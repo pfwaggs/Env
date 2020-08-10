@@ -89,10 +89,8 @@ function _flistXpnd ()
 function _flistFind ()
 {
     declare x dir
-    for dir in ${FLISTDIRS//:/ }; do
-	for x in $@; do
-	    [[ -f $dir/$x ]] && echo $dir/$x || continue
-	done
+    for x in $@; do
+	[[ -f $FLISTDIR/$x ]] && echo $FLISTDIR/$x || continue
     done
 }
 

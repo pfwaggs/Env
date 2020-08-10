@@ -88,12 +88,13 @@ update :
 	@git $(GITPREFIX) archive --format=tar --prefix=$(NEEDUPDATE)/ HEAD | (tar -xf -)
 
 #help: (%-)current : makes the named (latest) version current
+#help: (%-)testing : makes the named (lastest) version testing
 #help: (%-)save    : makes the named (current) version save
 save : $(CURRENT)-save
-
+testing : $(LAST)-testing
 current : $(LAST)-current
 
-%-current %-save :
+%-current %-save %-testing :
 	@dir=$*; tmp=$@; link="$${tmp##*-}"; ln -n -f -s $$dir $$link; ls -ld $$link
 
 #help: roll : relinks current to save and links last to current
