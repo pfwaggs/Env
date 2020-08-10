@@ -1,6 +1,6 @@
 # -*-sh-*-
 
-export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
+#export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
 export VIMHOME=~
 export VIMDIR=$VIMHOME/.vim
 export VIMINIT=":source $VIMDIR/vimrc"
@@ -8,6 +8,7 @@ export VIMINIT=":source $VIMDIR/vimrc"
 function configEd () {
     case $1 in
 	emacs)
+	    continue
 	    ps -f -C emacs | grep -q daemon || emacs --daemon
 	    EDITOR=$(type -p emacsclient | head -n 1)
 	    VISUAL=$EDITOR

@@ -2,6 +2,14 @@ SHELL = /bin/bash
 GITHOME = $(HOME)/Git/Env
 GITPREFIX = -C $(GITHOME)
 
+ifeq (,$(filter $(ENVTAG),$(wildcard *)))
+    DOTSRCDIR = dotinstall
+    MAKEFILE = Makefile
+else
+    DOTSRCDIR = $(ENVTAG)/dotinstall
+    MAKEFILE = $(ENVTAG)/Makefile
+endif
+
 BRANCH = $(shell git $(GITPREFIX) rev-parse --abbrev-ref HEAD)
 ifeq (,$(findstring $(BRANCH),master))
     $(error branch is not master. please change branches)
@@ -18,7 +26,6 @@ ifndef TUMBLE
     TUMBLE = -DTumble:true
 endif
 
-DOTSRCDIR = $(ENVTAG)/dotinstall
 DOTINSTALL = $(notdir $(wildcard $(DOTSRCDIR)/*))
 LAST = $(lastword $(LIST))
 CURRENT = $(notdir $(call FOLLOW_LINK,current))
@@ -35,7 +42,7 @@ export $(STATUS)
 .PHONY: archive
 
 help :
-	@grep '^#help: ' Makefile | cut -f2- -d: | column -s: -t
+	@grep '^#help: ' $(MAKEFILE) | cut -f2- -d: | column -s: -t
 
 #help: info : combines status and list
 info : status list
