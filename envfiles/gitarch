@@ -1,9 +1,0 @@
-
-function gitarch ()
-{
-    declare name=${PWD##*/}
-    declare branch=$(git branch | sed -n '/*/p' | cut -c3-)
-    declare ver=$(git tag | sed -n '$p')
-    declare tar=${name}_${branch}_${ver}.tgz
-    git archive --format=tgz --prefix=$name/ --output=$tar HEAD
-}

@@ -1,6 +1,9 @@
 
 function setPrompt () {
-    declare OPTIND x key value
+    declare x key
+    declare flip color text
+    declare colors=${!_ColorNum[*]}
+    declare colorPat=${colors// /|}
     declare -A promptMap
     for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
 
@@ -13,28 +16,24 @@ function setPrompt () {
 	return
     fi
     for x in "$@"; do
-	read key value <<-end
-	${x/=/ }
-	end
-        case $key in
-	    tag|xtra)
-		if [[ -n $value ]]; then
-		    [[ $value =~ = ]] && _PromptColor[$key]=${value%=*}
-		    _PromptCfg[$key]=${value#*=}
-		    _PromptShow[$key]=1 
-		else
-		    ((_PromptShow[$key]=1-${_PromptShow[$key]}))
-		fi
-		;;
-	    host|lpath|spath|num|user)
-		if [[ -n $value ]]; then
-		    _PromptColor[$key]=${value%=*}
-		    _PromptShow[$key]=1
-		else
-		    ((_PromptShow[$key]=1-${_PromptShow[$key]}))
-		fi
-		;;
-	esac
+	key=${x%%=*}
+	while read x; do
+	    case $x in 
+		[01])
+		    flip=$x
+		    ;;
+		@($colorPat))
+		    color=$x
+		    ;;
+		*)
+		    text=$x
+		    ;;
+	    esac
+	done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
+	[[ -n $text ]] && [[ $key =~ tag|xtra ]] && _PromptCfg[$key]=$text
+	[[ -n $color ]] && _PromptColor[$key]=$color
+	[[ -n $flip ]] && _PromptShow[$key]=$flip 
+	unset text color flip key
     done
     _PromptShow[host]=1
     _PromptShow[prompt]=1
@@ -51,4 +50,4 @@ function setPrompt () {
 
 function  tag () { setPrompt tag="$*"; }
 function xtra () { setPrompt xtra="$*"; }
-
+alias stp='setPrompt '

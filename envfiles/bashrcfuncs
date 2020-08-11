@@ -79,11 +79,7 @@ function envpurge ()
 
 function _flistXpnd ()
 {
-    declare x
-    for x in $@; do
-	[[ -f $x/FLIST ]] || continue
-	grep -o -P '^\w+' $x/FLIST | sed "s|^|$x/|"
-    done
+    grep -o -P '^\w+' $FLISTDIR/FLIST | sed "s|^|$FLISTDIR/|"
 }
 
 function _flistFind ()
@@ -94,30 +90,30 @@ function _flistFind ()
     done
 }
 
-# sources a provided list of files
-function _genFuncPaths ()
-{
-    declare x
-    declare -a mainList recheck
-    for x in $@; do
-	[[ $x =~ / ]] && mainList+=($x) || recheck+=($x)
-    done
-    if [[ ${#recheck[@]} -gt 0 ]]; then
-	while read x; do
-	    mainList+=($x)
-	done < <($(_flistFind ${recheck[@]}))
-    fi
-    for x in ${mainList[@]}; do
-	echo $x
-    done
-}
+## sources a provided list of files
+#function _genFuncPaths ()
+#{
+#    declare x
+#    declare -a mainList recheck
+#    for x in $@; do
+#	[[ $x =~ / ]] && mainList+=($x) || recheck+=($x)
+#    done
+#    if [[ ${#recheck[@]} -gt 0 ]]; then
+#	while read x; do
+#	    mainList+=($x)
+#	done < <($(_flistFind ${recheck[@]}))
+#    fi
+#    for x in ${mainList[@]}; do
+#	echo $x
+#    done
+#}
 
 function load () {
     declare x y
     [[ $# -gt 0 ]] || envpurge
     for x in ${@:-$(_flistXpnd)}; do
 	[[ -f ${y:=$x} ]] || y=$(_flistFind $x)
-	[[ -n $y ]] || { echo "can't find $x"; continue; }
+	[[ -n $y ]] && . $y || { echo "can't find $x"; continue; }
 	[[ -f ~/.quiet ]] && echo -n . || echo $y
     done
     echo ' done'

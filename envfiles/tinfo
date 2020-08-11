@@ -1,0 +1,14 @@
+
+function tinfo () {
+    declare x y
+    for x; do
+	for y in $(type -a -p $x); do	
+	    ls -l $y
+	    md5sum $y
+	    echo -ne $'\n'
+	    file -k $y
+	    echo -e $'\n\n\n'
+	done
+    done
+}
+

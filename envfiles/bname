@@ -1,7 +1,0 @@
-
-# returns the basename of given paths
-function bname ()
-{
-    declare x
-    for x in $@; do echo ${x##*/}; done
-}
