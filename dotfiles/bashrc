@@ -11,11 +11,11 @@ declare -rx ENVDIR=$(pushd ~/Env/$ENVTAG >&/dev/null; pwd -P)
 
 declare -rx FLISTDIR=$ENVDIR/envfiles
 
-srcfile=$ENVDIR/envfiles/bashrcfuncs
+srcfile=$FLISTDIR/bashrcfuncs
 compgen -A function | grep -q envpurge || source $srcfile
 [[ -f ~/.no_lock_funcs ]] || declare -frx $(awk '/^function/ {print $2}' $srcfile)
 envpurge
-for x in $(_flistXpnd $FLISTDIR); do
+for x in $(_flistXpnd); do
     . $x
     [[ -f ~/.quiet ]] && echo -n . || echo $x
 done
