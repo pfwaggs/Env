@@ -1,6 +1,9 @@
 SHELL = /bin/bash
 GITHOME = $(HOME)/Git/Env
 GITPREFIX = -C $(GITHOME)
+ifeq (.git,$(findstring .git,$(shell ls -d .git)))
+    $(error make operations should not be run in git repo)
+endif
 
 ifeq (,$(filter $(ENVTAG),$(wildcard *)))
     DOTSRCDIR = dotinstall

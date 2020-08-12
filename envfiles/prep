@@ -1,6 +1,12 @@
 
 declare -x PREPDIR=${ENVDIR%%:*}/envfiles/prep_files
 
+#help: prep : used to give a boilerplate file for editing
+#help: : based on extension;
+#help: : sh for shell scripts
+#help: : pl for perl scripts
+#help: : py for python scripts
+#help: : fn|fnc for bash functions
 function prep ()
 {
     declare dest base file type

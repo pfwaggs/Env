@@ -1,4 +1,5 @@
 
+#help : killdir : moves you to the parent and removes the dir you were in
 function killdir ()
 {
     [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }

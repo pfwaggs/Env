@@ -1,12 +1,12 @@
 
-# some basic list operations
-# -s sort
-# -e exists
-# -r reverse
-# -l resolve links
-# -c clear items
-# -u unique items
-# -S output a single string
+#help: _FixList :  some basic list operations:
+#help: :  -s sort
+#help: :  -e exists
+#help: :  -r reverse
+#help: :  -l resolve links
+#help: :  -c clear items
+#help: :  -u unique items
+#help: :  -S output a single string
 function _FixList ()
 {
     declare p opt
@@ -65,7 +65,7 @@ function _FixList ()
     printf '%s\n' "${list[@]}"
 }
 
-# clear the environment of crap
+#help: envpurge : reset the environment
 function envpurge ()
 {
     complete -r
@@ -73,15 +73,14 @@ function envpurge ()
     unset -f $(compgen -A function) &>/dev/null
 }
 
-# produces a list of paths for source-ing input paths should specify a
-# directory or filename of a list of files in the parent directory to
-# load relative to it's parent
-
+#help: _flistXpnd : expands the contents of FLIST by prepending the path to
+#help: : the name
 function _flistXpnd ()
 {
     grep -o -P '^\w+' $FLISTDIR/FLIST | sed "s|^|$FLISTDIR/|"
 }
 
+#help: _flistFind : finds the file that contains the function
 function _flistFind ()
 {
     declare x dir
@@ -90,24 +89,8 @@ function _flistFind ()
     done
 }
 
-## sources a provided list of files
-#function _genFuncPaths ()
-#{
-#    declare x
-#    declare -a mainList recheck
-#    for x in $@; do
-#	[[ $x =~ / ]] && mainList+=($x) || recheck+=($x)
-#    done
-#    if [[ ${#recheck[@]} -gt 0 ]]; then
-#	while read x; do
-#	    mainList+=($x)
-#	done < <($(_flistFind ${recheck[@]}))
-#    fi
-#    for x in ${mainList[@]}; do
-#	echo $x
-#    done
-#}
-
+#help: load : loads the given function names found in FLISTDIR or
+#help: : the given full path
 function load () {
     declare x y
     [[ $# -gt 0 ]] || envpurge

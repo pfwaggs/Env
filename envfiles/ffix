@@ -1,4 +1,5 @@
 
+#help: ffix : useful to grab a function and edit it for testing
 function ffix ()
 {
     declare x=/tmp/${1}2

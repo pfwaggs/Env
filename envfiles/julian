@@ -1,4 +1,5 @@
 
+#help: julian : presents dates in julian format and converts back
 function julian ()
 {
     case ${1//[0-9]/x} in

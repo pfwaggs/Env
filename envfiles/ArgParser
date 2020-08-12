@@ -1,4 +1,5 @@
 
+#help: _ArgParser : argument completion function
 function _ArgParser () {
     declare path file partial dir
     declare -a list

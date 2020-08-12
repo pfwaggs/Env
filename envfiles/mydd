@@ -1,8 +1,17 @@
 
+#help: mydd : convenience wrapper for dd/dcfldd
+#help: : this lets you use tab complete for filename
 function mydd ()
 {
     declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
     shift
-    $DD if="$if" "$@"
+    case $DD in
+	dd)
+	    $DD if="$if" "$@" style=progress
+	    ;;
+	dcfldd)
+	    $DD if="$if" "$@"
+	    ;;
+    esac
 }
 

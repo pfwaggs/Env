@@ -1,4 +1,5 @@
 
+#help: _Show : complete function for the show function
 function _Show ()
 {
     declare x
@@ -6,18 +7,18 @@ function _Show ()
     compgen -v | grep -i "^$x"
 }
 
+#help: show : used to show variable values
+#help: : type values in lowercase and <tab> will uppercase if needed
 function show ()
 {
-    declare x j
-    read j x j < <(declare -p $1)
-    var=${j%%=*}
+    declare x=$(declare -p $1 | awk '{print $2}')
     if [[ $x =~ [aA] ]]; then
-        echo array: $var
-        for z in $(eval "echo \${!$var[@]}"); do
-            eval "echo $z = \${$var[$z]}"
+        echo array $1:
+        for x in $(eval "echo \${!$1[@]}"); do
+            eval "echo $x = \${$1[$x]}"
         done
     else
-        echo $var = ${!var}
+        echo $1 = ${!1}
     fi
 }
 

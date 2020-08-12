@@ -1,4 +1,5 @@
 
+#help: lsu : a long listing of dirs moving up the dir path
 function lsu ()
 {
     declare -a np=(/ "${1:-$PWD}")

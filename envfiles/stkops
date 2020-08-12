@@ -1,75 +1,74 @@
 
-function stk ()
-{
+#help: stk : dir stack operations
+#help: : save filename : saves current dirstack to filename
+#help: : load filename : loads given filename into dirstack
+#help: : clear (x ...) : clears dirstack or removes specified dirstack elements 
+function stk () {
     declare n line cmd=$1
     shift
     case $cmd in
-        d)
-            [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
-            [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
-            return
+        save)
+	    : ${1:?missing input filename}
+            dirs -p > $1
+	    return
             ;;
-        l)
-            [[ -f $STKFILE ]] && cat $STKFILE
-            ;;
-        s)
-            dirs -p | tee $STKFILE
-            ;;
-        k)
-            push ..
-            rm -r ~1
-            pop +1
-            ;;
-        c)
+        clear)
             if [[ $# -gt 1 ]]; then
                 for n in $(echo ${@:2} | xargs -n 1 | sort -rn); do
-                    pop +$n
+                    popd +$n
                 done
             else
+		pushd ~
                 dirs -c
             fi
             ;;
-        R)
-            for line in $(tac $STKFILE); do
+        load)
+	    : ${1:?missing input filename}
+            for line in $(tac $1); do
                 [[ -d $line ]] || continue
                 push -n "$line"
             done
             ;;
-        r)
-            stk c
-            stk R
-            ;;
     esac
     dirs -l -v
 }
 
-function pop ()
-{
-    popd $@ > /dev/null
-    dirs -l -v
-}
-
-function push ()
-{
-    declare op
-    case $1 in
-        -n|-*|+*)
-            op=$1
-            shift;;
-        '')
-            :
-            ;;
-        *)
-            if [[ ! -d $1 ]]; then
-                read -p 'new dir:' -e -i "$1"
-                [[ -n $REPLY ]] && mkdir -p "$REPLY"
-                set - "$REPLY"
-            fi
-            ;;
+#help: stkdiff : convenient differences between stack elements
+#help: : 0 args : diff between current dir and ~1
+#help: : 2 args : diff between ~first and ~second
+#help: : 1 arg : diff between given filename and ~1/filename
+function stkdiff () {
+    [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
+    case $# in
+	2)
+	    eval "diff -qr ~$1 ~$2"
+	    ;;
+	1)
+	    [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
+	    ;;
+	0)
+	    diff -qr . ~1
+	    ;;
     esac
-    pushd $op $1 > /dev/null
+    return
+}
+
+#help: pop : simple wrapper for popd; pops given entry (default is current)
+function pop () {
+    popd ${1:++$1} > /dev/null
     dirs -l -v
 }
 
-complete -o filenames -C '_ArgParser' stk
+#help: push : simple wrapper for pushd
+function push () {
+    declare dir="$1"
+    if [[ ! -d $dir ]]; then
+	read -p 'new dir: ' -e -i "$dir" dir
+	[[ -n $dir ]] && mkdir -p "$dir"
+    fi
+    pushd "$dir" &>/dev/null
+    dirs -l -v
+}
+
+complete -o filenames -C '_ArgParser' stkdiff
 

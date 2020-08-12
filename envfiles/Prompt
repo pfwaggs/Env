@@ -1,4 +1,15 @@
 
+#help: setPrompt : utility to set prompt line characteristics (alias as stp)
+#help: : args are: key[=0|1][=color][=text]
+#help: : keys are:
+#help: : num : history number at beginning
+#help: : xtra : extra field (often set for labconfig)
+#help: : tag : loader tag field
+#help: : user : the users sid
+#help: : host : hostname
+#help: : spath : short path
+#help: : lpath : full path
+#help: : prompt : prompt symbol (# for root, $ for loader)
 function setPrompt () {
     declare x key
     declare flip color text
@@ -6,15 +17,6 @@ function setPrompt () {
     declare colorPat=${colors// /|}
     declare -A promptMap
     for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
-
-    if [[ $1 = help ]]; then
-	cat <<-end
-	args are: key[=color][=text]
-	keys are: num xtra tag user host spath lpath prompt
-	a bare key toggles that item
-	end
-	return
-    fi
     for x in "$@"; do
 	key=${x%%=*}
 	while read x; do
@@ -48,6 +50,10 @@ function setPrompt () {
     PS1+=$'\[\e[m\]'
 }
 
+#help: tag : shortcut to set tag for the prompt
 function  tag () { setPrompt tag="$*"; }
+
+#help: xtra : shortcut to set xtra for the prompt
 function xtra () { setPrompt xtra="$*"; }
+
 alias stp='setPrompt '

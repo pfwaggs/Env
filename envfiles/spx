@@ -1,4 +1,5 @@
 
+#help : spx : simple function to do aspell
 function spx ()
 {
     echo $@ | aspell -a
