@@ -1,5 +1,5 @@
 
-#help: setPrompt : utility to set prompt line characteristics (alias as stp)
+#help: setPrompt : : utility to set prompt line characteristics (alias as stp)
 #help: : args are: key[=0|1][=color][=text]
 #help: : keys are:
 #help: : num : history number at beginning

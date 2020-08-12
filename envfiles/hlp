@@ -1,8 +1,7 @@
 
 #help: hlp : help for loading functions
 function hlp () {
-    declare file=$(grep -m 1 -l "function $1" $FLISTDIR/* 2>/dev/null)
-    sed -nr "/^function $1/,/^##/p" $file | grep '^#help: ' | cut -f2- -d: | column -s: -t
+    sed -nr "/: $1 :/{:1;p;n;/^function/!b1}" $2 | cut -f2- -d: | column -n -s: -t
     
 }
 
