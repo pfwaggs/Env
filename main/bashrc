@@ -22,7 +22,7 @@ source $MAINDIR/aliases
 srcfile=$MAINDIR/bashrcfuncs
 source $srcfile
 source $MAINDIR/functions
-source $MAINDIR/complete
+source $MAINDIR/completes
 [[ -f ~/.no_lock_funcs ]] || declare -frx $(awk '/^function/ {print $2}' $srcfile) || :
 configEd vim
 setPrompt
