@@ -1,8 +1,7 @@
 
-#help: stk : dir stack operations
-#help: : save filename : saves current dirstack to filename
-#help: : load filename : loads given filename into dirstack
-#help: : clear (x ...) : clears dirstack or removes specified dirstack elements 
+#help: stk : dir stack operations to save, load and clear the dirstack
+#help: usage : stk [save|load] filename
+#help: : stk clear (n ...)
 function stk () {
     declare n line cmd=$1
     shift
@@ -34,9 +33,9 @@ function stk () {
 }
 
 #help: stkdiff : convenient differences between stack elements
-#help: : 0 args : diff between current dir and ~1
-#help: : 2 args : diff between ~first and ~second
-#help: : 1 arg : diff between given filename and ~1/filename
+#help: usage : stkdiff (does diff -qr . ~1)
+#help: : stkdiff filename (does diff -y filename ~1/filename)
+#help: : stkdiff x y (does diff -qr ~x ~y)
 function stkdiff () {
     [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
     case $# in
@@ -54,12 +53,14 @@ function stkdiff () {
 }
 
 #help: pop : simple wrapper for popd; pops given entry (default is current)
+#help: usage : pop [n]
 function pop () {
     popd ${1:++$1} > /dev/null
     dirs -l -v
 }
 
 #help: push : simple wrapper for pushd
+#help: usage : push (path)
 function push () {
     declare dir="$1"
     if [[ ! -d $dir ]]; then

@@ -20,3 +20,10 @@ export CDPATH=".:..:../..:~:~/Git"
 export GS_FONTPATH=~/.fonts
 
 export INPUTRC=~/.inputrc
+
+export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
+export VIMHOME=~
+export VIMDIR=$VIMHOME/.vim
+export VIMINIT=":source $VIMDIR/vimrc"
+
+

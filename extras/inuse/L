@@ -1,5 +1,6 @@
 
 #help: L : provides ls support for hidden (dot) files
+#help: usage : L [options] [dir]
 function L ()
 {
     declare -a args

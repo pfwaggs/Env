@@ -1,5 +1,6 @@
 
 #help: mkwdir : creates a new arg.nn dir based on arg
+#help: usage : mkwdir (base)
 #help: : default arg is the date
 function mkwdir ()
 {

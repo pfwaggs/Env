@@ -1,5 +1,6 @@
 
 #help: mydd : convenience wrapper for dd/dcfldd
+#help: usage : mydd object <tab> [option ...]
 #help: : this lets you use tab complete for filename
 function mydd ()
 {

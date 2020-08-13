@@ -1,5 +1,6 @@
 
-#help : killdir : moves you to the parent and removes the dir you were in
+#help: killdir : moves you to the parent and removes the dir you were in
+#help: usage : killdir
 function killdir ()
 {
     [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
@@ -8,7 +9,7 @@ function killdir ()
     pushd .. >/dev/null
     echo deleting: ~1
     rm -r ~1
-    popd +1 >/dev/null
+    popd +1 &>/dev/null
     dirs -v
 }
 

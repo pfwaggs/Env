@@ -6,19 +6,23 @@ set -C -b
 shopt -s extglob
 
 umask 0022
-source $MAINDIR/basevars
-source $MAINDIR/final
+
+# purge the env
+complete -r
+unalias -a
+unset -f $(compgen -A function) &>/dev/null
+
+# maybe legacy because LXDE uses vte.  is there a better check?
+[[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
+
+# start building the env. start with base_init and aliases
+source $MAINDIR/base_init # mainly var defs etc.
+source $MAINDIR/aliases
 
 srcfile=$MAINDIR/bashrcfuncs
 source $srcfile
-[[ -f ~/.lock_funcs ]] && declare -frx $(awk '/^function/ {print $2}' $srcfile) || :
-envpurge
-source $MAINDIR/aliases
 source $MAINDIR/functions
 source $MAINDIR/complete
-
-# because LXDE has vte?
-[[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
-
+[[ -f ~/.no_lock_funcs ]] || declare -frx $(awk '/^function/ {print $2}' $srcfile) || :
 configEd vim
 setPrompt

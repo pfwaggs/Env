@@ -1,17 +1,13 @@
 # -*-sh-*-
 
-export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
-export VIMHOME=~
-export VIMDIR=$VIMHOME/.vim
-export VIMINIT=":source $VIMDIR/vimrc"
-
 #help: configEd : configure the editor of your choice (emacs, vim)
+#help: usage : configEd [emacs|vim]
 function configEd () {
     case $1 in
 	emacs)
 	    ps -f -C emacs | grep -q daemon || emacs --daemon
-	    EDITOR=$(type -p emacsclient | head -n 1)
-	    VISUAL=$EDITOR
+	    export EDITOR=$(type -p emacsclient | head -n 1)
+	    export VISUAL=$EDITOR
 	    set -o emacs
 	    ;;
 	vim)

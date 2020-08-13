@@ -8,6 +8,7 @@ function _Show ()
 }
 
 #help: show : used to show variable values
+#help: usage : show var
 #help: : type values in lowercase and <tab> will uppercase if needed
 function show ()
 {

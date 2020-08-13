@@ -1,5 +1,6 @@
 
 #help: ffix : useful to grab a function and edit it for testing
+#help: usage : ffix function (the edited file will be in /tmp)
 function ffix ()
 {
     declare x=/tmp/${1}2

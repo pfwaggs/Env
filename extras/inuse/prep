@@ -1,5 +1,6 @@
 
 #help: prep : used to give a boilerplate file for editing
+#help: usage : prep file.(sh|pl|py|fn|fnc)
 #help: : based on extension;
 #help: : sh for shell scripts
 #help: : pl for perl scripts

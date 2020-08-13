@@ -1,5 +1,6 @@
 
 #help: ffunc : presents defined functions and file they are from
+#help: usage : ffunc function
 function ffunc ()
 {
     shopt -s extdebug

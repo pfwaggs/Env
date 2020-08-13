@@ -1,5 +1,6 @@
 
 #help: setPrompt : : utility to set prompt line characteristics (alias as stp)
+#help: usage : setPrompt [args...]
 #help: : args are: key[=0|1][=color][=text]
 #help: : keys are:
 #help: : num : history number at beginning
@@ -51,8 +52,10 @@ function setPrompt () {
 }
 
 #help: tag : shortcut to set tag for the prompt
+#help: usage : tag [color=]'text'
 function  tag () { setPrompt tag="$*"; }
 
 #help: xtra : shortcut to set xtra for the prompt
+#help: usage : xtra [color=]'text'
 function xtra () { setPrompt xtra="$*"; }
 
