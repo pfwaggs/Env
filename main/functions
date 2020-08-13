@@ -1,4 +1,108 @@
 
+#help: _FixList :  some basic list operations:
+#help: :  -s sort
+#help: :  -e exists
+#help: :  -r reverse
+#help: :  -l resolve links
+#help: :  -c clear items
+#help: :  -u unique items
+#help: :  -S output a single string
+function _FixList ()
+{
+    declare p opt
+    declare -a nlist list opts
+    for p in "$@"; do
+        [[ $p =~ ^-.* ]] && opts+=($p) || list+=("$p")
+    done
+    if [[ ${#list[@]} -eq 0 ]]; then
+        while read p; do
+            list+=("$p")
+        done < <(cat -- -)
+    fi
+    for opt in ${opts[@]}; do
+        nlist=()
+        case $opt in
+            -s)
+		while read -r p; do
+                    nlist+=("$p")
+                done < <(printf '%s\n' "${list[@]}" | sort)
+                ;;
+            -e)
+                for p in "${list[@]}"; do
+                    [[ -e "$p" ]] && nlist+=("$p") || continue
+                done
+                ;;
+            -r)
+		while read -r p; do
+                    nlist+=("$p")
+                done < <(printf '%s\n' "${list[@]}" | tac)
+                ;;
+            -l)
+                for p in "${list[@]}"; do
+                    [[ -L "$p" ]] && p=$(readlink -e "$p") || :
+                    nlist+=("$p")
+                done
+                ;;
+            -c)
+		for p in "${list[@]:1}"; do
+		    [[ $p =~ ${list[0]}.* ]] || nlist+=("$p")
+                done
+                ;;
+            -u)
+                for p in "${list[@]}"; do
+                    [[ ${nlist[@]} =~ :$p ]] || nlist+=(":$p")
+                done
+                nlist=("${nlist[@]/#:}")
+                ;;
+            -S|*)
+                declare IFS=${SEP:-:}$IFS
+                echo "${list[*]}"
+		return
+                ;;
+        esac
+        list=("${nlist[@]}")
+    done
+    printf '%s\n' "${list[@]}"
+}
+
+#help: envpurge : reset the environment
+function envpurge ()
+{
+    complete -r
+    unalias -a
+    unset -f $(compgen -A function) &>/dev/null
+}
+
+#help: _flistXpnd : expands the contents of FLIST by prepending the path to
+#help: : the name
+function _flistXpnd ()
+{
+    grep -o -P '^\w+' $FLISTDIR/FLIST | sed "s|^|$FLISTDIR/|"
+}
+
+#help: _flistFind : finds the file that contains the function
+function _flistFind ()
+{
+    declare x dir
+    for x in $@; do
+	[[ -f $FLISTDIR/$x ]] && echo $FLISTDIR/$x || continue
+    done
+}
+
+#help: load : loads the given function names found in FLISTDIR or
+#help: : the given full path
+function load () {
+    declare x y
+    [[ $# -gt 0 ]] || envpurge
+    for x in ${@:-$(_flistXpnd)}; do
+	[[ -f ${y:=$x} ]] || y=$(_flistFind $x)
+	[[ -n $y ]] && . $y || { echo "can't find $x"; continue; }
+	[[ -f ~/.quiet ]] && echo -n . || echo $y
+    done
+    echo ' done'
+}
+
+
 #help: _ArgParser : argument completion function
 function _ArgParser () {
     declare path file partial dir
