@@ -11,14 +11,12 @@ function gigify ()
     printf "%s%7.3f%s\n" "${s: }" $v ${u:$m:1}
 }
 
-
 #help: psfu : checks the process table for specified user
 #help: usage : psfu sid
 function psfu ()
 {
     ps -f -u ${1:-$(id -un)}
 }
-
 
 #help: tinfo : generates some metatdata for a path versions of given filename
 #help: usage : tinfo file
@@ -35,14 +33,12 @@ function tinfo () {
     done
 }
 
-
 #help: tname : modifies titlename
 #help: usage : tname (str)
 function tname ()
 {
     printf "\033k%s\033\\" ${1:-bash}
 }
-
 
 #help: typer : used to examine files based on type
 #help: usage : typer file
@@ -69,7 +65,6 @@ function typer ()
         esac
     done
 }
-
 
 #help: wup : function to wake up machines on the network
 #help: usage : wup machine_name
@@ -143,10 +138,9 @@ function xmn ()
     done
 }
 
-
-
 #help: xtfn : function to extract a function for an aggregated list
 #help: usage : xtfn function
 function xtfn () {
     sed -nr "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $ENVDIR/main/bashrcfuncs;
 }
+
