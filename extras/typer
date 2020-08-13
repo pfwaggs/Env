@@ -1,5 +1,6 @@
 
 #help: typer : used to examine files based on type
+#help: usage : typer file
 function typer ()
 {
     declare mtype x

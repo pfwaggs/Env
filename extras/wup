@@ -1,4 +1,6 @@
 
+#help: wup : function to wake up machines on the network
+#help: usage : wup machine_name
 function wup ()
 {
     declare cmd=$(type -p etherwake wol)

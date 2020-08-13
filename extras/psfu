@@ -1,5 +1,6 @@
 
 #help: psfu : checks the process table for specified user
+#help: usage : psfu sid
 function psfu ()
 {
     ps -f -u ${1:-$(id -un)}

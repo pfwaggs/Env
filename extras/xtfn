@@ -1,4 +1,6 @@
 
+#help: xtfn : function to extract a function for an aggregated list
+#help: usage : xtfn function
 function xtfn () {
     sed -nr "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $ENVDIR/main/bashrcfuncs;
 }

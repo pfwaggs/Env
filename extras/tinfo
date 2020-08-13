@@ -1,4 +1,6 @@
 
+#help: tinfo : generates some metatdata for a path versions of given filename
+#help: usage : tinfo file
 function tinfo () {
     declare x y
     for x; do

@@ -1,4 +1,6 @@
 
+#help: xmn : used to produce a detailed listing
+#help:     : of source code with some extra stuff
 function xmn ()
 {
     declare opt infile tmp n arg file OPTIND=1 keep=0
