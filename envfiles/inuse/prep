@@ -1,6 +1,4 @@
 
-declare -x PREPDIR=${ENVDIR%%:*}/envfiles/prep_files
-
 #help: prep : used to give a boilerplate file for editing
 #help: : based on extension;
 #help: : sh for shell scripts
@@ -9,6 +7,7 @@ declare -x PREPDIR=${ENVDIR%%:*}/envfiles/prep_files
 #help: : fn|fnc for bash functions
 function prep ()
 {
+    declare PREPDIR=$FLISTDIR/prep_files
     declare dest base file type
     source ${PREPDIR}/map
     for file in $@; do

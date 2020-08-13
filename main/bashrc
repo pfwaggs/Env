@@ -1,0 +1,24 @@
+[[ $- =~ i ]] || return 0 # -*-sh-*-
+
+trap "date >> $HISTFILE; history -a" HUP INT QUIT KILL TERM
+
+set -C -b
+shopt -s extglob
+
+umask 0022
+source $MAINDIR/basevars
+source $MAINDIR/final
+
+srcfile=$MAINDIR/bashrcfuncs
+source $srcfile
+[[ -f ~/.lock_funcs ]] && declare -frx $(awk '/^function/ {print $2}' $srcfile) || :
+envpurge
+source $MAINDIR/aliases
+source $MAINDIR/functions
+source $MAINDIR/complete
+
+# because LXDE has vte?
+[[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
+
+configEd vim
+setPrompt

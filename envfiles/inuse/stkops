@@ -70,5 +70,3 @@ function push () {
     dirs -l -v
 }
 
-complete -o filenames -C '_ArgParser' stkdiff
-

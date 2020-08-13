@@ -1,4 +1,6 @@
 
+#help: mkwdir : creates a new arg.nn dir based on arg
+#help: : default arg is the date
 function mkwdir ()
 {
     declare count dir pat date=$(date +%F | tr '-' '_')

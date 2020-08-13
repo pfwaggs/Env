@@ -56,4 +56,3 @@ function  tag () { setPrompt tag="$*"; }
 #help: xtra : shortcut to set xtra for the prompt
 function xtra () { setPrompt xtra="$*"; }
 
-alias stp='setPrompt '

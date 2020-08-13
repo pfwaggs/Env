@@ -1,0 +1,3 @@
+Show:complete -C '_Show' show
+final:complete -o filenames -C '_ArgParser' cd
+stkops:complete -o filenames -C '_ArgParser' stkdiff

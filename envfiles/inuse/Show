@@ -22,5 +22,3 @@ function show ()
     fi
 }
 
-complete -C '_Show' show
-
