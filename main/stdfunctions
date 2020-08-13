@@ -1,0 +1,371 @@
+
+#help: _ArgParser : argument completion function
+function _ArgParser () {
+    declare path file partial dir
+    declare -a list
+    [[ -n COMP_LINE ]] && x=$2 || x=$1
+    partial=${x/\~/$HOME}
+    file=${partial##*/}
+    for dir in "${partial%/*}" "${DIRSTACK[@]}" ${CDPATH//:/ }; do
+	[[ ${#list[@]} -eq 0 ]] || break
+	while read -r path; do
+	    [[ -d $path ]] && list+=("$path")
+	done < <(compgen -G "${dir:-.}/$file*" | sort)
+    done
+    [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
+}
+
+#help: L : provides ls support for hidden (dot) files
+#help: usage : L [options] [dir]
+function L ()
+{
+    declare -a args
+    declare opts=lAd
+    for x in $*; do
+        case $x in
+            -?)
+                opts+=${x/-}
+                ;;
+            *)
+                args+=("$x")
+                ;;
+        esac
+    done
+    [[ ${#args[@]} -gt 0 ]] || args+=(.)
+    for x in "${args[@]}"; do
+        ls -$opts "$x"/.??* 2> /dev/null
+    done
+}
+
+
+#help: setPrompt : : utility to set prompt line characteristics (alias as stp)
+#help: usage : setPrompt [args...]
+#help: : args are: key[=0|1][=color][=text]
+#help: : keys are:
+#help: : num : history number at beginning
+#help: : xtra : extra field (often set for labconfig)
+#help: : tag : loader tag field
+#help: : user : the users sid
+#help: : host : hostname
+#help: : spath : short path
+#help: : lpath : full path
+#help: : prompt : prompt symbol (# for root, $ for loader)
+function setPrompt () {
+    declare x key
+    declare flip color text
+    declare colors=${!_ColorNum[*]}
+    declare colorPat=${colors// /|}
+    declare -A promptMap
+    for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
+    for x in "$@"; do
+	key=${x%%=*}
+	while read x; do
+	    case $x in 
+		[01])
+		    flip=$x
+		    ;;
+		@($colorPat))
+		    color=$x
+		    ;;
+		*)
+		    text=$x
+		    ;;
+	    esac
+	done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
+	[[ -n $text ]] && [[ $key =~ tag|xtra ]] && _PromptCfg[$key]=$text
+	[[ -n $color ]] && _PromptColor[$key]=$color
+	[[ -n $flip ]] && _PromptShow[$key]=$flip 
+	unset text color flip key
+    done
+    _PromptShow[host]=1
+    _PromptShow[prompt]=1
+    PS1=
+    for x in num xtra tag user host spath lpath prompt; do
+        [[ ${_PromptShow[$x]} = 0 ]] && continue
+	[[ ${_PromptCfg[$x]} = '' ]] && continue
+        color=${_PromptColor[$x]}
+        num=${_ColorNum[$color]}
+        PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
+    done
+    PS1+=$'\[\e[m\]'
+}
+
+#help: tag : shortcut to set tag for the prompt
+#help: usage : tag [color=]'text'
+function  tag () { setPrompt tag="$*"; }
+
+#help: xtra : shortcut to set xtra for the prompt
+#help: usage : xtra [color=]'text'
+function xtra () { setPrompt xtra="$*"; }
+
+
+#help: _Show : complete function for the show function
+function _Show ()
+{
+    declare x
+    [[ -n $COMP_LINE ]] && x=$2 || x=$1
+    compgen -v | grep -i "^$x"
+}
+
+#help: show : used to show variable values
+#help: usage : show var
+#help: : type values in lowercase and <tab> will uppercase if needed
+function show ()
+{
+    declare x=$(declare -p $1 | awk '{print $2}')
+    if [[ $x =~ [aA] ]]; then
+        echo array $1:
+        for x in $(eval "echo \${!$1[@]}"); do
+            eval "echo $x = \${$1[$x]}"
+        done
+    else
+        echo $1 = ${!1}
+    fi
+}
+
+
+#help: commas : commafy numeric fields in input stream
+#help: usage : ... | commas
+function commas ()
+{
+    rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
+}
+
+# -*-sh-*-
+
+#help: configEd : configure the editor of your choice (emacs, vim)
+#help: usage : configEd [emacs|vim]
+function configEd () {
+    case $1 in
+	emacs)
+	    ps -f -C emacs | grep -q daemon || emacs --daemon
+	    export EDITOR=$(type -p emacsclient | head -n 1)
+	    export VISUAL=$EDITOR
+	    set -o emacs
+	    ;;
+	vim)
+	    export EDITOR=$(type -p vim vi | head -n 1)
+	    export VISUAL=$EDITOR
+	    set -o vi
+	    ;;
+    esac
+}
+
+
+#help: ffix : useful to grab a function and edit it for testing
+#help: usage : ffix function (the edited file will be in /tmp)
+function ffix ()
+{
+    declare x=/tmp/${1}2
+    type $1 | sed  "1d;s/${1}/${1}2/" > $x
+    vim $x
+    . $x
+}
+
+
+#help: ffunc : presents defined functions and file they are from
+#help: usage : ffunc function
+function ffunc ()
+{
+    shopt -s extdebug
+    declare -F ${@:-$(compgen -A function)} | column -t
+    shopt -u extdebug
+}
+
+
+#help: hlp : help for loading functions
+#help: usage : hlp function
+function hlp () {
+    sed -nr "/: $1 :/{:1;p;n;/^function/!b1}" $2 | cut -f2- -d: | column -n -s: -t
+    
+}
+
+
+#help: julian : presents dates in julian format and converts back
+#help: usage : julian [date]
+#help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
+#help: : date defaults to today
+function julian ()
+{
+    case ${1//[0-9]/x} in
+        '')
+            date +%Y.%j
+            ;;
+        xxxx-xx-xx)
+            date -u -d $1 +%Y.%j
+            ;;
+        xxxx.xxx)
+            declare y d
+            read y d < <(echo ${1/./ })
+            date -u -d "$y-01-01 $((d-1)) days" +%F
+            ;;
+        *)
+            echo 'unknown request'
+            ;;
+    esac
+}
+
+
+#help: killdir : moves you to the parent and removes the dir you were in
+#help: usage : killdir
+function killdir ()
+{
+    [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
+    read -p "remove < $PWD > ? "
+    [[ $REPLY =~ ^[yY] ]] || return 0
+    pushd .. >/dev/null
+    echo deleting: ~1
+    rm -r ~1
+    popd +1 &>/dev/null
+    dirs -v
+}
+
+
+#help: lsu : a long listing of dirs moving up the dir path
+#help: usage : lsu
+function lsu ()
+{
+    declare -a np=(/ "${1:-$PWD}")
+    while [[ -n ${np[-1]%/*} ]]; do
+        np+=(${np[-1]%/*})
+    done
+    ls -ld "${np[@]}"
+}
+
+
+#help: mkwdir : creates a new arg.nn dir based on arg
+#help: usage : mkwdir (base)
+#help: : default arg is the date
+function mkwdir ()
+{
+    declare count dir pat date=$(date +%F | tr '-' '_')
+    pat=${1:=$date}
+    count=$(ls -d $pat.?? 2>/dev/null | wc -l)
+    printf -v dir "%s.%02d" $pat $((1+count))
+    mkdir -v $dir
+}
+
+
+
+#help: mydd : convenience wrapper for dd/dcfldd
+#help: usage : mydd object <tab> [option ...]
+#help: : this lets you use tab complete for filename
+function mydd ()
+{
+    declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
+    shift
+    case $DD in
+	dd)
+	    $DD if="$if" "$@" style=progress
+	    ;;
+	dcfldd)
+	    $DD if="$if" "$@"
+	    ;;
+    esac
+}
+
+
+#help: prep : used to give a boilerplate file for editing
+#help: usage : prep file.(sh|pl|py|fn|fnc)
+#help: : based on extension;
+#help: : sh for shell scripts
+#help: : pl for perl scripts
+#help: : py for python scripts
+#help: : fn|fnc for bash functions
+function prep ()
+{
+    declare PREPDIR=$FLISTDIR/prep_files
+    declare dest base file type
+    source ${PREPDIR}/map
+    for file in $@; do
+        read base type < <(echo ${file/./ })
+        [[ $type =~ fn ]] && dest=$base || dest=$file
+        [[ -s $dest ]] && echo $dest exists: skipping && continue
+        sed -e "s/zZz/$base/" $PREPDIR/${map[$type]} > $dest
+        [[ -s $dest ]] || { echo sed failed; continue; }
+        [[ $type =~ (sh|pl|py) ]] && chmod 755 $dest
+        echo prepped $dest as ${map[$type]}
+    done
+}
+
+
+#help: spx : simple function to do aspell
+#help: usage : spx word [word ...]
+function spx ()
+{
+    echo $@ | aspell -a
+}
+
+
+#help: stk : dir stack operations to save, load and clear the dirstack
+#help: usage : stk [save|load] filename
+#help: : stk clear (n ...)
+function stk () {
+    declare n line cmd=$1
+    shift
+    case $cmd in
+        save)
+	    : ${1:?missing input filename}
+            dirs -p > $1
+	    return
+            ;;
+        clear)
+            if [[ $# -gt 1 ]]; then
+                for n in $(echo ${@:2} | xargs -n 1 | sort -rn); do
+                    popd +$n
+                done
+            else
+		pushd ~
+                dirs -c
+            fi
+            ;;
+        load)
+	    : ${1:?missing input filename}
+            for line in $(tac $1); do
+                [[ -d $line ]] || continue
+                push -n "$line"
+            done
+            ;;
+    esac
+    dirs -l -v
+}
+
+#help: stkdiff : convenient differences between stack elements
+#help: usage : stkdiff (does diff -qr . ~1)
+#help: : stkdiff filename (does diff -y filename ~1/filename)
+#help: : stkdiff x y (does diff -qr ~x ~y)
+function stkdiff () {
+    [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
+    case $# in
+	2)
+	    eval "diff -qr ~$1 ~$2"
+	    ;;
+	1)
+	    [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
+	    ;;
+	0)
+	    diff -qr . ~1
+	    ;;
+    esac
+    return
+}
+
+#help: pop : simple wrapper for popd; pops given entry (default is current)
+#help: usage : pop [n]
+function pop () {
+    popd ${1:++$1} > /dev/null
+    dirs -l -v
+}
+
+#help: push : simple wrapper for pushd
+#help: usage : push (path)
+function push () {
+    declare dir="$1"
+    if [[ ! -d $dir ]]; then
+	read -p 'new dir: ' -e -i "$dir" dir
+	[[ -n $dir ]] && mkdir -p "$dir"
+    fi
+    pushd "$dir" &>/dev/null
+    dirs -l -v
+}
+

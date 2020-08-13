@@ -1,8 +1,0 @@
-
-#help: spx : simple function to do aspell
-#help: usage : spx word [word ...]
-function spx ()
-{
-    echo $@ | aspell -a
-}
-
