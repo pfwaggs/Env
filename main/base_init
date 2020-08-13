@@ -28,8 +28,6 @@ for x in {/usr{local,},}/{sbin,bin} /usr/games; do
 done
 PATH=${npath%:}
 unset npath
-#PATH=$(_FixList -u -S /usr/local/bin /usr/sbin ${PATH//:/ }) # | _List2Var)
-#PATH=$(_FixList -c -S /usr/local/sbin ${PATH//:/ }) # | _List2Var) # /usr/local/sbin is empty for now
 
 export FIGNORE='~'
 
