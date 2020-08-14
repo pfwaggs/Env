@@ -5,4 +5,4 @@ if [[ -L ~/Env/testing ]]; then
 fi
 : ${ENVTAG:=current}
 declare -rx ENVTAG
-. ~/Env/$ENVTAG/dotfiles/bashrc
+. ~/Env/$ENVTAG/main/bashrc
