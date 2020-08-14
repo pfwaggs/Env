@@ -1,8 +1,0 @@
-
-#help: tname : modifies titlename
-#help: usage : tname (str)
-function tname ()
-{
-    printf "\033k%s\033\\" ${1:-bash}
-}
-

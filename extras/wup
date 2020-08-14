@@ -1,9 +1,0 @@
-
-#help: wup : function to wake up machines on the network
-#help: usage : wup machine_name
-function wup ()
-{
-    declare cmd=$(type -p etherwake wol)
-    declare ip=$(dig +search +short -t txt $1)
-    eval $cmd $ip
-}
