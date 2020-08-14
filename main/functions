@@ -1,3 +1,40 @@
+#help: L : provides ls support for hidden (dot) files
+#help: usage : L [options] [dir]
+function L ()
+{
+    declare -a args
+    declare opts=lAd
+    for x in $*; do
+        case $x in
+            -?)
+                opts+=${x/-}
+                ;;
+            *)
+                args+=("$x")
+                ;;
+        esac
+    done
+    [[ ${#args[@]} -gt 0 ]] || args+=(.)
+    for x in "${args[@]}"; do
+        ls -$opts "$x"/.??* 2> /dev/null
+    done
+}
+
+#help: _ArgParser : argument completion function
+function _ArgParser () {
+    declare path file partial dir
+    declare -a list
+    [[ -n COMP_LINE ]] && x=$2 || x=$1
+    partial=${x/\~/$HOME}
+    file=${partial##*/}
+    for dir in "${partial%/*}" "${DIRSTACK[@]}" ${CDPATH//:/ }; do
+	[[ ${#list[@]} -eq 0 ]] || break
+	while read -r path; do
+	    [[ -d $path ]] && list+=("$path")
+	done < <(compgen -G "${dir:-.}/$file*" | sort)
+    done
+    [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
+}
 
 #help: _FixList :  some basic list operations:
 #help: :  -s sort
@@ -65,160 +102,6 @@ function _FixList ()
     printf '%s\n' "${list[@]}"
 }
 
-##help: envpurge : reset the environment
-#function envpurge ()
-#{
-#    complete -r
-#    unalias -a
-#    unset -f $(compgen -A function) &>/dev/null
-#}
-#
-##help: _flistXpnd : expands the contents of FLIST by prepending the path to
-##help: : the name
-#function _flistXpnd ()
-#{
-#    grep -o -P '^\w+' $FLISTDIR/FLIST | sed "s|^|$FLISTDIR/|"
-#}
-#
-##help: _flistFind : finds the file that contains the function
-#function _flistFind ()
-#{
-#    declare x dir
-#    for x in $@; do
-#	[[ -f $FLISTDIR/$x ]] && echo $FLISTDIR/$x || continue
-#    done
-#}
-#
-##help: load : loads the given function names found in FLISTDIR or
-##help: : the given full path
-#function load () {
-#    declare x y
-#    [[ $# -gt 0 ]] || envpurge
-#    for x in ${@:-$(_flistXpnd)}; do
-#	[[ -f ${y:=$x} ]] || y=$(_flistFind $x)
-#	[[ -n $y ]] && . $y || { echo "can't find $x"; continue; }
-#	[[ -f ~/.quiet ]] && echo -n . || echo $y
-#    done
-#    echo ' done'
-#}
-
-#help: load : loads the given functions
-#help: : the given full path
-function load () { 
-    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
-    for x in $@; do
-	sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $flist > /tmp/$x
-	. /tmp/$x
-	rm /tmp/$x
-    done
-}
-
-#help: hlistf : lists available functions
-#help: usage : hlistf
-function listf () {
-    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
-    awk '/^#help : [[:alpha:]]+ / {print $2}' $flist | cut -c8- | column -s: -t
-}
-
-#help: _ArgParser : argument completion function
-function _ArgParser () {
-    declare path file partial dir
-    declare -a list
-    [[ -n COMP_LINE ]] && x=$2 || x=$1
-    partial=${x/\~/$HOME}
-    file=${partial##*/}
-    for dir in "${partial%/*}" "${DIRSTACK[@]}" ${CDPATH//:/ }; do
-	[[ ${#list[@]} -eq 0 ]] || break
-	while read -r path; do
-	    [[ -d $path ]] && list+=("$path")
-	done < <(compgen -G "${dir:-.}/$file*" | sort)
-    done
-    [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
-}
-
-#help: L : provides ls support for hidden (dot) files
-#help: usage : L [options] [dir]
-function L ()
-{
-    declare -a args
-    declare opts=lAd
-    for x in $*; do
-        case $x in
-            -?)
-                opts+=${x/-}
-                ;;
-            *)
-                args+=("$x")
-                ;;
-        esac
-    done
-    [[ ${#args[@]} -gt 0 ]] || args+=(.)
-    for x in "${args[@]}"; do
-        ls -$opts "$x"/.??* 2> /dev/null
-    done
-}
-
-#help: setPrompt : : utility to set prompt line characteristics (alias as stp)
-#help: usage : setPrompt [args...]
-#help: : args are: key[=0|1][=color][=text]
-#help: : keys are:
-#help: : num : history number at beginning
-#help: : xtra : extra field (often set for labconfig)
-#help: : tag : loader tag field
-#help: : user : the users sid
-#help: : host : hostname
-#help: : spath : short path
-#help: : lpath : full path
-#help: : prompt : prompt symbol (# for root, $ for loader)
-function setPrompt () {
-    declare x key
-    declare flip color text
-    declare colors=${!_ColorNum[*]}
-    declare colorPat=${colors// /|}
-    declare -A promptMap
-    for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
-    for x in "$@"; do
-	key=${x%%=*}
-	while read x; do
-	    case $x in 
-		[01])
-		    flip=$x
-		    ;;
-		@($colorPat))
-		    color=$x
-		    ;;
-		*)
-		    text=$x
-		    ;;
-	    esac
-	done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
-	[[ -n $text ]] && [[ $key =~ tag|xtra ]] && _PromptCfg[$key]=$text
-	[[ -n $color ]] && _PromptColor[$key]=$color
-	[[ -n $flip ]] && _PromptShow[$key]=$flip 
-	unset text color flip key
-    done
-    _PromptShow[host]=1
-    _PromptShow[prompt]=1
-    PS1=
-    for x in num xtra tag user host spath lpath prompt; do
-        [[ ${_PromptShow[$x]} = 0 ]] && continue
-	[[ ${_PromptCfg[$x]} = '' ]] && continue
-        color=${_PromptColor[$x]}
-        num=${_ColorNum[$color]}
-        PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
-    done
-    PS1+=$'\[\e[m\]'
-}
-
-#help: tag : shortcut to set tag for the prompt
-#help: usage : tag [color=]'text'
-function  tag () { setPrompt tag="$*"; }
-
-#help: xtra : shortcut to set xtra for the prompt
-#help: usage : xtra [color=]'text'
-function xtra () { setPrompt xtra="$*"; }
-
-
 #help: _Show : complete function for the show function
 function _Show ()
 {
@@ -227,30 +110,12 @@ function _Show ()
     compgen -v | grep -i "^$x"
 }
 
-#help: show : used to show variable values
-#help: usage : show var
-#help: : type values in lowercase and <tab> will uppercase if needed
-function show ()
-{
-    declare x=$(declare -p $1 | awk '{print $2}')
-    if [[ $x =~ [aA] ]]; then
-        echo array $1:
-        for x in $(eval "echo \${!$1[@]}"); do
-            eval "echo $x = \${$1[$x]}"
-        done
-    else
-        echo $1 = ${!1}
-    fi
-}
-
 #help: commas : commafy numeric fields in input stream
 #help: usage : ... | commas
 function commas ()
 {
     rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
 }
-
-# -*-sh-*-
 
 #help: configEd : configure the editor of your choice (emacs, vim)
 #help: usage : configEd [emacs|vim]
@@ -289,10 +154,16 @@ function ffunc ()
     shopt -u extdebug
 }
 
-#help: hlp : help for loading functions
+#help: hlp : help for functions loaded
 #help: usage : hlp function
+#help: usage : hlp
 function hlp () {
-    sed -nr "/: $1 :/{:1;p;n;/^function/!b1}" $2 | cut -f2- -d: | column -n -s: -t
+    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
+    if [[ $# -eq 1 ]]; then
+	sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist | cut -f2- -d: | column -n -s: -t
+    else
+	awk '/^function / {print "#help: "$2" :"}' $flist | grep -h -f - $flist | cut -c8- | column -s: -t
+    fi
 }
 
 #help: julian : presents dates in julian format and converts back
@@ -331,6 +202,24 @@ function killdir ()
     rm -r ~1
     popd +1 &>/dev/null
     dirs -v
+}
+
+#help: hlistf : lists available functions
+#help: usage : hlistf
+function listf () {
+    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
+    awk '/^#help : [[:alpha:]]+ / {print $2}' $flist | cut -c8- | column -s: -t
+}
+
+#help: load : loads the given functions
+#help: : the given full path
+function load () { 
+    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
+    for x in $@; do
+	sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $flist > /tmp/$x
+	. /tmp/$x
+	rm /tmp/$x
+    done
 }
 
 #help: lsu : a long listing of dirs moving up the dir path
@@ -373,6 +262,13 @@ function mydd ()
     esac
 }
 
+#help: pop : simple wrapper for popd; pops given entry (default is current)
+#help: usage : pop [n]
+function pop () {
+    popd ${1:++$1} > /dev/null
+    dirs -l -v
+}
+
 #help: prep : used to give a boilerplate file for editing
 #help: usage : prep file.(sh|pl|py|fn|fnc)
 #help: : based on extension;
@@ -382,7 +278,7 @@ function mydd ()
 #help: : fn|fnc for bash functions
 function prep ()
 {
-    declare PREPDIR=$FLISTDIR/prep_files
+    declare PREPDIR=$MAINDIR/support/prep_files
     declare dest base file type
     source ${PREPDIR}/map
     for file in $@; do
@@ -394,6 +290,34 @@ function prep ()
         [[ $type =~ (sh|pl|py) ]] && chmod 755 $dest
         echo prepped $dest as ${map[$type]}
     done
+}
+
+#help: push : simple wrapper for pushd
+#help: usage : push (path)
+function push () {
+    declare dir="$1"
+    if [[ ! -d $dir ]]; then
+	read -p 'new dir: ' -e -i "$dir" dir
+	[[ -n $dir ]] && mkdir -p "$dir"
+    fi
+    pushd "$dir" &>/dev/null
+    dirs -l -v
+}
+
+#help: show : used to show variable values
+#help: usage : show var
+#help: : type values in lowercase and <tab> will uppercase if needed
+function show ()
+{
+    declare x=$(declare -p $1 | awk '{print $2}')
+    if [[ $x =~ [aA] ]]; then
+        echo array $1:
+        for x in $(eval "echo \${!$1[@]}"); do
+            eval "echo $x = \${$1[$x]}"
+        done
+    else
+        echo $1 = ${!1}
+    fi
 }
 
 #help: spx : simple function to do aspell
@@ -456,22 +380,62 @@ function stkdiff () {
     return
 }
 
-#help: pop : simple wrapper for popd; pops given entry (default is current)
-#help: usage : pop [n]
-function pop () {
-    popd ${1:++$1} > /dev/null
-    dirs -l -v
+#help: stp :: utility to set prompt line characteristics
+#help: usage : stp [args...]
+#help: : args are: key[=0|1][=color][=text]
+#help: : keys are:
+#help: : num : history number at beginning
+#help: : xtra : extra field (often set for labconfig)
+#help: : tag : loader tag field
+#help: : user : the users sid
+#help: : host : hostname
+#help: : spath : short path
+#help: : lpath : full path
+#help: : prompt : prompt symbol (# for root, $ for loader)
+function stp () {
+    declare x key
+    declare flip color text
+    declare colors=${!_ColorNum[*]}
+    declare colorPat=${colors// /|}
+    declare -A promptMap
+    for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
+    for x in "$@"; do
+	key=${x%%=*}
+	while read x; do
+	    case $x in 
+		[01])
+		    flip=$x
+		    ;;
+		@($colorPat))
+		    color=$x
+		    ;;
+		*)
+		    text=$x
+		    ;;
+	    esac
+	done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
+	[[ -n $text ]] && [[ $key =~ tag|xtra ]] && _PromptCfg[$key]=$text
+	[[ -n $color ]] && _PromptColor[$key]=$color
+	[[ -n $flip ]] && _PromptShow[$key]=$flip 
+	unset text color flip key
+    done
+    _PromptShow[host]=1
+    _PromptShow[prompt]=1
+    PS1=
+    for x in num xtra tag user host spath lpath prompt; do
+        [[ ${_PromptShow[$x]} = 0 ]] && continue
+	[[ ${_PromptCfg[$x]} = '' ]] && continue
+        color=${_PromptColor[$x]}
+        num=${_ColorNum[$color]}
+        PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
+    done
+    PS1+=$'\[\e[m\]'
 }
 
-#help: push : simple wrapper for pushd
-#help: usage : push (path)
-function push () {
-    declare dir="$1"
-    if [[ ! -d $dir ]]; then
-	read -p 'new dir: ' -e -i "$dir" dir
-	[[ -n $dir ]] && mkdir -p "$dir"
-    fi
-    pushd "$dir" &>/dev/null
-    dirs -l -v
-}
+#help: tag : shortcut to set tag for the prompt
+#help: usage : tag [color=]'text'
+function  tag () { stp tag="$*"; }
 
+#help: xtra : shortcut to set xtra for the prompt
+#help: usage : xtra [color=]'text'
+function xtra () { stp xtra="$*"; }
