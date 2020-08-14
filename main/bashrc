@@ -22,5 +22,8 @@ source $MAINDIR/base_init # mainly var defs etc.
 source $MAINDIR/aliases
 source $MAINDIR/functions
 source $MAINDIR/completes
+tmp=$MAINDIR/sshAgentPrep
+[[ -e ~/.no_ssh ]] && echo not loading $tmp || source $tmp
+unset tmp
 configEd vim
 stp

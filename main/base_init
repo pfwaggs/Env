@@ -61,15 +61,3 @@ _PromptColor[tag]=magenta
 _PromptColor[prompt]=green
 _PromptColor[host]=$([[ $UID -eq 0 ]] && echo red || echo cyan)
 
-if [[ -f ~/.agentfile ]]; then
-    AGENTFILE=$(cat ~/.agentfile)
-    [[ -e $AGENTFILE ]] || { ssh-agent -k; rm ~/.agentfile /tmp/agentInit*; unset AGENTFILE; }
-fi
-if [[ ${AGENTFILE:-no} = no ]]; then
-    AGENTFILE=$(echo /tmp/agentInit-$PPID | tee ~/.agentfile)
-    pid=$(grep AGENT $AGENTFILE 2>/dev/null | perl -n -E 'say /=(\d+)/')
-    eval "$(ssh-agent | tee $AGENTFILE)"
-fi
-declare -xr AGENTFILE
-. $AGENTFILE
-export SSH_AGENT_PID SSH_AUTH_SOCK
