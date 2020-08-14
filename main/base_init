@@ -17,8 +17,14 @@ export GS_FONTPATH=~/.fonts
 
 export INPUTRC=~/.inputrc
 
+export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
+export VIMHOME=~
+export VIMDIR=$VIMHOME/.vim
+export VIMINIT=":source $VIMDIR/vimrc"
+
+
 #check usual places for actual directories and not symlinks
-for x in {/usr{local,},}/{sbin,bin} /usr/games; do
+for x in {/usr{/local,},}/{sbin,bin} /usr/games; do
     [[ -L $x ]] && continue
     [[ -d $x ]] || continue
     [[ -n $(ls -A $x) ]] || continue
@@ -55,3 +61,15 @@ _PromptColor[tag]=magenta
 _PromptColor[prompt]=green
 _PromptColor[host]=$([[ $UID -eq 0 ]] && echo red || echo cyan)
 
+if [[ -f ~/.agentfile ]]; then
+    AGENTFILE=$(cat ~/.agentfile)
+    [[ -e $AGENTFILE ]] || { ssh-agent -k; rm ~/.agentfile /tmp/agentInit*; unset AGENTFILE; }
+fi
+if [[ ${AGENTFILE:-no} = no ]]; then
+    AGENTFILE=$(echo /tmp/agentInit-$PPID | tee ~/.agentfile)
+    pid=$(grep AGENT $AGENTFILE 2>/dev/null | perl -n -E 'say /=(\d+)/')
+    eval "$(ssh-agent | tee $AGENTFILE)"
+fi
+declare -xr AGENTFILE
+. $AGENTFILE
+export SSH_AGENT_PID SSH_AUTH_SOCK
