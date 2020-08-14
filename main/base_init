@@ -1,7 +1,5 @@
 
 declare -x  HISTFILE=~/.history
-declare -rx ENVDIR=$(cd ~/Env/$ENVTAG &>/dev/null; pwd -P)
-declare -rx MAINDIR=$ENVDIR/main
 
 host=${HOSTNAME%%.*}
 host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')

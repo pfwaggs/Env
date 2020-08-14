@@ -16,6 +16,8 @@ unset -f $(compgen -A function) &>/dev/null
 [[ $PROMPT_COMMAND =~ __vte ]] && PROMPT_COMMAND= || :
 
 # start building the env. start with base_init and aliases
+declare -rx ENVDIR=$(cd ~/Env/$ENVTAG &>/dev/null; pwd -P)
+declare -rx MAINDIR=$ENVDIR/main
 source $MAINDIR/base_init # mainly var defs etc.
 source $MAINDIR/aliases
 source $MAINDIR/functions
