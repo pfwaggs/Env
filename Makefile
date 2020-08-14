@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 GITHOME = $(HOME)/Git/Env
 GITPREFIX = -C $(GITHOME)
-ifeq (.git,$(findstring .git,$(shell ls -d .git)))
+ifeq (.git,$(findstring .git,$(shell ls -d .git &>/dev/null)))
     $(error make operations should not be run in git repo)
 endif
 
