@@ -23,4 +23,4 @@ source $MAINDIR/aliases
 source $MAINDIR/functions
 source $MAINDIR/completes
 configEd vim
-setPrompt
+stp
