@@ -119,7 +119,7 @@ check :
 
 filelist :
 	@echo Makefile > filelist
-	@find dotinstalls dotfiles envfiles -maxdepth 2 -type f | grep -v '~' | sort >> filelist
+	@find main dotinstall -maxdepth 2 -type f | grep -v '~' | sort >> filelist
 	-@echo remove old print files; rm -r long* short* 2>/dev/null
 
 #help: long : output in portrait, duplex
