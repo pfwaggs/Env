@@ -110,13 +110,6 @@ function _Show ()
     compgen -v | grep -i "^$x"
 }
 
-#help: commas : commafy numeric fields in input stream
-#help: usage : ... | commas
-function commas ()
-{
-    rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
-}
-
 #help: configEd : configure the editor of your choice (emacs, vim)
 #help: usage : configEd [emacs|vim]
 function configEd () {
@@ -135,90 +128,38 @@ function configEd () {
     esac
 }
 
-#help: ffix : useful to grab a function and edit it for testing
-#help: usage : ffix function (the edited file will be in /tmp)
-function ffix ()
-{
-    declare x=/tmp/${1}2
-    type $1 | sed  "1d;s/${1}/${1}2/" > $x
-    vim $x
-    . $x
-}
-
-#help: ffunc : presents defined functions and file they are from
-#help: usage : ffunc function
-function ffunc ()
-{
-    shopt -s extdebug
-    declare -F ${@:-$(compgen -A function)} | column -t
-    shopt -u extdebug
-}
+#help: extra : shortcut to set extra for the prompt
+#help: usage : extra [color=]'text'
+function extra () { stp extra="$*"; }
 
 #help: hlp : help for functions loaded
 #help: usage : hlp function
 #help: usage : hlp
 function hlp () {
-    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
+    declare flist=$(echo $MAINDIR/*_functions)
     if [[ $# -eq 1 ]]; then
 	sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist | cut -f2- -d: | column -n -s: -t
     else
-	awk '/^function / {print "#help: "$2" :"}' $flist | grep -h -f - $flist | cut -c8- | column -s: -t
+	awk '/^function / {print "#help: "$2" :"}' $flist |
+	    grep -f - $flist | sed -n "s|$MAINDIR/||p" |
+	    cut -f1,3- -d: | column -s: -t | sort -k1,1r -k2,2 
     fi
 }
 
-#help: julian : presents dates in julian format and converts back
-#help: usage : julian [date]
-#help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
-#help: : date defaults to today
-function julian ()
-{
-    case ${1//[0-9]/x} in
-        '')
-            date +%Y.%j
-            ;;
-        xxxx-xx-xx)
-            date -u -d $1 +%Y.%j
-            ;;
-        xxxx.xxx)
-            declare y d
-            read y d < <(echo ${1/./ })
-            date -u -d "$y-01-01 $((d-1)) days" +%F
-            ;;
-        *)
-            echo 'unknown request'
-            ;;
-    esac
-}
-
-#help: killdir : moves you to the parent and removes the dir you were in
-#help: usage : killdir
-function killdir ()
-{
-    [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
-    read -p "remove < $PWD > ? "
-    [[ $REPLY =~ ^[yY] ]] || return 0
-    pushd .. >/dev/null
-    echo deleting: ~1
-    rm -r ~1
-    popd +1 &>/dev/null
-    dirs -v
-}
-
-#help: hlistf : lists available functions
-#help: usage : hlistf
-function listf () {
-    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
-    awk '/^#help : [[:alpha:]]+ / {print $2}' $flist | cut -c8- | column -s: -t
-}
-
-#help: load : loads the given functions
-#help: : the given full path
-function load () { 
-    declare flist=$(echo ~/Git/Env/main/functions ~/Git/Env/main/extra_functions)
+#help: load : loads functions from MAINDIR files
+#help: usage : load function
+function load () {
+    declare list x y 
     for x in $@; do
-	sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $flist > /tmp/$x
-	. /tmp/$x
-	rm /tmp/$x
+	list=$(grep -l -w "^function $x " $MAINDIR/*_functions)
+	[[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
+	for y in $list; do
+	    echo loading $x from $y
+	    sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $y > /tmp/$x
+	    . /tmp/$x
+	    rm /tmp/$x
+	done
+	list=''
     done
 }
 
@@ -245,23 +186,6 @@ function mkwdir ()
     mkdir -v $dir
 }
 
-#help: mydd : convenience wrapper for dd/dcfldd
-#help: usage : mydd object <tab> [option ...]
-#help: : this lets you use tab complete for filename
-function mydd ()
-{
-    declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
-    shift
-    case $DD in
-	dd)
-	    $DD if="$if" "$@" style=progress
-	    ;;
-	dcfldd)
-	    $DD if="$if" "$@"
-	    ;;
-    esac
-}
-
 #help: pop : simple wrapper for popd; pops given entry (default is current)
 #help: usage : pop [n]
 function pop () {
@@ -278,7 +202,7 @@ function pop () {
 #help: : fn|fnc for bash functions
 function prep ()
 {
-    declare PREPDIR=$MAINDIR/support/prep_files
+    declare PREPDIR=$ENVDIR/support/prep_files
     declare dest base file type
     source ${PREPDIR}/map
     for file in $@; do
@@ -327,66 +251,13 @@ function spx ()
     echo $@ | aspell -a
 }
 
-#help: stk : dir stack operations to save, load and clear the dirstack
-#help: usage : stk [save|load] filename
-#help: : stk clear (n ...)
-function stk () {
-    declare n line cmd=$1
-    shift
-    case $cmd in
-        save)
-	    : ${1:?missing input filename}
-            dirs -p > $1
-	    return
-            ;;
-        clear)
-            if [[ $# -gt 1 ]]; then
-                for n in $(echo ${@:2} | xargs -n 1 | sort -rn); do
-                    popd +$n
-                done
-            else
-		pushd ~
-                dirs -c
-            fi
-            ;;
-        load)
-	    : ${1:?missing input filename}
-            for line in $(tac $1); do
-                [[ -d $line ]] || continue
-                push -n "$line"
-            done
-            ;;
-    esac
-    dirs -l -v
-}
-
-#help: stkdiff : convenient differences between stack elements
-#help: usage : stkdiff (does diff -qr . ~1)
-#help: : stkdiff filename (does diff -y filename ~1/filename)
-#help: : stkdiff x y (does diff -qr ~x ~y)
-function stkdiff () {
-    [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
-    case $# in
-	2)
-	    eval "diff -qr ~$1 ~$2"
-	    ;;
-	1)
-	    [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
-	    ;;
-	0)
-	    diff -qr . ~1
-	    ;;
-    esac
-    return
-}
-
 #help: stp :: utility to set prompt line characteristics
 #help: usage : stp [args...]
 #help: : args are: key[=0|1][=color][=text]
 #help: : keys are:
 #help: : num : history number at beginning
-#help: : xtra : extra field (often set for labconfig)
-#help: : tag : loader tag field
+#help: : extra : extra field
+#help: : tag : tag field
 #help: : user : the users sid
 #help: : host : hostname
 #help: : spath : short path
@@ -414,7 +285,7 @@ function stp () {
 		    ;;
 	    esac
 	done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
-	[[ -n $text ]] && [[ $key =~ tag|xtra ]] && _PromptCfg[$key]=$text
+	[[ -n $text ]] && [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$text
 	[[ -n $color ]] && _PromptColor[$key]=$color
 	[[ -n $flip ]] && _PromptShow[$key]=$flip 
 	unset text color flip key
@@ -422,7 +293,7 @@ function stp () {
     _PromptShow[host]=1
     _PromptShow[prompt]=1
     PS1=
-    for x in num xtra tag user host spath lpath prompt; do
+    for x in num extra tag user host spath lpath prompt; do
         [[ ${_PromptShow[$x]} = 0 ]] && continue
 	[[ ${_PromptCfg[$x]} = '' ]] && continue
         color=${_PromptColor[$x]}
@@ -436,6 +307,8 @@ function stp () {
 #help: usage : tag [color=]'text'
 function  tag () { stp tag="$*"; }
 
-#help: xtra : shortcut to set xtra for the prompt
-#help: usage : xtra [color=]'text'
-function xtra () { stp xtra="$*"; }
+#help: xtfn : function to extract a function for an aggregated list
+#help: usage : xtfn function
+function xtfn () {
+    sed -nrs "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $MAINDIR/*_functions
+}

@@ -1,4 +1,42 @@
 
+#help: commas : commafy numeric fields in input stream
+#help: usage : <-> | commas
+function commas ()
+{
+    rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
+}
+
+#help: ffix : useful to grab a function and edit it for testing
+#help: usage : ffix function (the edited file will be in /tmp)
+function ffix ()
+{
+    declare x=/tmp/${1}2
+    type $1 | sed  "1d;s/${1}/${1}2/" > $x
+    vim $x
+    . $x
+}
+
+#help: fsplit : splits a file of functions into a dir of separate functions
+#help: : must be in MAINDIR to use this function
+function fsplit () {
+    [[ $PWD =~ $MAINDIR ]] || { echo wrong dir; return 1; }
+    declare -x lib=${1:-standard_functions}
+    declare -x parent=${lib%_*}
+    [[ $lib =~ _functions ]] || { echo bad function file name; return 1; }
+    [[ -d $parent ]] && { echo dir for $parent already exists; return 1; }
+    mkdir $parent
+    (
+	pwd
+	cd $parent
+	csplit -z ../$lib /^$/ {*}
+	for x in *; do
+	    new=$(awk '/^function / {print $2;exit}' $x)
+	    mv -v $x $new
+	done
+    )
+    pwd
+}
+
 #help: gigify : converts numbers to a different unit
 #help: usage : gigify text
 function gigify ()
@@ -11,11 +49,119 @@ function gigify ()
     printf "%s%7.3f%s\n" "${s: }" $v ${u:$m:1}
 }
 
+#help: julian : presents dates in julian format and converts back
+#help: usage : julian [date]
+#help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
+#help: : date defaults to today
+function julian ()
+{
+    case ${1//[0-9]/x} in
+        '')
+            date +%Y.%j
+            ;;
+        xxxx-xx-xx)
+            date -u -d $1 +%Y.%j
+            ;;
+        xxxx.xxx)
+            declare y d
+            read y d < <(echo ${1/./ })
+            date -u -d "$y-01-01 $((d-1)) days" +%F
+            ;;
+        *)
+            echo 'unknown request'
+            ;;
+    esac
+}
+
+#help: killdir : moves you to the parent and removes the dir you were in
+#help: usage : killdir
+function killdir ()
+{
+    [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
+    read -p "remove < $PWD > ? "
+    [[ $REPLY =~ ^[yY] ]] || return 0
+    pushd .. >/dev/null
+    echo deleting: ~1
+    rm -r ~1
+    popd +1 &>/dev/null
+    dirs -v
+}
+
+#help: mydd : convenience wrapper for dd/dcfldd
+#help: usage : mydd object <tab> [option ...]
+#help: : this lets you use tab complete for filename
+function mydd ()
+{
+    declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
+    shift
+    case $DD in
+	dd)
+	    $DD if="$if" "$@" style=progress
+	    ;;
+	dcfldd)
+	    $DD if="$if" "$@"
+	    ;;
+    esac
+}
+
 #help: psfu : checks the process table for specified user
 #help: usage : psfu sid
 function psfu ()
 {
     ps -f -u ${1:-$(id -un)}
+}
+
+#help: stk : dir stack operations to save, load and clear the dirstack
+#help: usage : stk [save|load] filename
+#help: : stk clear (n ...)
+function stk () {
+    declare n line cmd=$1
+    shift
+    case $cmd in
+        save)
+	    : ${1:?missing input filename}
+            dirs -p > $1
+	    return
+            ;;
+        clear)
+            if [[ $# -gt 1 ]]; then
+                for n in $(echo ${@:2} | xargs -n 1 | sort -rn); do
+                    popd +$n
+                done
+            else
+		pushd ~
+                dirs -c
+            fi
+            ;;
+        load)
+	    : ${1:?missing input filename}
+            for line in $(tac $1); do
+                [[ -d $line ]] || continue
+                push -n "$line"
+            done
+            ;;
+    esac
+    dirs -l -v
+}
+
+#help: stkdiff : convenient differences between stack elements
+#help: usage : stkdiff (does diff -qr . ~1)
+#help: : stkdiff filename (does diff -y filename ~1/filename)
+#help: : stkdiff x y (does diff -qr ~x ~y)
+function stkdiff () {
+    [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
+    case $# in
+	2)
+	    eval "diff -qr ~$1 ~$2"
+	    ;;
+	1)
+	    [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
+	    ;;
+	0)
+	    diff -qr . ~1
+	    ;;
+    esac
+    return
 }
 
 #help: tinfo : generates some metatdata for a path versions of given filename
@@ -137,11 +283,3 @@ function xmn ()
 	echo ''
     done
 }
-
-#help: xtfn : function to extract a function for an aggregated list
-#help: usage : xtfn function
-function xtfn () {
-    declare flist=$(echo $MAINDIR/functions $MAINDIR/extra_functions)
-    sed -nr "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $flist
-}
-

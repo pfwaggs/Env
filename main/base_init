@@ -41,7 +41,7 @@ export PAGER=$(type -p less more | head -n 1)
 
 declare -A _ColorNum _PromptColor
 declare -A _PromptCfg=([num]=$'\!' [user]=$'\u' [host]=$'\h' [prompt]=$'\$' [spath]=$'\W' [lpath]=$'\w')
-declare -A _PromptShow=([num]=0 [spath]=0 [lpath]=0 [tag]=0 [xtra]=0 [user]=0 [host]=1 [prompt]=1)
+declare -A _PromptShow=([num]=0 [spath]=0 [lpath]=0 [tag]=0 [extra]=0 [user]=0 [host]=1 [prompt]=1)
 
 _ColorNum[black]=30
 _ColorNum[red]=31
@@ -56,7 +56,7 @@ _PromptColor[num]=white
 _PromptColor[user]=blue
 _PromptColor[spath]=green
 _PromptColor[lpath]=green
-_PromptColor[xtra]=red
+_PromptColor[extra]=red
 _PromptColor[tag]=magenta
 _PromptColor[prompt]=green
 _PromptColor[host]=$([[ $UID -eq 0 ]] && echo red || echo cyan)
