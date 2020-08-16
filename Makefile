@@ -125,8 +125,8 @@ check :
 
 filelist : functions
 	@echo Makefile > filelist
-	@find main dotinstall support -maxdepth 2 -type f | grep -v 'functions' | sort >> filelist
-	-@echo remove old print files; rm -r long* short* 2>/dev/null
+	@find main dotinstall support -maxdepth 2 -type f | grep -v '_functions' | sort >> filelist
+	-@echo removing old print files; rm -r long* short* 2>/dev/null
 
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
