@@ -1,21 +1,23 @@
 SHELL = /bin/bash
 GITHOME = $(HOME)/Git/Env
 GITPREFIX = -C $(GITHOME)
-ifeq (.git,$(findstring .git,$(shell ls -d .git &>/dev/null)))
+ifeq (.git,$(notdir $(findstring .git,$(shell ls -d .git 2>/dev/null))))
+  ifeq (,$(filter tmp help filelist long short envcheck,$(MAKECMDGOALS)))
     $(error make operations should not be run in git repo)
+  endif
 endif
 
 ifeq (,$(filter $(ENVTAG),$(wildcard *)))
-    DOTSRCDIR = dotinstall
-    MAKEFILE = Makefile
+  DOTSRCDIR = dotinstall
+  MAKEFILE = Makefile
 else
-    DOTSRCDIR = $(ENVTAG)/dotinstall
-    MAKEFILE = $(ENVTAG)/Makefile
+  DOTSRCDIR = $(ENVTAG)/dotinstall
+  MAKEFILE = $(ENVTAG)/Makefile
 endif
 
 BRANCH = $(shell git $(GITPREFIX) rev-parse --abbrev-ref HEAD)
 ifeq (,$(findstring $(BRANCH),master))
-    $(error branch is not master. please change branches)
+  $(error branch is not master. please change branches)
 endif
 
 ifeq (short,$(findstring short,$(MAKECMDGOALS)))
@@ -26,9 +28,10 @@ LIST := $(shell ls | sed -nr '/^[0-9][0-9_.]+-[[:alnum:]]+$$/p' | sort)
 FOLLOW_LINK = $(shell cd $(1) &>/dev/null && pwd -P || echo none)
 
 ifndef TUMBLE
-    TUMBLE = -DTumble:true
+  TUMBLE = -DTumble:true
 endif
 
+ENVCHECK = fsplit
 DOTINSTALL = $(notdir $(wildcard $(DOTSRCDIR)/*))
 LAST = $(lastword $(LIST))
 CURRENT = $(notdir $(call FOLLOW_LINK,current))
@@ -47,6 +50,9 @@ export $(STATUS)
 help :
 	@grep '^#help: ' $(MAKEFILE) | cut -f2- -d: | column -s: -t
 
+envcheck :
+	@for x in $(ENVCHECK); do \
+	    [[ $$(compgen -A function) =~ $$x ]] || { echo ENVCHECK failure; exit 1; }; done
 #help: info : combines status and list
 info : status list
 
@@ -117,9 +123,9 @@ check :
 	    diff -qr $(DOTSRCDIR)/$$x ~/.$$x || echo $$x is not current; \
 	done
 
-filelist :
+filelist : functions
 	@echo Makefile > filelist
-	@find main dotinstall -maxdepth 2 -type f | grep -v '~' | sort >> filelist
+	@find main dotinstall support -maxdepth 2 -type f | grep -v 'functions' | sort >> filelist
 	-@echo remove old print files; rm -r long* short* 2>/dev/null
 
 #help: long : output in portrait, duplex
@@ -128,3 +134,8 @@ long short : filelist
 	@source envfiles/xmn; source envfiles/bashrcfuncs; \
 	xmn -pm -f filelist | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
+
+functions :
+	@[[ ! -d main/prime ]] || { echo main/prime exits; exit 1; }
+	@[[ ! -d main/extra ]] || { echo main/extra exits; exit 1; }
+	@cd main; fsplit prime_functions 2>/dev/null; fsplit extra_functions 2>/dev/null

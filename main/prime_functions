@@ -194,12 +194,13 @@ function pop () {
 }
 
 #help: prep : used to give a boilerplate file for editing
-#help: usage : prep file.(sh|pl|py|fn|fnc)
+#help: usage : prep file.(sh||fn|pl|pm|py)
 #help: : based on extension;
 #help: : sh for shell scripts
 #help: : pl for perl scripts
 #help: : py for python scripts
-#help: : fn|fnc for bash functions
+#help: : fn for bash functions
+#help: : pm for perl module
 function prep ()
 {
     declare PREPDIR=$ENVDIR/support/prep_files
@@ -212,7 +213,7 @@ function prep ()
         sed -e "s/zZz/$base/" $PREPDIR/${map[$type]} > $dest
         [[ -s $dest ]] || { echo sed failed; continue; }
         [[ $type =~ (sh|pl|py) ]] && chmod 755 $dest
-        echo prepped $dest as ${map[$type]}
+        echo prepped $dest as ${map[$type]/_/ }
     done
 }
 

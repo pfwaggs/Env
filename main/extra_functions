@@ -17,24 +17,24 @@ function ffix ()
 }
 
 #help: fsplit : splits a file of functions into a dir of separate functions
-#help: : must be in MAINDIR to use this function
+#help: usage : fsplit path dest
+#help: : fsplit path (n.b. dest derived from path)
+#help: : fsplit (n.b. uses $MAINDIR/prime_functions by default)
 function fsplit () {
-    [[ $PWD =~ $MAINDIR ]] || { echo wrong dir; return 1; }
-    declare -x lib=${1:-standard_functions}
-    declare -x parent=${lib%_*}
-    [[ $lib =~ _functions ]] || { echo bad function file name; return 1; }
-    [[ -d $parent ]] && { echo dir for $parent already exists; return 1; }
-    mkdir $parent
+    [[ $# -gt 0 ]] || set - $MAINDIR/prime_functions
+    [[ ${1##*_} = functions ]] || { echo input file not a functions file; return 1; }
+    declare inputFile=${1##*/}
+    declare -x outputDir=${2:-${inputFile%_*}}
+    [[ -d $outputDir ]] && { echo dir for $outputDir already exists; return 1; }
+    mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; return 1; }
     (
-	pwd
-	cd $parent
-	csplit -z ../$lib /^$/ {*}
+	cd $outputDir &>/dev/null || { echo "can't cd into dir $outputDir"; return 1; }
+	csplit -s -z $1 /^$/ {*}
 	for x in *; do
 	    new=$(awk '/^function / {print $2;exit}' $x)
-	    mv -v $x $new
+	    mv $x $new
 	done
     )
-    pwd
 }
 
 #help: gigify : converts numbers to a different unit
