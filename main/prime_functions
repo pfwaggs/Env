@@ -28,10 +28,10 @@ function _ArgParser () {
     partial=${x/\~/$HOME}
     file=${partial##*/}
     for dir in "${partial%/*}" "${DIRSTACK[@]}" ${CDPATH//:/ }; do
-	[[ ${#list[@]} -eq 0 ]] || break
-	while read -r path; do
-	    [[ -d $path ]] && list+=("$path")
-	done < <(compgen -G "${dir:-.}/$file*" | sort)
+        [[ ${#list[@]} -eq 0 ]] || break
+        while read -r path; do
+            [[ -d $path ]] && list+=("$path")
+        done < <(compgen -G "${dir:-.}/$file*" | sort)
     done
     [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
 }
@@ -60,7 +60,7 @@ function _FixList ()
         nlist=()
         case $opt in
             -s)
-		while read -r p; do
+                while read -r p; do
                     nlist+=("$p")
                 done < <(printf '%s\n' "${list[@]}" | sort)
                 ;;
@@ -70,7 +70,7 @@ function _FixList ()
                 done
                 ;;
             -r)
-		while read -r p; do
+                while read -r p; do
                     nlist+=("$p")
                 done < <(printf '%s\n' "${list[@]}" | tac)
                 ;;
@@ -81,8 +81,8 @@ function _FixList ()
                 done
                 ;;
             -c)
-		for p in "${list[@]:1}"; do
-		    [[ $p =~ ${list[0]}.* ]] || nlist+=("$p")
+                for p in "${list[@]:1}"; do
+                    [[ $p =~ ${list[0]}.* ]] || nlist+=("$p")
                 done
                 ;;
             -u)
@@ -94,7 +94,7 @@ function _FixList ()
             -S|*)
                 declare IFS=${SEP:-:}$IFS
                 echo "${list[*]}"
-		return
+                return
                 ;;
         esac
         list=("${nlist[@]}")
@@ -114,17 +114,17 @@ function _Show ()
 #help: usage : configEd [emacs|vim]
 function configEd () {
     case $1 in
-	emacs)
-	    ps -f -C emacs | grep -q daemon || emacs --daemon
-	    export EDITOR=$(type -p emacsclient | head -n 1)
-	    export VISUAL=$EDITOR
-	    set -o emacs
-	    ;;
-	vim)
-	    export EDITOR=$(type -p vim vi | head -n 1)
-	    export VISUAL=$EDITOR
-	    set -o vi
-	    ;;
+        emacs)
+            ps -f -C emacs | grep -q daemon || emacs --daemon
+            export EDITOR=$(type -p emacsclient | head -n 1)
+            export VISUAL=$EDITOR
+            set -o emacs
+            ;;
+        vim)
+            export EDITOR=$(type -p vim vi | head -n 1)
+            export VISUAL=$EDITOR
+            set -o vi
+            ;;
     esac
 }
 
@@ -138,11 +138,11 @@ function extra () { stp extra="$*"; }
 function hlp () {
     declare flist=$(echo $MAINDIR/*_functions)
     if [[ $# -eq 1 ]]; then
-	sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist | cut -f2- -d: | column -n -s: -t
+        sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist | cut -f2- -d: | column -n -s: -t
     else
-	awk '/^function / {print "#help: "$2" :"}' $flist |
-	    grep -f - $flist | sed -n "s|$MAINDIR/||p" |
-	    cut -f1,3- -d: | column -s: -t | sort -k1,1r -k2,2 
+        awk '/^function / {print "#help: "$2" :"}' $flist |
+            grep -f - $flist | sed -n "s|$MAINDIR/||p" |
+            cut -f1,3- -d: | column -s: -t | sort -k1,1r -k2,2 
     fi
 }
 
@@ -151,15 +151,15 @@ function hlp () {
 function load () {
     declare list x y 
     for x in $@; do
-	list=$(grep -l -w "^function $x " $MAINDIR/*_functions)
-	[[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
-	for y in $list; do
-	    echo loading $x from $y
-	    sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $y > /tmp/$x
-	    . /tmp/$x
-	    rm /tmp/$x
-	done
-	list=''
+        list=$(grep -l -w "^function $x " $MAINDIR/*_functions)
+        [[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
+        for y in $list; do
+            echo loading $x from $y
+            sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $y > /tmp/$x
+            . /tmp/$x
+            rm /tmp/$x
+        done
+        list=''
     done
 }
 
@@ -222,8 +222,8 @@ function prep ()
 function push () {
     declare dir="$1"
     if [[ ! -d $dir ]]; then
-	read -p 'new dir: ' -e -i "$dir" dir
-	[[ -n $dir ]] && mkdir -p "$dir"
+        read -p 'new dir: ' -e -i "$dir" dir
+        [[ -n $dir ]] && mkdir -p "$dir"
     fi
     pushd "$dir" &>/dev/null
     dirs -l -v
@@ -272,31 +272,31 @@ function stp () {
     declare -A promptMap
     for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
     for x in "$@"; do
-	key=${x%%=*}
-	while read x; do
-	    case $x in 
-		[01])
-		    flip=$x
-		    ;;
-		@($colorPat))
-		    color=$x
-		    ;;
-		*)
-		    text=$x
-		    ;;
-	    esac
-	done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
-	[[ -n $text ]] && [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$text
-	[[ -n $color ]] && _PromptColor[$key]=$color
-	[[ -n $flip ]] && _PromptShow[$key]=$flip 
-	unset text color flip key
+        key=${x%%=*}
+        while read x; do
+            case $x in 
+                [01])
+                    flip=$x
+                    ;;
+                @($colorPat))
+                    color=$x
+                    ;;
+                *)
+                    text=$x
+                    ;;
+            esac
+        done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
+        [[ -n $text ]] && [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$text
+        [[ -n $color ]] && _PromptColor[$key]=$color
+        [[ -n $flip ]] && _PromptShow[$key]=$flip 
+        unset text color flip key
     done
     _PromptShow[host]=1
     _PromptShow[prompt]=1
     PS1=
     for x in num extra tag user host spath lpath prompt; do
         [[ ${_PromptShow[$x]} = 0 ]] && continue
-	[[ ${_PromptCfg[$x]} = '' ]] && continue
+        [[ ${_PromptCfg[$x]} = '' ]] && continue
         color=${_PromptColor[$x]}
         num=${_ColorNum[$color]}
         PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '

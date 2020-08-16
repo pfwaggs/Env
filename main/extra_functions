@@ -1,3 +1,15 @@
+#help: cksumit : provides a line checksum for given files.
+#help: usage : cksumit file [file ...]
+function cksumit () {
+    for x in $@; do
+        while read; do
+            ck=$(echo $REPLY | tr -d '[[:space:]]' | sum)
+            echo ${ck%% *} "$REPLY"
+        done < $x
+        echo ''
+        md5sum $x
+    done
+}
 
 #help: commas : commafy numeric fields in input stream
 #help: usage : <-> | commas
@@ -95,12 +107,12 @@ function mydd ()
     declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
     shift
     case $DD in
-	dd)
-	    $DD if="$if" "$@" style=progress
-	    ;;
-	dcfldd)
-	    $DD if="$if" "$@"
-	    ;;
+        dd)
+            $DD if="$if" "$@" style=progress
+            ;;
+        dcfldd)
+            $DD if="$if" "$@"
+            ;;
     esac
 }
 
@@ -119,9 +131,9 @@ function stk () {
     shift
     case $cmd in
         save)
-	    : ${1:?missing input filename}
+            : ${1:?missing input filename}
             dirs -p > $1
-	    return
+            return
             ;;
         clear)
             if [[ $# -gt 1 ]]; then
@@ -129,12 +141,12 @@ function stk () {
                     popd +$n
                 done
             else
-		pushd ~
+                pushd ~
                 dirs -c
             fi
             ;;
         load)
-	    : ${1:?missing input filename}
+            : ${1:?missing input filename}
             for line in $(tac $1); do
                 [[ -d $line ]] || continue
                 push -n "$line"
@@ -151,15 +163,15 @@ function stk () {
 function stkdiff () {
     [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
     case $# in
-	2)
-	    eval "diff -qr ~$1 ~$2"
-	    ;;
-	1)
-	    [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
-	    ;;
-	0)
-	    diff -qr . ~1
-	    ;;
+        2)
+            eval "diff -qr ~$1 ~$2"
+            ;;
+        1)
+            [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
+            ;;
+        0)
+            diff -qr . ~1
+            ;;
     esac
     return
 }
@@ -169,13 +181,13 @@ function stkdiff () {
 function tinfo () {
     declare x y
     for x; do
-	for y in $(type -a -p $x); do	
-	    ls -l $y
-	    md5sum $y
-	    echo -ne $'\n'
-	    file -k $y
-	    echo -e $'\n\n\n'
-	done
+        for y in $(type -a -p $x); do   
+            ls -l $y
+            md5sum $y
+            echo -ne $'\n'
+            file -k $y
+            echo -e $'\n\n\n'
+        done
     done
 }
 
@@ -228,58 +240,58 @@ function xmn ()
     declare opt infile tmp n arg file OPTIND=1 keep=0
     declare -a opts flist
     while getopts 'acf:KmMptw' arg; do
-	case $arg in
-	    a)
-		opts+=(m c w)
-		;;
-	    [cKmMptw])
-		opts+=($arg)
-		;;
-	    f)
-		file=$OPTARG
-		;;
-	esac
+        case $arg in
+            a)
+                opts+=(m c w)
+                ;;
+            [cKmMptw])
+                opts+=($arg)
+                ;;
+            f)
+                file=$OPTARG
+                ;;
+        esac
     done
     opts=($(_FixList -u ${opts[@]}))
     shift $((OPTIND-1))
     [[ -n $file ]] && flist=($(cat $file | xargs)) || :
     for infile in ${flist[@]} $@; do
-	echo -e "\n#### ${infile##*/}"
-	tmp=/tmp/${infile##*/}
-	expand $infile | sed -r 's/ +$//' > $tmp
-	for opt in ${opts[@]}; do
-	    case $opt in
-		p)
-		    cat -n $tmp
-		    ;;
-		c)
-		    [[ -f $tmp ]] || continue
-		    while read -r n; do
-			printf "%3d %s\n" ${#n} $(echo -E "$n" | sum | cut -c1-5)
-		    done < $tmp | paste -d ' ' - <(sed 's/^/^/;s/$/$/' $tmp) | cat -n
-		    ;;
-		w)
-		    [[ -f $tmp ]] || continue
-		    wc $tmp
-		    ;;
-		m)
-		    md5sum $infile
-		    ;;
-		M)
-		    [[ -f $tmp ]] || continue
-		    md5sum $tmp
-		    ;;
-		t)
-		    ls -l $infile
-		    file $infile
-		    stat $infile
-		    ;;
-		K)
-		    ((keep=1-keep))
-		    ;;
-	    esac
-	done
-	((keep)) || rm $tmp >/dev/null
-	echo ''
+        echo -e "\n#### ${infile##*/}"
+        tmp=/tmp/${infile##*/}
+        expand $infile | sed -r 's/ +$//' > $tmp
+        for opt in ${opts[@]}; do
+            case $opt in
+                p)
+                    cat -n $tmp
+                    ;;
+                c)
+                    [[ -f $tmp ]] || continue
+                    while read -r n; do
+                        printf "%3d %s\n" ${#n} $(echo -E "$n" | sum | cut -c1-5)
+                    done < $tmp | paste -d ' ' - <(sed 's/^/^/;s/$/$/' $tmp) | cat -n
+                    ;;
+                w)
+                    [[ -f $tmp ]] || continue
+                    wc $tmp
+                    ;;
+                m)
+                    md5sum $infile
+                    ;;
+                M)
+                    [[ -f $tmp ]] || continue
+                    md5sum $tmp
+                    ;;
+                t)
+                    ls -l $infile
+                    file $infile
+                    stat $infile
+                    ;;
+                K)
+                    ((keep=1-keep))
+                    ;;
+            esac
+        done
+        ((keep)) || rm $tmp >/dev/null
+        echo ''
     done
 }
