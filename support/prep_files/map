@@ -2,7 +2,6 @@
 declare -A map
 map[sh]='bash_script'
 map[fn]='bash_function'
-map[fnc]='bash_function'
 map[pl]='perl_script'
 map[pm]='perl_module'
 map[py]='python_script'
