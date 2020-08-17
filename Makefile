@@ -2,18 +2,22 @@ SHELL = /bin/bash
 GITHOME = $(HOME)/Git/Env
 GITPREFIX = -C $(GITHOME)
 ifeq (.git,$(notdir $(findstring .git,$(shell ls -d .git 2>/dev/null))))
-  ifeq (,$(filter tmp help filelist long short envcheck,$(MAKECMDGOALS)))
+  ifeq (,$(filter status help filelist long short envcheck,$(MAKECMDGOALS)))
     $(error make operations should not be run in git repo)
   endif
 endif
 
-ifeq (,$(filter $(ENVTAG),$(wildcard *)))
-  DOTSRCDIR = dotinstall
-  MAKEFILE = Makefile
-else
-  DOTSRCDIR = $(ENVTAG)/dotinstall
-  MAKEFILE = $(ENVTAG)/Makefile
+ENVCHECK = fsplit cksumit
+ENVNEEDS = $(shell have=$$(compgen -A function); for x in $(ENVCHECK); do [[ $$have =~ $$x ]] || echo $$x; done)
+ifneq (,$(ENVNEEDS))
+    $(error environment needs: $(ENVNEEDS))
 endif
+
+#ifeq (,$(filter $(ENVTAG),$(wildcard *)))
+#else
+#  DOTSRCDIR = $(ENVTAG)/dotinstall
+#  MAKEFILE = $(ENVTAG)/Makefile
+#endif
 
 BRANCH = $(shell git $(GITPREFIX) rev-parse --abbrev-ref HEAD)
 ifeq (,$(findstring $(BRANCH),master))
@@ -31,7 +35,8 @@ ifndef TUMBLE
   TUMBLE = -DTumble:true
 endif
 
-ENVCHECK = fsplit
+DOTSRCDIR = $(ENVDIR)/dotinstall
+MAKEFILE = $(ENVDIR)/Makefile
 DOTINSTALL = $(notdir $(wildcard $(DOTSRCDIR)/*))
 LAST = $(lastword $(LIST))
 CURRENT = $(notdir $(call FOLLOW_LINK,current))
@@ -50,9 +55,13 @@ export $(STATUS)
 help :
 	@grep '^#help: ' $(MAKEFILE) | cut -f2- -d: | column -s: -t
 
+#help: envcheck : checks environment for needed functions
+#help: : you may need to load these functions then export them
+#help: : use 'make status' to find what ENVCHECK functions are needed
 envcheck :
 	@for x in $(ENVCHECK); do \
 	    [[ $$(compgen -A function) =~ $$x ]] || { echo ENVCHECK failure; exit 1; }; done
+
 #help: info : combines status and list
 info : status list
 
@@ -111,31 +120,37 @@ roll : save current
 	-@rm testing &>/dev/null
 
 #help: install-% : used to install individual user dotfile like .bashrc
-#help: install : used to install all the dotfiles for the user
 .SECONDEXPANSION:
 install-% : $(DOTSRCDIR)/$$*
 	@echo checking $^; diff -qr $^ ~/.$* || cp -r $^ ~/.$*
 
+#help: install : used to install all the dotfiles for the user
 install : $(addprefix install-, $(DOTINSTALL));
 
+#help: check : checks content of DOTINSTALL with the users dotfiles for status
 check :
 	@for x in $(DOTINSTALL); do \
 	    diff -qr $(DOTSRCDIR)/$$x ~/.$$x || echo $$x is not current; \
 	done
 
-filelist : functions
-	@echo Makefile > filelist
-	@find main dotinstall support -maxdepth 2 -type f | grep -v '_functions' | sort >> filelist
+#help: filelist : generates the list of files to print
+#	@sed -n 's/\\$/\\\\/;p' Makefile > Makefile.txt; echo Makefile.txt > filelist
+filelist :
+	@[[ ! -d $(MAINDIR)/prime ]] || { echo $(MAINDIR)/prime exits; exit 1; }
+	@[[ ! -d $(MAINDIR)/extra ]] || { echo $(MAINDIR)/extra exits; exit 1; }
+	@cd $(MAINDIR) &>/dev/null; fsplit prime_functions 2>/dev/null
+	@cd $(MAINDIR) &>/dev/null; fsplit extra_functions 2>/dev/null
+	@echo Makefile > $@
+	@find $(ENVDIR)/{main,dotinstall,support} -maxdepth 2 -type f | \
+	    grep -v '_functions' | sort >> $@
 	-@echo removing old print files; rm -r long* short* 2>/dev/null
 
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
 long short : filelist
-	@source envfiles/xmn; source envfiles/bashrcfuncs; \
-	xmn -pm -f filelist | tee $@.txt | \
+	@cksumit $$(cat $^) | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
 
-functions :
-	@[[ ! -d main/prime ]] || { echo main/prime exits; exit 1; }
-	@[[ ! -d main/extra ]] || { echo main/extra exits; exit 1; }
-	@cd main; fsplit prime_functions 2>/dev/null; fsplit extra_functions 2>/dev/null
+md5sums : filelist
+	@while read; do md5sum $$REPLY; done < $^ > $@
+
