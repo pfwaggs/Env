@@ -2,7 +2,7 @@
 #help: usage : cksumit file [file ...]
 function cksumit () {
     for x in $@; do
-	echo $x
+	echo ${x#$PRUNE/}
         while read -r; do
             ck=$(echo $REPLY | tr -d '[[:space:]]' | sum)
             echo ${ck%% *} "$REPLY"

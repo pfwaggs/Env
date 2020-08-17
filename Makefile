@@ -35,6 +35,7 @@ ifndef TUMBLE
   TUMBLE = -DTumble:true
 endif
 
+PRUNE = $(shell echo $${ENVDIR%/*/*})
 DOTSRCDIR = $(ENVDIR)/dotinstall
 MAKEFILE = $(ENVDIR)/Makefile
 DOTINSTALL = $(notdir $(wildcard $(DOTSRCDIR)/*))
@@ -148,7 +149,7 @@ filelist :
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
 long short : filelist
-	@cksumit $$(cat $^) | tee $@.txt | \
+	@PRUNE=$(PRUNE) cksumit $$(cat $^) | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
 	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null
 
