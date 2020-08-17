@@ -109,6 +109,18 @@ function _Show ()
     [[ -n $COMP_LINE ]] && x=$2 || x=$1
     compgen -v | grep -i "^$x"
 }
+#help: cksumit : provides a line checksum for given files.
+#help: usage : cksumit file [file ...]
+function cksumit () {
+    for x in $@; do
+	echo ${x#$PRUNE/}
+        while read -r; do
+            ck=$(echo $REPLY | tr -d '[[:space:]]' | sum)
+            echo ${ck%% *} "$REPLY"
+        done < $x
+        echo ''
+    done
+}
 
 #help: configEd : configure the editor of your choice (emacs, vim)
 #help: usage : configEd [emacs|vim]
@@ -131,6 +143,23 @@ function configEd () {
 #help: extra : shortcut to set extra for the prompt
 #help: usage : extra [color=]'text'
 function extra () { stp extra="$*"; }
+
+#help: fsplit : splits a file of functions into a dir of separate functions
+#help: usage : fsplit file [dir]
+function fsplit () {
+    [[ ${1##*_} = functions ]] || { echo input file not a functions file; return 1; }
+    [[ -s $1 ]] || { echo "can not find <$1>"; return 1; }
+    declare -x outputDir=${2:-${1%_*}}
+    [[ -d $outputDir ]] && { echo dir for $outputDir already exists; return 1; }
+    mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; return 1; }
+    csplit -s -z --prefix=$outputDir/xx $1 /^$/ {*}
+    pushd $outputDir &>/dev/null || { echo "can't cd into dir $outputDir"; return 1; }
+    for x in *; do
+        new=$(awk '/^function / {print $2;exit}' $x)
+        mv $x $new
+    done
+    popd &>/dev/null
+}
 
 #help: hlp : help for functions loaded
 #help: usage : hlp function
