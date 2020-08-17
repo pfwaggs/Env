@@ -9,9 +9,9 @@ endif
 
 ENVCHECK = fsplit cksumit
 ENVNEEDS = $(shell have=$$(compgen -A function); for x in $(ENVCHECK); do [[ $$have =~ $$x ]] || echo $$x; done)
-ifneq (,$(ENVNEEDS))
-    $(error environment needs: $(ENVNEEDS))
-endif
+#ifneq (,$(ENVNEEDS))
+#    $(error environment needs: $(ENVNEEDS))
+#endif
 
 #ifeq (,$(filter $(ENVTAG),$(wildcard *)))
 #else
