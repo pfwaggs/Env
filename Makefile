@@ -140,7 +140,7 @@ filelist :
 	@[[ ! -d $(MAINDIR)/extra ]] || { echo $(MAINDIR)/extra exits; exit 1; }
 	@cd $(MAINDIR) &>/dev/null; fsplit prime_functions 2>/dev/null
 	@cd $(MAINDIR) &>/dev/null; fsplit extra_functions 2>/dev/null
-	@echo Makefile > $@
+	@echo $(MAKEFILE) > $@
 	@find $(ENVDIR)/{main,dotinstall,support} -maxdepth 2 -type f | \
 	    grep -v '_functions' | sort >> $@
 	-@echo removing old print files; rm -r long* short* 2>/dev/null
@@ -150,6 +150,7 @@ filelist :
 long short : filelist
 	@cksumit $$(cat $^) | tee $@.txt | \
 	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
+	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null
 
 md5sums : filelist
 	@while read; do md5sum $$REPLY; done < $^ > $@
