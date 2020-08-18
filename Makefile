@@ -136,9 +136,9 @@ filelist :
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
 long short : filelist
-	@PRUNE=$(PRUNE) cksumit $$(cat $^) > tee $@.txt
+	@PRUNE=$(PRUNE) cksumit $$(cat $^) > $@.txt
 	@enscript $(OPT_ENSCRIPT) -o $@.ps $@.txt
-	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sum.ps md5sum.txt
+	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sums.ps md5sums.txt
 	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null
 
 #help: md5sums : generates md5sums for files in the filelist
