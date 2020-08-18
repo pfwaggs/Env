@@ -9,15 +9,9 @@ endif
 
 ENVCHECK = fsplit cksumit
 ENVNEEDS = $(shell have=$$(compgen -A function); for x in $(ENVCHECK); do [[ $$have =~ $$x ]] || echo $$x; done)
-#ifneq (,$(ENVNEEDS))
-#    $(error environment needs: $(ENVNEEDS))
-#endif
-
-#ifeq (,$(filter $(ENVTAG),$(wildcard *)))
-#else
-#  DOTSRCDIR = $(ENVTAG)/dotinstall
-#  MAKEFILE = $(ENVTAG)/Makefile
-#endif
+ifneq (,$(ENVNEEDS))
+    $(error environment needs: $(ENVNEEDS). run 'export -f $(ENVNEEDS)' then rerun make)
+endif
 
 BRANCH = $(shell git $(GITPREFIX) rev-parse --abbrev-ref HEAD)
 ifeq (,$(findstring $(BRANCH),master))
@@ -25,15 +19,16 @@ ifeq (,$(findstring $(BRANCH),master))
 endif
 
 ifeq (short,$(findstring short,$(MAKECMDGOALS)))
-  ENSCRIPT = -2 -r -f Courier8
+  OPT_ENSCRIPT = -2 -r -f Courier8
+endif
+OPT_ENSCRIPT += -DDuplex:true
+
+ifdef TUMBLE
+  OPT_ENSCRIPT += -DTumble:true
 endif
 
 LIST := $(shell ls | sed -nr '/^[0-9][0-9_.]+-[[:alnum:]]+$$/p' | sort)
 FOLLOW_LINK = $(shell cd $(1) &>/dev/null && pwd -P || echo none)
-
-ifndef TUMBLE
-  TUMBLE = -DTumble:true
-endif
 
 PRUNE = $(shell echo $${ENVDIR%/*/*})
 DOTSRCDIR = $(ENVDIR)/dotinstall
@@ -120,16 +115,8 @@ current : $(LAST)-current
 roll : save current
 	-@rm testing &>/dev/null
 
-#help: install-% : used to install individual user dotfile like .bashrc
-.SECONDEXPANSION:
-install-% : $(DOTSRCDIR)/$$*
-	@echo checking $^; diff -qr $^ ~/.$* || cp -r $^ ~/.$*
-
-#help: install : used to install all the dotfiles for the user
-install : $(addprefix install-, $(DOTINSTALL));
-
-#help: check : checks content of DOTINSTALL with the users dotfiles for status
-check :
+#help: dotcheck : checks content of DOTINSTALL with the users dotfiles for diffs
+dotcheck :
 	@for x in $(DOTINSTALL); do \
 	    diff -qr $(DOTSRCDIR)/$$x ~/.$$x || echo $$x is not current; \
 	done
@@ -144,15 +131,17 @@ filelist :
 	@echo $(MAKEFILE) > $@
 	@find $(ENVDIR)/{main,dotinstall,support} -maxdepth 2 -type f | \
 	    grep -v '_functions' | sort >> $@
-	-@echo removing old print files; rm -r long* short* 2>/dev/null
+	-@echo removing old print files; rm -r long* short* md5sums* 2>/dev/null
 
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
 long short : filelist
-	@PRUNE=$(PRUNE) cksumit $$(cat $^) | tee $@.txt | \
-	enscript $(ENSCRIPT) -DDuplex:true $(TUMBLE) -o $@.ps
+	@PRUNE=$(PRUNE) cksumit $$(cat $^) > tee $@.txt
+	@enscript $(OPT_ENSCRIPT) -o $@.ps $@.txt
+	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sum.ps md5sum.txt
 	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null
 
+#help: md5sums : generates md5sums for files in the filelist
 md5sums : filelist
-	@while read; do md5sum $$REPLY; done < $^ > $@
+	@while read; do md5sum $$REPLY; done < $^ > $@.txt
 

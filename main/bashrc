@@ -21,6 +21,7 @@ declare -rx MAINDIR=$ENVDIR/main
 source $MAINDIR/base_init # mainly var defs etc.
 source $MAINDIR/aliases
 source $MAINDIR/prime_functions
+export -f $(compgen -A function)
 source $MAINDIR/completes
 [[ -e ~/.no_agentprep ]] && echo not loading agentprep || source $MAINDIR/sshAgentPrep
 configEd vim
