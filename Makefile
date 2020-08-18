@@ -136,12 +136,14 @@ filelist :
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
 long short : filelist
-	@PRUNE=$(PRUNE) cksumit $$(cat $^) > $@.txt
+	@echo $(ENVDIR) > $@.txt
+	@PRUNE=$(ENVDIR) cksumit $$(cat $^) >> $@.txt
 	@enscript $(OPT_ENSCRIPT) -o $@.ps $@.txt
-	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sums.ps md5sums.txt
+	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sums.ps md5sums.txt || :
 	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null
 
 #help: md5sums : generates md5sums for files in the filelist
 md5sums : filelist
-	@while read; do md5sum $$REPLY; done < $^ > $@.txt
+	@echo $(ENVDIR) >$@.txt
+	@while read; do md5sum $$REPLY; done < $^ | sed "s|$(ENVDIR)/||" >> $@.txt
 
