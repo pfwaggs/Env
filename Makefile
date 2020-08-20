@@ -80,7 +80,7 @@ list :
 %-recover :
 	@x=$$(grep $* archive.txt); [[ -n $$x ]] || { echo $* not found in archive.txt; exit 1; }; \
 	    read date seq rev < <(echo $${x//[.-]/ }); \
-	    git $(GITPREFIX) archive --format=tar --prefix=$$x/ $$rev | (tar -xf -)
+	    git $(GITPREFIX) archive --format=tar --prefix=$$x/ $$rev | tar -x
 
 #help: %-tar : create a tar of the repo
 %-tar %-targz:
