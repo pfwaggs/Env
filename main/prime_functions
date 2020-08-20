@@ -298,8 +298,6 @@ function stp () {
     declare flip color text
     declare colors=${!_ColorNum[*]}
     declare colorPat=${colors// /|}
-    declare -A promptMap
-    for x in ${!_PromptShow[*]}; do promptMap[${x:0:1}]=$x; done
     for x in "$@"; do
         key=${x%%=*}
         while read x; do
