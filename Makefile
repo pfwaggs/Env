@@ -99,7 +99,7 @@ archive :
 #help: snapshot : takes a snapshot into a derived dir
 update :
 	@[[ -n $(NEEDUPDATE) ]] || { echo no update needed.; exit 1; }
-	@git $(GITPREFIX) archive --format=tar --prefix=$(NEEDUPDATE)/ HEAD | (tar -xf -)
+	@git $(GITPREFIX) archive --format=tar --prefix=$(NEEDUPDATE)/ HEAD | tar -x
 
 #help: (%-)current : makes the named (latest) version current
 #help: (%-)testing : makes the named (lastest) version testing
