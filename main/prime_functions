@@ -142,14 +142,28 @@ function configEd () {
 
 #help: extra : shortcut to set extra for the prompt
 #help: usage : extra [color=]'text'
-function extra () { stp extra="$*"; }
+function extra () {
+    stp extra=1="$*"
+}
+
+#help: fjoin : takes a dir of functions and makes a function file
+#help: usage : fjoin base
+#help: : this wants a dir called functions_'base' to exists and will
+#help: : overwrite a 'base'_functions file then delete the original dir
+function fjoin () {
+    declare dir=functions_$1 file=${1}_functions
+    [[ -d $dir ]] || { echo  $dir does not exist; return 1; }
+    cat $dir/* >| $file || { echo unable to create $file; return 1; }
+    rm -r $dir || { echo unable to remove $dir; return 1; }
+}
+
 
 #help: fsplit : splits a file of functions into a dir of separate functions
-#help: usage : fsplit file [dir]
+#help: usage : fsplit file
 function fsplit () {
     [[ ${1##*_} = functions ]] || { echo input file not a functions file; return 1; }
     [[ -s $1 ]] || { echo "can not find <$1>"; return 1; }
-    declare -x outputDir=${2:-${1%_*}}
+    declare -x outputDir=functions_${1%_*}
     [[ -d $outputDir ]] && { echo dir for $outputDir already exists; return 1; }
     mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; return 1; }
     csplit -s -z --prefix=$outputDir/xx $1 /^$/ {*}
@@ -249,14 +263,18 @@ function prep ()
 #help: push : simple wrapper for pushd
 #help: usage : push (path)
 function push () {
-    declare dir="$1"
-    if [[ ! -d $dir ]]; then
-        read -p 'new dir: ' -e -i "$dir" dir
-        [[ -n $dir ]] && mkdir -p "$dir"
+    if [[ -n $1 ]]; then
+	if [[ -d $1 ]]; then
+	    pushd -n $1 &>/dev/null
+	else
+	    read -p 'new dir: ' -e -i "$1"
+	    [[ -n $REPLY ]] && mkdir -p "$REPLY"
+	    pushd -n "$REPLY" &>/dev/null
+	fi
     fi
-    pushd "$dir" &>/dev/null
+    pushd &>/dev/null
     dirs -l -v
-}
+}	
 
 #help: show : used to show variable values
 #help: usage : show var
@@ -330,7 +348,9 @@ function stp () {
 
 #help: tag : shortcut to set tag for the prompt
 #help: usage : tag [color=]'text'
-function  tag () { stp tag="$*"; }
+function  tag () {
+    stp tag=1="$*"
+}
 
 #help: xtfn : function to extract a function for an aggregated list
 #help: usage : xtfn function
