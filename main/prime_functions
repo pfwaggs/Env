@@ -303,19 +303,16 @@ function stp () {
         while read x; do
             case $x in 
                 [01])
-                    flip=$x
+		    _PromptShow[$key]=$x
                     ;;
                 @($colorPat))
-                    color=$x
+		    _PromptColor[$key]=$x
                     ;;
-                *)
-                    text=$x
+		    *|'')
+		    [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$x
                     ;;
             esac
-        done < <(echo -n ${1#*=} | perl -a -F/=/ -E 'say for @F')
-        [[ -n $text ]] && [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$text
-        [[ -n $color ]] && _PromptColor[$key]=$color
-        [[ -n $flip ]] && _PromptShow[$key]=$flip 
+        done < <(echo ${x#*=} | sed -nr 's/=/\n/g;p')
         unset text color flip key
     done
     _PromptShow[host]=1
