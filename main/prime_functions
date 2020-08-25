@@ -312,13 +312,13 @@ function stp () {
         key=${x%%=*}
         while read x; do
             case $x in 
-                [01])
+                0|1)
 		    _PromptShow[$key]=$x
                     ;;
                 @($colorPat))
 		    _PromptColor[$key]=$x
                     ;;
-		"#*([[:xdigit:]])")
+		+([[:digit:]]))
 		    _PromptColor[$key]=$x
 		    ;;
 		    *|'')
@@ -334,9 +334,13 @@ function stp () {
     for x in num extra tag user host spath lpath prompt; do
         [[ ${_PromptShow[$x]} = 0 ]] && continue
         [[ ${_PromptCfg[$x]} = '' ]] && continue
-        color=${_PromptColor[$x]}
-        num=${_ColorNum[$color]}
-        PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
+	if [[ ${_PromptColor[$x]} =~ [0-9] ]]; then
+	    num="38:5:${_PromptColor[$x]}"
+	else
+	    color=${_PromptColor[$x]}
+	    num=${_ColorNum[$color]}
+	fi
+	PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
     done
     PS1+=$'\[\e[m\]'
 }
