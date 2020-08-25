@@ -1,7 +1,6 @@
 #help: L : provides ls support for hidden (dot) files
 #help: usage : L [options] [dir]
-function L ()
-{
+function L () {
     declare -a args
     declare opts=lAd
     for x in $*; do
@@ -44,8 +43,7 @@ function _ArgParser () {
 #help: :  -c clear items
 #help: :  -u unique items
 #help: :  -S output a single string
-function _FixList ()
-{
+function _FixList () {
     declare p opt
     declare -a nlist list opts
     for p in "$@"; do
@@ -103,12 +101,12 @@ function _FixList ()
 }
 
 #help: _Show : complete function for the show function
-function _Show ()
-{
+function _Show () {
     declare x
     [[ -n $COMP_LINE ]] && x=$2 || x=$1
     compgen -v | grep -i "^$x"
 }
+
 #help: cksumit : provides a line checksum for given files.
 #help: usage : cksumit file [file ...]
 function cksumit () {
@@ -156,7 +154,6 @@ function fjoin () {
     cat $dir/* >| $file || { echo unable to create $file; return 1; }
     rm -r $dir || { echo unable to remove $dir; return 1; }
 }
-
 
 #help: fsplit : splits a file of functions into a dir of separate functions
 #help: usage : fsplit file
@@ -208,8 +205,7 @@ function load () {
 
 #help: lsu : a long listing of dirs moving up the dir path
 #help: usage : lsu
-function lsu ()
-{
+function lsu () {
     declare -a np=(/ "${1:-$PWD}")
     while [[ -n ${np[-1]%/*} ]]; do
         np+=(${np[-1]%/*})
@@ -220,8 +216,7 @@ function lsu ()
 #help: mkwdir : creates a new arg.nn dir based on arg
 #help: usage : mkwdir (base)
 #help: : default arg is the date
-function mkwdir ()
-{
+function mkwdir () {
     declare count dir pat date=$(date +%F | tr '-' '_')
     pat=${1:=$date}
     count=$(ls -d $pat.?? 2>/dev/null | wc -l)
@@ -244,8 +239,7 @@ function pop () {
 #help: : py for python scripts
 #help: : fn for bash functions
 #help: : pm for perl module
-function prep ()
-{
+function prep () {
     declare PREPDIR=$ENVDIR/support/prep_files
     declare dest base file type
     source ${PREPDIR}/map
@@ -279,8 +273,7 @@ function push () {
 #help: show : used to show variable values
 #help: usage : show var
 #help: : type values in lowercase and <tab> will uppercase if needed
-function show ()
-{
+function show () {
     declare x=$(declare -p $1 | awk '{print $2}')
     if [[ $x =~ [aA] ]]; then
         echo array $1:
@@ -294,8 +287,7 @@ function show ()
 
 #help: spx : simple function to do aspell
 #help: usage : spx word [word ...]
-function spx ()
-{
+function spx () {
     echo $@ | aspell -a
 }
 
@@ -326,6 +318,9 @@ function stp () {
                 @($colorPat))
 		    _PromptColor[$key]=$x
                     ;;
+		"#*([[:xdigit:]])")
+		    _PromptColor[$key]=$x
+		    ;;
 		    *|'')
 		    [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$x
                     ;;
