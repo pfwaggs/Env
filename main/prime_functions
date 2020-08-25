@@ -149,8 +149,11 @@ function extra () {
 #help: : this wants a dir called functions_'base' to exists and will
 #help: : overwrite a 'base'_functions file then delete the original dir
 function fjoin () {
-    declare dir=functions_$1 file=${1}_functions
+    declare tag base dir=${1/%\/}
     [[ -d $dir ]] || { echo  $dir does not exist; return 1; }
+    read tag base < <(echo ${dir/_/ })
+    [[ $tag = functions ]] || { echo bad input argument; return 1; }
+    declare file=${base}_$tag
     cat $dir/* >| $file || { echo unable to create $file; return 1; }
     rm -r $dir || { echo unable to remove $dir; return 1; }
 }
@@ -158,9 +161,11 @@ function fjoin () {
 #help: fsplit : splits a file of functions into a dir of separate functions
 #help: usage : fsplit file
 function fsplit () {
-    [[ ${1##*_} = functions ]] || { echo input file not a functions file; return 1; }
-    [[ -s $1 ]] || { echo "can not find <$1>"; return 1; }
-    declare -x outputDir=functions_${1%_*}
+    declare tag base dir=${1/%\/}
+    read base tag < <(echo ${dir/_/ })
+    [[ $tag = functions ]] || { echo bad input argument; return 1; }
+    [[ -s $dir ]] || { echo "can not find <$dir>"; return 1; }
+    declare -x outputDir=${tag}_${base}
     [[ -d $outputDir ]] && { echo dir for $outputDir already exists; return 1; }
     mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; return 1; }
     csplit -s -z --prefix=$outputDir/xx $1 /^$/ {*}

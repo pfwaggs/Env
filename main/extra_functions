@@ -8,7 +8,6 @@ function colorsamples () {
     done
 }
 
-
 #help: commas : commafy numeric fields in input stream
 #help: usage : <-> | commas
 function commas () {
@@ -69,6 +68,20 @@ function killdir () {
     rm -r ~1
     popd +1 &>/dev/null
     dirs -v
+}
+
+#help: mlinker : mlinker creates the links for music dirs
+#help: usage : mlinker (mp3|flac) localParent file
+#help: : file needs to be the base paths you want mounted. the mount point is
+#help: : given on the command line
+function mlinker () {
+    declare orig remote=${1/#\/} local=${2/%\/}
+    while read; do
+	echo $REPLY
+	need=$(echo $REPLY | cut -f2 -d/)
+	[[ -d $local/$need ]] || mkdir "$local/$need"
+	ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
+    done < <(cat $3)
 }
 
 #help: mydd : convenience wrapper for dd/dcfldd
