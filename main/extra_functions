@@ -1,15 +1,23 @@
 
+#help: colorsamples : show sample text in specified colors of 256 values
+#help: usage : colorsamples num [num ...]
+function colorsamples () {
+    declare x
+    for x in $@; do
+	echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
+    done
+}
+
+
 #help: commas : commafy numeric fields in input stream
 #help: usage : <-> | commas
-function commas ()
-{
+function commas () {
     rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
 }
 
 #help: ffix : useful to grab a function and edit it for testing
 #help: usage : ffix function (the edited file will be in /tmp)
-function ffix ()
-{
+function ffix () {
     declare x=/tmp/${1}2
     type $1 | sed  "1d;s/${1}/${1}2/" > $x
     vim $x
@@ -18,8 +26,7 @@ function ffix ()
 
 #help: gigify : converts numbers to a different unit
 #help: usage : gigify text
-function gigify ()
-{
+function gigify () {
     declare u=BKMGT b=1024 v=$(echo ${@//[^0-9.+-]}) s=${v//[0-9.]}
     v=${v//[+-]}
     [[ $@ =~ [bB] ]] || b=1000
@@ -32,8 +39,7 @@ function gigify ()
 #help: usage : julian [date]
 #help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
 #help: : date defaults to today
-function julian ()
-{
+function julian () {
     case ${1//[0-9]/x} in
         '')
             date +%Y.%j
@@ -54,8 +60,7 @@ function julian ()
 
 #help: killdir : moves you to the parent and removes the dir you were in
 #help: usage : killdir
-function killdir ()
-{
+function killdir () {
     [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
     read -p "remove < $PWD > ? "
     [[ $REPLY =~ ^[yY] ]] || return 0
@@ -69,8 +74,7 @@ function killdir ()
 #help: mydd : convenience wrapper for dd/dcfldd
 #help: usage : mydd object <tab> [option ...]
 #help: : this lets you use tab complete for filename
-function mydd ()
-{
+function mydd () {
     declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
     shift
     case $DD in
@@ -85,8 +89,7 @@ function mydd ()
 
 #help: psfu : checks the process table for specified user
 #help: usage : psfu sid
-function psfu ()
-{
+function psfu () {
     ps -f -u ${1:-$(id -un)}
 }
 
@@ -160,15 +163,13 @@ function tinfo () {
 
 #help: tname : modifies titlename
 #help: usage : tname (str)
-function tname ()
-{
+function tname () {
     printf "\033k%s\033\\" ${1:-bash}
 }
 
 #help: typer : used to examine files based on type
 #help: usage : typer file
-function typer ()
-{
+function typer () {
     declare mtype x
     for mtype in $(type -at $1); do
         case $mtype in
@@ -193,8 +194,7 @@ function typer ()
 
 #help: wup : function to wake up machines on the network
 #help: usage : wup machine_name
-function wup ()
-{
+function wup () {
     declare cmd=$(type -p etherwake wol)
     declare ip=$(dig +search +short -t txt $1)
     eval $cmd $ip
@@ -202,8 +202,7 @@ function wup ()
 
 #help: xmn : used to produce a detailed listing
 #help:     : of source code with some extra stuff
-function xmn ()
-{
+function xmn () {
     declare opt infile tmp n arg file OPTIND=1 keep=0
     declare -a opts flist
     while getopts 'acf:KmMptw' arg; do
