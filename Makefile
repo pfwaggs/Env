@@ -111,6 +111,10 @@ current : $(LAST)-current
 %-current %-save %-testing :
 	@dir=$*; tmp=$@; link="$${tmp##*-}"; ln -n -f -s $$dir $$link; ls -ld $$link
 
+#help: devtest : links the Git repo to testing
+devtest :
+	ln -n -f -s $(GITHOME) testing
+
 #help: roll : relinks current to save and links last to current
 roll : save current
 	-@rm testing &>/dev/null
