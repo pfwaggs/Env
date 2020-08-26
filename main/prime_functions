@@ -196,7 +196,7 @@ function hlp () {
 function load () {
     declare list x y 
     for x in $@; do
-        list=$(grep -l -w "^function $x " $MAINDIR/*_functions)
+        list=$(grep -l -w "^function $x " $MAINDIR/*_functions $MAINDIR/$x 2>/dev/null)
         [[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
         for y in $list; do
             echo loading $x from $y
