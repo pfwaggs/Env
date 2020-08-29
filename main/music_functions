@@ -1,0 +1,85 @@
+
+#help: cdsizer : shows the size of a possible cd
+#help: usage : cdsizer file
+function cdsizer () { 
+    awk -F: '{sum+=$1}END{print NR":"sum}' $1
+}
+
+#help: m3urndm : randomizes an m3u file
+#help: usage : m3urndm 
+#help: : this requires you to have already split the m3u into a dir
+#help: : and run the script from inside that dir
+function m3urndm () {
+    declare x y dest=tmp
+    [[ -d $dest ]] && { echo $dest exists; return 1; } || mkdir $dest
+    ln xx000 $dest
+    for x in $(ls -I[^xX]* -Ixx000); do
+	echo $RANDOM $x
+    done | sort -n |
+	awk -v d=$dest '{print d"/"$2}' | paste <(ls -I[^xX]* -Ixx000) - | xargs -L 1 ln 
+    cat $dest/* > rndm.m3u
+    rm -r $dest
+}
+
+#help: m3usplitter : splits an m3u file into pieces to burn to cd
+#help: usage : m3usplitter file.m3u
+function m3usplitter () {
+    sum=0
+    max=$((700*10**6))
+    sed -n '/#/!p' $1 | while read; do stat -L -c "%s:%n" "$REPLY"; done |
+    while read; do
+	s=${REPLY%:*}
+	((sum+=$s))
+	if (( $sum < $max )); then
+	    echo "$REPLY"
+	else
+	    echo -e "\n$REPLY"
+	    sum=$s
+	fi
+    done | csplit - /^$/ {*}
+
+    for x in xx*; do
+	awk -v n=$x -F: '{sum+=$1}END{print n":"NR":"sum}' $x
+	n=1
+	dir=${x/xx/cd}
+	mkdir $dir
+	while read; do
+	    [[ -n $REPLY ]] || continue
+	    printf -v dest "$dir/file%03d.mp3" $((n++))
+	    echo $dest
+	    cp -H "$REPLY" $dest
+	done < <(cut -f2 -d: $x)
+    done
+}
+
+#help: mp3dedupe : takes a list of mp3 files and creates a uniq list of titles
+#help: usage : mp3dedupe file
+#help: :
+function mp3dedupe () {
+    declare x old input=$1
+    rm /tmp/??.titles
+    awk -F/ '{print $NF}' $input | cut -c6- | sort | uniq -c |
+	while read n title; do
+	    printf -v dest "/tmp/%02d.titles" $n
+	    echo "$title" >> $dest
+	done
+    rm /tmp/masterMP3.txt &>/dev/null
+    for x in /tmp/*.titles; do
+	echo cleaning $x >&2
+	while read; do
+	    grep -m 1 -F "$REPLY" $input
+	done < $x >> /tmp/masterMP3.txt
+    done
+}
+
+#help: repath : repath rewrites the path in m3u files to be absolute
+#help: usage : repath link_dir file
+#help: : the output file has .m3u stripped and -new added
+function repath () {
+    declare baseDir=$1 input=$2 sedfile=/tmp/rewrite.sed output=${2%.m3u}-new
+    [[ ! -f $sedfile ]] || rm $sedfile || { echo could not remove $sedfile; return 1; }
+    echo '/^#/{p;n}' > $sedfile
+    find $baseDir -type l -printf "s|%p|%l|p\n" >> $sedfile
+    sed -n -f $sedfile $input > $output
+}
+
