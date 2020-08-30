@@ -155,7 +155,8 @@ function fjoin () {
     [[ $tag = functions ]] || { echo bad input argument; return 1; }
     declare file=${base}_$tag
     for x in $dir/*; do
-	cat $x <(echo '#split#')
+	cat $x
+	echo '#split#'
     done >| $file || { echo unable to create $file; return 1; }
     rm -r $dir || { echo unable to remove $dir; return 1; }
 }
@@ -172,9 +173,9 @@ function fsplit () {
     mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; return 1; }
     csplit -s -z --prefix=$outputDir/xx $1 /^#split#$/ {*}
     sed -i '/^#split#$/d' $outputDir/xx*
+    find $outputDir -type f -empty | xargs rm
     pushd $outputDir &>/dev/null || { echo "can't cd into dir $outputDir"; return 1; }
     for x in *; do
-	[[ $(stat -c %s $x) -gt 0 ]] || { rm $x; continue; }
         new=$(awk '/^function / {print $2;exit}' $x)
         mv $x $new
     done
