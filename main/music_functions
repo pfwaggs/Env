@@ -1,10 +1,9 @@
-
 #help: cdsizer : shows the size of a possible cd
 #help: usage : cdsizer file
 function cdsizer () { 
     awk -F: '{sum+=$1}END{print NR":"sum}' $1
 }
-
+#split#
 #help: m3urndm : randomizes an m3u file
 #help: usage : m3urndm 
 #help: : this requires you to have already split the m3u into a dir
@@ -20,7 +19,7 @@ function m3urndm () {
     cat $dest/* > rndm.m3u
     rm -r $dest
 }
-
+#split#
 #help: m3usplitter : splits an m3u file into pieces to burn to cd
 #help: usage : m3usplitter file.m3u
 function m3usplitter () {
@@ -37,21 +36,8 @@ function m3usplitter () {
 	    sum=$s
 	fi
     done | csplit - /^$/ {*}
-
-    for x in xx*; do
-	awk -v n=$x -F: '{sum+=$1}END{print n":"NR":"sum}' $x
-	n=1
-	dir=${x/xx/cd}
-	mkdir $dir
-	while read; do
-	    [[ -n $REPLY ]] || continue
-	    printf -v dest "$dir/file%03d.mp3" $((n++))
-	    echo $dest
-	    cp -H "$REPLY" $dest
-	done < <(cut -f2 -d: $x)
-    done
 }
-
+#split#
 #help: mp3dedupe : takes a list of mp3 files and creates a uniq list of titles
 #help: usage : mp3dedupe file
 #help: :
@@ -71,7 +57,7 @@ function mp3dedupe () {
 	done < $x >> /tmp/masterMP3.txt
     done
 }
-
+#split#
 #help: repath : repath rewrites the path in m3u files to be absolute
 #help: usage : repath link_dir file
 #help: : the output file has .m3u stripped and -new added
@@ -82,4 +68,23 @@ function repath () {
     find $baseDir -type l -printf "s|%p|%l|p\n" >> $sedfile
     sed -n -f $sedfile $input > $output
 }
-
+#split#
+#help: trknamer : used to name the tracks in a simple fashion
+#help: usage : trknamer start
+function trknamer () {
+    declare type track tcount dir dcount=$1
+    [[ -n $dcount ]] || { echo need a starting disk number; return 1; }
+    for x in xx*; do
+	printf -v dir "d%04d" $((dcount++))
+	[[ -d $dir ]] || mkdir $dir
+	tcount=1
+	while read; do
+	    [[ -n $REPLY ]] || continue
+	    type=${REPLY##*.}
+	    printf -v track "%s%03d" ${type:0:1} $((tcount++))
+	    cp -H "$REPLY" $dir/$dir$track.$type && echo "$dir;$track;$REPLY"
+	done < <(cut -f2 -d: $x) >> pairs
+	awk -v n=$x -F: '{sum+=$1}END{print n":"NR":"sum}' $x
+    done
+}
+#split#
