@@ -18,7 +18,7 @@ function L () {
         ls -$opts "$x"/.??* 2> /dev/null
     done
 }
-
+#split#
 #help: _ArgParser : argument completion function
 function _ArgParser () {
     declare path file partial dir
@@ -34,7 +34,7 @@ function _ArgParser () {
     done
     [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
 }
-
+#split#
 #help: _FixList :  some basic list operations:
 #help: :  -s sort
 #help: :  -e exists
@@ -99,14 +99,14 @@ function _FixList () {
     done
     printf '%s\n' "${list[@]}"
 }
-
+#split#
 #help: _Show : complete function for the show function
 function _Show () {
     declare x
     [[ -n $COMP_LINE ]] && x=$2 || x=$1
     compgen -v | grep -i "^$x"
 }
-
+#split#
 #help: cksumit : provides a line checksum for given files.
 #help: usage : cksumit file [file ...]
 function cksumit () {
@@ -119,7 +119,7 @@ function cksumit () {
         echo ''
     done
 }
-
+#split#
 #help: configEd : configure the editor of your choice (emacs, vim)
 #help: usage : configEd [emacs|vim]
 function configEd () {
@@ -137,13 +137,13 @@ function configEd () {
             ;;
     esac
 }
-
+#split#
 #help: extra : shortcut to set extra for the prompt
 #help: usage : extra [color=]'text'
 function extra () {
     stp extra=1="$*"
 }
-
+#split#
 #help: fjoin : takes a dir of functions and makes a function file
 #help: usage : fjoin base
 #help: : this wants a dir called functions_'base' to exists and will
@@ -154,10 +154,12 @@ function fjoin () {
     read tag base < <(echo ${dir/_/ })
     [[ $tag = functions ]] || { echo bad input argument; return 1; }
     declare file=${base}_$tag
-    cat $dir/* >| $file || { echo unable to create $file; return 1; }
+    for x in $dir/*; do
+	cat $x <(echo '#split#')
+    done >| $file || { echo unable to create $file; return 1; }
     rm -r $dir || { echo unable to remove $dir; return 1; }
 }
-
+#split#
 #help: fsplit : splits a file of functions into a dir of separate functions
 #help: usage : fsplit file
 function fsplit () {
@@ -168,15 +170,17 @@ function fsplit () {
     declare -x outputDir=${tag}_${base}
     [[ -d $outputDir ]] && { echo dir for $outputDir already exists; return 1; }
     mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; return 1; }
-    csplit -s -z --prefix=$outputDir/xx $1 /^$/ {*}
+    csplit -s -z --prefix=$outputDir/xx $1 /^#split#$/ {*}
+    sed -i '/^#split#$/d' $outputDir/xx*
     pushd $outputDir &>/dev/null || { echo "can't cd into dir $outputDir"; return 1; }
     for x in *; do
+	[[ $(stat -c %s $x) -gt 0 ]] || { rm $x; continue; }
         new=$(awk '/^function / {print $2;exit}' $x)
         mv $x $new
     done
     popd &>/dev/null
 }
-
+#split#
 #help: hlp : help for functions loaded
 #help: usage : hlp function
 #help: usage : hlp
@@ -190,7 +194,7 @@ function hlp () {
             cut -f1,3- -d: | column -s: -t | sort -k1,1r -k2,2 
     fi
 }
-
+#split#
 #help: load : loads functions from MAINDIR files
 #help: usage : load function
 function load () {
@@ -207,7 +211,7 @@ function load () {
         list=''
     done
 }
-
+#split#
 #help: lsu : a long listing of dirs moving up the dir path
 #help: usage : lsu
 function lsu () {
@@ -217,7 +221,7 @@ function lsu () {
     done
     ls -ld "${np[@]}"
 }
-
+#split#
 #help: mkwdir : creates a new arg.nn dir based on arg
 #help: usage : mkwdir (base)
 #help: : default arg is the date
@@ -228,14 +232,14 @@ function mkwdir () {
     printf -v dir "%s.%02d" $pat $((1+count))
     mkdir -v $dir
 }
-
+#split#
 #help: pop : simple wrapper for popd; pops given entry (default is current)
 #help: usage : pop [n]
 function pop () {
     popd ${1:++$1} > /dev/null
     dirs -l -v
 }
-
+#split#
 #help: prep : used to give a boilerplate file for editing
 #help: usage : prep file.(sh||fn|pl|pm|py)
 #help: : based on extension;
@@ -258,7 +262,7 @@ function prep () {
         echo prepped $dest as ${map[$type]/_/ }
     done
 }
-
+#split#
 #help: push : simple wrapper for pushd
 #help: usage : push (path)
 function push () {
@@ -274,7 +278,7 @@ function push () {
     pushd &>/dev/null
     dirs -l -v
 }	
-
+#split#
 #help: show : used to show variable values
 #help: usage : show var
 #help: : type values in lowercase and <tab> will uppercase if needed
@@ -289,13 +293,13 @@ function show () {
         echo $1 = ${!1}
     fi
 }
-
+#split#
 #help: spx : simple function to do aspell
 #help: usage : spx word [word ...]
 function spx () {
     echo $@ | aspell -a
 }
-
+#split#
 #help: stp :: utility to set prompt line characteristics
 #help: usage : stp [args...]
 #help: : args are: key[=0|1][=color][=text]
@@ -349,15 +353,16 @@ function stp () {
     done
     PS1+=$'\[\e[m\]'
 }
-
+#split#
 #help: tag : shortcut to set tag for the prompt
 #help: usage : tag [color=]'text'
 function  tag () {
     stp tag=1="$*"
 }
-
+#split#
 #help: xtfn : function to extract a function for an aggregated list
 #help: usage : xtfn function
 function xtfn () {
     sed -nrs "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $MAINDIR/*_functions
 }
+#split#
