@@ -4,7 +4,6 @@ function cdsizer () {
     awk -F: '{sum+=$1}END{print NR":"sum}' $1
 }
 #split#
-
 #help: m3uredo : redo the cds for given inputs
 #help: usage : m3uredo d#### [d#### ...]
 function m3uredo () {
@@ -20,7 +19,6 @@ function m3uredo () {
 	done < <(grep $x pairs.csv);
     done
 }
-
 #split#
 #help: m3urndm : randomizes an m3u file
 #help: usage : m3urndm 

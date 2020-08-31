@@ -145,41 +145,44 @@ function extra () {
 }
 #split#
 #help: fjoin : takes a dir of functions and makes a function file
-#help: usage : fjoin base
-#help: : this wants a dir called functions_'base' to exists and will
-#help: : overwrite a 'base'_functions file then delete the original dir
+#help: usage : fjoin functions_<*> [functions_<*> ...]
+#help: : for each existing named dir this will cat the files in that dir and
+#help: : output the results to <*>_functions. this overwrites the dest file.
+#help: : then the dir is removed.
 function fjoin () {
-    declare tag base dir=${1/%\/}
-    [[ -d $dir ]] || { echo  $dir does not exist; return 1; }
-    read tag base < <(echo ${dir/_/ })
-    [[ $tag = functions ]] || { echo bad input argument; return 1; }
-    declare file=${base}_$tag
-    for x in $dir/*; do
-	cat $x
-	echo '#split#'
-    done >| $file || { echo unable to create $file; return 1; }
-    rm -r $dir || { echo unable to remove $dir; return 1; }
+    declare dir=${1/%\/}
+    for dir in ${@/%\/}; do
+	[[ -d $dir ]] || { echo  $dir does not exist, skipping; continue; }
+	[[ $dir =~ ^functions_ ]] || { echo bad input argument, skipping; continue; }
+	declare file=${dir#*_}_functions
+	for x in $dir/*; do
+	    cat $x
+	    echo '#split#'
+	done >| $file || { echo unable to create $file, skipping; continue; }
+	rm -r $dir || { echo unable to remove $dir, skipping; rm $file; continue; }
+    done
 }
 #split#
 #help: fsplit : splits a file of functions into a dir of separate functions
 #help: usage : fsplit file
 function fsplit () {
-    declare tag base dir=${1/%\/}
-    read base tag < <(echo ${dir/_/ })
-    [[ $tag = functions ]] || { echo bad input argument; return 1; }
-    [[ -s $dir ]] || { echo "can not find <$dir>"; return 1; }
-    declare -x outputDir=${tag}_${base}
-    [[ -d $outputDir ]] && { echo dir for $outputDir already exists; return 1; }
-    mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; return 1; }
-    csplit -s -z --prefix=$outputDir/xx $1 /^#split#$/ {*}
-    sed -i '/^#split#$/d' $outputDir/xx*
-    find $outputDir -type f -empty | xargs rm
-    pushd $outputDir &>/dev/null || { echo "can't cd into dir $outputDir"; return 1; }
-    for x in *; do
-        new=$(awk '/^function / {print $2;exit}' $x)
-        mv $x $new
+    declare lib
+    for lib in $*; do
+	[[ $lib =~ _functions$ ]] || { echo bad input argument for $lib, skipping; continue; }
+	[[ -s $lib ]] || { echo "can not find <$lib>, skipping"; continue; }
+	declare -x outputDir=functions_${lib%_*}
+	[[ -d $outputDir ]] && { echo dir for $outputDir already exists; continue; }
+	mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; continue; }
+	csplit -s -z --prefix=$outputDir/xx $1 /^#split#$/ {*}
+	sed -i '/^#split#$/d' $outputDir/xx*
+	find $outputDir -type f -empty | xargs rm
+	pushd $outputDir &>/dev/null || { echo "can't cd into $outputDir"; rm -r $outputDir; continue; }
+	for x in *; do
+	    new=$(awk '/^function / {print $2;exit}' $x)
+	    mv $x $new
+	done
+	popd &>/dev/null
     done
-    popd &>/dev/null
 }
 #split#
 #help: hlp : help for functions loaded
