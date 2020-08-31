@@ -4,6 +4,24 @@ function cdsizer () {
     awk -F: '{sum+=$1}END{print NR":"sum}' $1
 }
 #split#
+
+#help: m3uredo : redo the cds for given inputs
+#help: usage : m3uredo d#### [d#### ...]
+function m3uredo () {
+    declare x path disk type track
+    for x in $*; do
+	while read; do
+	    IFS=$';'
+	    read disk track path < <(echo "$REPLY")
+	    IFS=$' \t\n'
+	    type=${REPLY##*.}
+	    [[ -d $disk ]] || mkdir $disk
+	    cp -H "$path" $disk/$disk$track.$type
+	done < <(grep $x pairs.csv);
+    done
+}
+
+#split#
 #help: m3urndm : randomizes an m3u file
 #help: usage : m3urndm 
 #help: : this requires you to have already split the m3u into a dir
@@ -72,8 +90,14 @@ function repath () {
 #help: trknamer : used to name the tracks in a simple fashion
 #help: usage : trknamer start
 function trknamer () {
-    declare type track tcount dir dcount=$1
-    [[ -n $dcount ]] || { echo need a starting disk number; return 1; }
+    declare type track tcount dir dcount
+    declare dbfile=pairs.csv
+    if [[ -f $dbfile ]]; then
+	dcount=$(sed -n '2,$p' $dbfile | cut -f1 -d\; | sort -r | sed -n '1p')
+	dcount=$((1+10#${dcount/d}))
+    else
+	dcount=1
+    fi
     for x in xx*; do
 	printf -v dir "d%04d" $((dcount++))
 	[[ -d $dir ]] || mkdir $dir
