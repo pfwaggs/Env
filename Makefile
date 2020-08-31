@@ -130,8 +130,7 @@ dotcheck :
 filelist :
 	@[[ ! -d $(MAINDIR)/prime ]] || { echo $(MAINDIR)/prime exits; exit 1; }
 	@[[ ! -d $(MAINDIR)/extra ]] || { echo $(MAINDIR)/extra exits; exit 1; }
-	@cd $(MAINDIR) &>/dev/null; fsplit prime_functions 2>/dev/null
-	@cd $(MAINDIR) &>/dev/null; fsplit extra_functions 2>/dev/null
+	@cd $(MAINDIR) &>/dev/null; fsplit prime_functions extra_functions 2>/dev/null
 	@echo $(MAKEFILE) > $@
 	@find $(ENVDIR)/{main,dotinstall,support} -maxdepth 2 -type f | \
 	    grep -v '_functions' | sort >> $@
