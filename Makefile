@@ -7,10 +7,9 @@ ifeq (.git,$(notdir $(findstring .git,$(shell ls -d .git 2>/dev/null))))
   endif
 endif
 
-ENVCHECK = fsplit cksumit
-ENVNEEDS = $(shell have=$$(compgen -A function); for x in $(ENVCHECK); do [[ $$have =~ $$x ]] || echo $$x; done)
-ifneq (,$(ENVNEEDS))
-    $(error environment needs: $(ENVNEEDS). run 'export -f $(ENVNEEDS)' then rerun make)
+NEEDLOAD = $(shell [[ $$(compgen -A function) =~ load ]] || echo load)
+ifeq (load,$(NEEDLOAD))
+    $(error environment needs function load. run 'export -f load' then rerun make)
 endif
 
 BRANCH = $(shell git $(GITPREFIX) rev-parse --abbrev-ref HEAD)
@@ -130,17 +129,17 @@ dotcheck :
 filelist :
 	@[[ ! -d $(MAINDIR)/prime ]] || { echo $(MAINDIR)/prime exits; exit 1; }
 	@[[ ! -d $(MAINDIR)/extra ]] || { echo $(MAINDIR)/extra exits; exit 1; }
-	@cd $(MAINDIR) &>/dev/null; fsplit prime_functions extra_functions 2>/dev/null
+	@cd $(MAINDIR) &>/dev/null; load fsplit; fsplit prime.rc extra.rc 2>/dev/null
 	@echo $(MAKEFILE) > $@
 	@find $(ENVDIR)/{main,dotinstall,support} -maxdepth 2 -type f | \
-	    grep -v '_functions' | sort >> $@
+	    grep -v '.rc' | sort >> $@
 	-@echo removing old print files; rm -r long* short* md5sums* 2>/dev/null
 
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
 long short : filelist
 	@echo $(ENVDIR) > $@.txt
-	@PRUNE=$(ENVDIR) cksumit $$(cat $^) >> $@.txt
+	@load cksumit; PRUNE=$(ENVDIR) cksumit $$(cat $^) >> $@.txt
 	@enscript $(OPT_ENSCRIPT) -o $@.ps $@.txt
 	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sums.ps md5sums.txt || :
 	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null
