@@ -109,4 +109,3 @@ function trknamer () {
 	awk -v n=$x -F: '{sum+=$1}END{print n":"NR":"sum}' $x
     done
 }
-#split#
