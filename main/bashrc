@@ -19,10 +19,8 @@ unset -f $(compgen -A function) &>/dev/null
 declare -rx ENVDIR=$(cd ~/Env/$ENVTAG &>/dev/null; pwd -P)
 declare -rx MAINDIR=$ENVDIR/main
 source $MAINDIR/base_init # mainly var defs etc.
-source $MAINDIR/aliases
-source $MAINDIR/prime_functions
+source $MAINDIR/prime.rc
 export -f cksumit fsplit # needed for make files
-source $MAINDIR/completes
 [[ -e ~/.no_agentprep ]] && echo not loading agentprep || source $MAINDIR/sshAgentPrep
 configEd vim
 stp

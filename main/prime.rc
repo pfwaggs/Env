@@ -145,16 +145,16 @@ function extra () {
 }
 #split#
 #help: fjoin : takes a dir of functions and makes a function file
-#help: usage : fjoin functions_<*> [functions_<*> ...]
+#help: usage : fjoin src_<*> [src_<*> ...]
 #help: : for each existing named dir this will cat the files in that dir and
-#help: : output the results to <*>_functions. this overwrites the dest file.
+#help: : output the results to <*>.rc. this overwrites the dest file.
 #help: : then the dir is removed.
 function fjoin () {
     declare dir
     for dir in ${@/%\/}; do
-	[[ $dir =~ ^functions_ ]] || { echo bad input argument, skipping; continue; }
+	[[ $dir =~ ^src_ ]] || { echo bad input argument, skipping; continue; }
 	[[ -d $dir ]] || { echo  $dir does not exist, skipping; continue; }
-	declare file=${dir#*_}_functions
+	declare file=${dir#*_}.rc
 	mv $file $file.bk
 	for x in $dir/*; do
 	    cat $x
@@ -169,9 +169,9 @@ function fjoin () {
 function fsplit () {
     declare lib
     for lib in $*; do
-	[[ $lib =~ _functions$ ]] || { echo bad input argument for $lib, skipping; continue; }
+	[[ $lib =~ .rc$ ]] || { echo bad input argument for $lib, skipping; continue; }
 	[[ -s $lib ]] || { echo "can not find <$lib>, skipping"; continue; }
-	declare -x outputDir=functions_${lib%_*}
+	declare -x outputDir=src_${lib%.*}
 	[[ -d $outputDir ]] && { echo dir for $outputDir already exists; continue; }
 	mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; continue; }
 	csplit -s -z --prefix=$outputDir/zz $lib /^#split#$/ {*}
@@ -188,23 +188,23 @@ function fsplit () {
 #help: usage : hlp function
 #help: usage : hlp
 function hlp () {
-    declare flist=$(echo $MAINDIR/*_functions)
+    declare flist=$(echo $MAINDIR/*.rc)
     if [[ $# -eq 1 ]]; then
         sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist | cut -f2- -d: | column -n -s: -t
     else
-        awk '/^function / {print "#help: "$2" :"}' $flist |
+        awk '/^function / {printf "#help: %s :\n",$2}' $flist |
             grep -f - $flist | sed -n "s|$MAINDIR/||p" |
             cut -f1,3- -d: | column -s: -t | sort -k1,1r -k2,2 
     fi
 }
 #split#
-#help: load : loads functions from MAINDIR files
-#help: usage : load function
+#help: load : loads MAINDIR rc files
+#help: usage : load function|<rc file> [function|<rc file> ...]
 function load () {
     declare list x y 
     for x in $@; do
-	[[ $x =~ _functions$ ]] && . $MAINDIR/$x && continue
-	list=$(grep -l -w "^function $x " $MAINDIR/*_functions $MAINDIR/$x 2>/dev/null)
+	[[ $x =~ .rc$ ]] && [[ -s $MAINDIR/$x ]] && source $MAINDIR/$x && continue
+	list=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null)
 	[[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
 	for y in $list; do
 	    echo loading $x from $y
@@ -212,7 +212,6 @@ function load () {
 	    . /tmp/$x
 	    rm /tmp/$x
 	done
-	list=''
     done
 }
 #split#
@@ -364,10 +363,10 @@ function  tag () {
     stp tag=1="$*"
 }
 #split#
-#help: xtfn : function to extract a function for an aggregated list
+#help: xtfn : function to extract a function from an rc file
 #help: usage : xtfn function
 function xtfn () {
-    sed -nrs "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $MAINDIR/*_functions
+    sed -nrs "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $MAINDIR/*.rc $MAINDIR/$1
 }
 #split#
 # alias definitions
