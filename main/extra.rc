@@ -1,4 +1,3 @@
-
 #help: colorsamples : show sample text in specified colors of 256 values
 #help: usage : colorsamples num [num ...]
 function colorsamples () {
@@ -7,13 +6,13 @@ function colorsamples () {
 	echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
     done
 }
-
+#split#
 #help: commas : commafy numeric fields in input stream
 #help: usage : <-> | commas
 function commas () {
     rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
 }
-
+#split#
 #help: ffix : useful to grab a function and edit it for testing
 #help: usage : ffix function (the edited file will be in /tmp)
 function ffix () {
@@ -22,7 +21,7 @@ function ffix () {
     vim $x
     . $x
 }
-
+#split#
 #help: gigify : converts numbers to a different unit
 #help: usage : gigify text
 function gigify () {
@@ -33,7 +32,7 @@ function gigify () {
     v=$(dc -e "4 k $v $f $m ^ / p")
     printf "%s%7.3f%s\n" "${s: }" $v ${u:$m:1}
 }
-
+#split#
 #help: julian : presents dates in julian format and converts back
 #help: usage : julian [date]
 #help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
@@ -56,7 +55,7 @@ function julian () {
             ;;
     esac
 }
-
+#split#
 #help: killdir : moves you to the parent and removes the dir you were in
 #help: usage : killdir
 function killdir () {
@@ -69,7 +68,7 @@ function killdir () {
     popd +1 &>/dev/null
     dirs -v
 }
-
+#split#
 #help: mlinker : mlinker creates the links for music dirs
 #help: usage : mlinker (mp3|flac) localParent file
 #help: : file needs to be the base paths you want mounted. the mount point is
@@ -83,7 +82,7 @@ function mlinker () {
 	ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
     done < <(cat $3)
 }
-
+#split#
 #help: mydd : convenience wrapper for dd/dcfldd
 #help: usage : mydd object <tab> [option ...]
 #help: : this lets you use tab complete for filename
@@ -99,13 +98,13 @@ function mydd () {
             ;;
     esac
 }
-
+#split#
 #help: psfu : checks the process table for specified user
 #help: usage : psfu sid
 function psfu () {
     ps -f -u ${1:-$(id -un)}
 }
-
+#split#
 #help: stk : dir stack operations to save, load and clear the dirstack
 #help: usage : stk [save|load] filename
 #help: : stk clear (n ...)
@@ -138,7 +137,7 @@ function stk () {
     esac
     dirs -l -v
 }
-
+#split#
 #help: stkdiff : convenient differences between stack elements
 #help: usage : stkdiff (does diff -qr . ~1)
 #help: : stkdiff filename (does diff -y filename ~1/filename)
@@ -158,7 +157,7 @@ function stkdiff () {
     esac
     return
 }
-
+#split#
 #help: tinfo : generates some metatdata for a path versions of given filename
 #help: usage : tinfo file
 function tinfo () {
@@ -173,13 +172,13 @@ function tinfo () {
         done
     done
 }
-
+#split#
 #help: tname : modifies titlename
 #help: usage : tname (str)
 function tname () {
     printf "\033k%s\033\\" ${1:-bash}
 }
-
+#split#
 #help: typer : used to examine files based on type
 #help: usage : typer file
 function typer () {
@@ -204,7 +203,7 @@ function typer () {
         esac
     done
 }
-
+#split#
 #help: wup : function to wake up machines on the network
 #help: usage : wup machine_name
 function wup () {
@@ -212,7 +211,7 @@ function wup () {
     declare ip=$(dig +search +short -t txt $1)
     eval $cmd $ip
 }
-
+#split#
 #help: xmn : used to produce a detailed listing
 #help:     : of source code with some extra stuff
 function xmn () {
