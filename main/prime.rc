@@ -274,7 +274,8 @@ function push () {
 	    pushd -n $1 &>/dev/null
 	else
 	    read -p 'new dir: ' -e -i "$1"
-	    [[ -n $REPLY ]] && mkdir -p "$REPLY"
+	    [[ -n $REPLY ]] || return 0
+	    mkdir -p "$REPLY"
 	    pushd -n "$REPLY" &>/dev/null
 	fi
     fi
