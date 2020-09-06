@@ -410,5 +410,10 @@ function ulist () {
 #help: xtfn : function to extract a function from an rc file
 #help: usage : xtfn function
 function xtfn () {
-    sed -nrs "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $MAINDIR/*.rc $MAINDIR/$1
+    declare x list=$(grep -l $1 $MAINDIR/*.rc)
+    [[ -f $MAINDIR/$1 ]] && list+=($MAINDIR/$1)
+    for x in ${list[@]}; do
+	echo $1 found in $x ...
+	sed -nr "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $x
+    done
 }
