@@ -20,7 +20,7 @@ declare -rx ENVDIR=$(cd ~/Env/$ENVTAG &>/dev/null; pwd -P)
 declare -rx MAINDIR=$ENVDIR/main
 source $MAINDIR/base_init # mainly var defs etc.
 source $MAINDIR/prime.rc
-export -f cksumit fsplit # needed for make files
+export -f load # needed for make files
 [[ -e ~/.no_agentprep ]] && echo not loading agentprep || source $MAINDIR/sshAgentPrep
 configEd vim
 stp
