@@ -1,3 +1,31 @@
+# alias definitions
+alias ..='cd ..'
+alias ...='cd ../..'
+alias c='clear'
+alias ?='dirs -l -v'
+alias edit='$EDITOR'
+alias e='emacsclient -nw '
+alias h='history'
+alias l='ls -F'
+alias ll='l -l'
+alias lr='ll -R'
+alias now='date +%F; date -u; date +"%a %h %d %T"; date +%s'
+alias p='$PAGER'
+alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
+alias brewon='source ~/perl5/perlbrew/etc/bashrc'
+alias dateme='ntpdate 0.pool.ntp.org'
+alias sgg='/usr/bin/shutdown -h +1'
+alias pacman='sudo /usr/bin/pacman'
+alias pmnew='sudo /usr/bin/pacman -Sy; sudo /usr/bin/pacman -Qu'
+alias pmup='sudo /usr/bin/pacman -Su'
+alias su='sudo /bin/su -'
+alias Cat='clear; cat '
+alias gitbr='b=play-$(date +%Y.%j); git branch $b; git checkout $b'
+alias sshFingerPrint='ssh-keygen -E md5 -lf ~/.ssh/id_rsa'
+alias xme='ssh-agent startxfce4'
+alias addkeys='ssh-add ~/.ssh/{github,id}_rsa'
+alias vimh='vim +:help +:only'
+#split#
 #help: L : provides ls support for hidden (dot) files
 #help: usage : L [options] [dir]
 function L () {
@@ -19,21 +47,25 @@ function L () {
     done
 }
 #split#
-#help: _ArgParser : argument completion function
-function _ArgParser () {
-    declare path file partial dir
-    declare -a list
-    [[ -n COMP_LINE ]] && x=$2 || x=$1
-    partial=${x/\~/$HOME}
-    file=${partial##*/}
-    for dir in "${partial%/*}" "${DIRSTACK[@]}" ${CDPATH//:/ }; do
-        [[ ${#list[@]} -eq 0 ]] || break
+#help: _ArgParser : assists in parsing command line args
+function _ArgParser () { 
+    declare path file partial dir;
+    declare -a list;
+    [[ -n COMP_LINE ]] && x=$2 || x=$1;
+    partial=${x/\~/$HOME};
+    file=${partial##*/};
+    for dir in "${partial%/*}" "${DIRSTACK[@]}" ${CDPATH//:/ };
+    do
+        [[ ${#list[@]} -eq 0 ]] || break;
         while read -r path; do
-            [[ -d $path ]] && list+=("$path")
-        done < <(compgen -G "${dir:-.}/$file*" | sort)
-    done
-    [[ ${#list[@]} -gt 0 ]] && _FixList -u "${list[@]}"
+            [[ -d $path ]] && list+=("$path");
+        done < <(compgen -G "${dir:-.}/$file*" | sort);
+    done;
+    [[ ${#list[@]} -gt 0 ]] && printf "%s\n" "${list[@]}" | ulist
 }
+
+complete -o filenames -C '_ArgParser' cd
+complete -o filenames -C '_ArgParser' stkdiff
 #split#
 #help: _FixList :  some basic list operations:
 #help: :  -s sort
@@ -106,6 +138,21 @@ function _Show () {
     [[ -n $COMP_LINE ]] && x=$2 || x=$1
     compgen -v | grep -i "^$x"
 }
+#help: show : used to show variable values
+#help: usage : show var
+#help: : type values in lowercase and <tab> will uppercase if needed
+function show () {
+    declare x=$(declare -p $1 | awk '{print $2}')
+    if [[ $x =~ [aA] ]]; then
+        echo array $1:
+        for x in $(eval "echo \${!$1[@]}"); do
+            eval "echo $x = \${$1[$x]}"
+        done
+    else
+        echo $1 = ${!1}
+    fi
+}
+complete -C '_Show' show
 #split#
 #help: cksumit : provides a line checksum for given files.
 #help: usage : cksumit file [file ...]
@@ -174,8 +221,8 @@ function fsplit () {
 	declare -x outputDir=src_${lib%.*}
 	[[ -d $outputDir ]] && { echo dir for $outputDir already exists; continue; }
 	mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; continue; }
-	csplit -s -z --prefix=$outputDir/zz $lib /^#split#$/ {*}
-	sed -i -s '/^#split#$/d' $outputDir/zz*
+	csplit -s -z --prefix=$outputDir/AA $lib /^#split#$/ {*}
+	sed -i -s '/^#split#$/d' $outputDir/AA*
 	find $outputDir -type f -empty -exec rm {} \;
 	for x in $outputDir/*; do
 	    new=$(awk '/^function / {print $2;exit}' $x)
@@ -283,21 +330,6 @@ function push () {
     dirs -l -v
 }	
 #split#
-#help: show : used to show variable values
-#help: usage : show var
-#help: : type values in lowercase and <tab> will uppercase if needed
-function show () {
-    declare x=$(declare -p $1 | awk '{print $2}')
-    if [[ $x =~ [aA] ]]; then
-        echo array $1:
-        for x in $(eval "echo \${!$1[@]}"); do
-            eval "echo $x = \${$1[$x]}"
-        done
-    else
-        echo $1 = ${!1}
-    fi
-}
-#split#
 #help: spx : simple function to do aspell
 #help: usage : spx word [word ...]
 function spx () {
@@ -364,41 +396,19 @@ function  tag () {
     stp tag=1="$*"
 }
 #split#
+#help: ulist :
+#help: usage :
+#help: :
+function ulist () {
+    declare -a list
+    while read; do
+	[[ ${list[@]} =~ :$REPLY ]] || list+=(":$REPLY")
+    done < <(cat -)
+    printf "%s\n" "${list[@]/:}"
+}
+#split#
 #help: xtfn : function to extract a function from an rc file
 #help: usage : xtfn function
 function xtfn () {
     sed -nrs "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $MAINDIR/*.rc $MAINDIR/$1
 }
-#split#
-# alias definitions
-alias ..='cd ..'
-alias ...='cd ../..'
-alias c='clear'
-alias ?='dirs -l -v'
-alias edit='$EDITOR'
-alias e='emacsclient -nw '
-alias h='history'
-alias l='ls -F'
-alias ll='l -l'
-alias lr='ll -R'
-alias now='date +%F; date -u; date +"%a %h %d %T"; date +%s'
-alias p='$PAGER'
-alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
-alias brewon='source ~/perl5/perlbrew/etc/bashrc'
-alias dateme='ntpdate 0.pool.ntp.org'
-alias sgg='/usr/bin/shutdown -h +1'
-alias pacman='sudo /usr/bin/pacman'
-alias pmnew='sudo /usr/bin/pacman -Sy; sudo /usr/bin/pacman -Qu'
-alias pmup='sudo /usr/bin/pacman -Su'
-alias su='sudo /bin/su -'
-alias Cat='clear; cat '
-alias gitbr='b=play-$(date +%Y.%j); git branch $b; git checkout $b'
-alias sshFingerPrint='ssh-keygen -E md5 -lf ~/.ssh/id_rsa'
-alias xme='ssh-agent startxfce4'
-alias addkeys='ssh-add ~/.ssh/{github,id}_rsa'
-alias vimh='vim +:help +:only'
-#split#
-# complete definitions
-complete -C '_Show' show
-complete -o filenames -C '_ArgParser' cd
-complete -o filenames -C '_ArgParser' stkdiff
