@@ -396,8 +396,8 @@ function  tag () {
     stp tag=1="$*"
 }
 #split#
-#help: ulist :
-#help: usage :
+#help: ulist : finds, in order, the unique items in a list.
+#help: usage : .. | ulist
 #help: :
 function ulist () {
     declare -a list
