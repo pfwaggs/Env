@@ -158,7 +158,7 @@ complete -C '_Show' show
 #help: usage : cksumit file [file ...]
 function cksumit () {
     for x in $@; do
-	echo ${x#$PRUNE/}
+        echo ${x#$PRUNE/}
         while read -r; do
             ck=$(echo $REPLY | tr -d '[[:space:]]' | sum)
             echo ${ck%% *} "$REPLY"
@@ -199,15 +199,15 @@ function extra () {
 function fjoin () {
     declare dir
     for dir in ${@/%\/}; do
-	[[ $dir =~ ^src_ ]] || { echo bad input argument, skipping; continue; }
-	[[ -d $dir ]] || { echo  $dir does not exist, skipping; continue; }
-	declare file=${dir#*_}.rc
-	mv $file $file.bk
-	for x in $dir/*; do
-	    cat $x
-	    echo '#split#'
-	done >| $file
-	sed -i '$d' $file && rm -r $dir && rm $file.bk || { echo something broke; return 1; }
+        [[ $dir =~ ^src_ ]] || { echo bad input argument, skipping; continue; }
+        [[ -d $dir ]] || { echo  $dir does not exist, skipping; continue; }
+        declare file=${dir#*_}.rc
+        mv $file $file.bk
+        for x in $dir/*; do
+            cat $x
+            echo '#split#'
+        done | expand >| $file
+        sed -i '$d' $file && rm -r $dir && rm $file.bk || { echo something broke; return 1; }
     done
 }
 #split#
@@ -216,18 +216,18 @@ function fjoin () {
 function fsplit () {
     declare lib
     for lib in $*; do
-	[[ $lib =~ .rc$ ]] || { echo bad input argument for $lib, skipping; continue; }
-	[[ -s $lib ]] || { echo "can not find <$lib>, skipping"; continue; }
-	declare -x outputDir=src_${lib%.*}
-	[[ -d $outputDir ]] && { echo dir for $outputDir already exists; continue; }
-	mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; continue; }
-	csplit -s -z --prefix=$outputDir/AA $lib /^#split#$/ {*}
-	sed -i -s '/^#split#$/d' $outputDir/AA*
-	find $outputDir -type f -empty -exec rm {} \;
-	for x in $outputDir/*; do
-	    new=$(awk '/^function / {print $2;exit}' $x)
-	    [[ -n $new ]] && mv $x $outputDir/$new
-	done
+        [[ $lib =~ .rc$ ]] || { echo bad input argument for $lib, skipping; continue; }
+        [[ -s $lib ]] || { echo "can not find <$lib>, skipping"; continue; }
+        declare -x outputDir=src_${lib%.*}
+        [[ -d $outputDir ]] && { echo dir for $outputDir already exists; continue; }
+        mkdir $outputDir &>/dev/null || { echo "can't make dir $outputDir"; continue; }
+        csplit -s -z --prefix=$outputDir/AA $lib /^#split#$/ {*}
+        sed -i -s '/^#split#$/d' $outputDir/AA*
+        find $outputDir -type f -empty -exec rm {} \;
+        for x in $outputDir/*; do
+            new=$(awk '/^function / {print $2;exit}' $x)
+            [[ -n $new ]] && mv $x $outputDir/$new
+        done
     done
 }
 #split#
@@ -250,15 +250,15 @@ function hlp () {
 function load () {
     declare list x y 
     for x in $@; do
-	[[ $x =~ .rc$ ]] && [[ -s $MAINDIR/$x ]] && source $MAINDIR/$x && continue
-	list=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null)
-	[[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
-	for y in $list; do
-	    echo loading $x from $y
-	    sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $y > /tmp/$x
-	    . /tmp/$x
-	    rm /tmp/$x
-	done
+        [[ $x =~ .rc$ ]] && [[ -s $MAINDIR/$x ]] && source $MAINDIR/$x && continue
+        list=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null)
+        [[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
+        for y in $list; do
+            echo loading $x from $y
+            sed -nr "/^function $x /{:1;p;n;/^}/!b1;p;q}" $y > /tmp/$x
+            . /tmp/$x
+            rm /tmp/$x
+        done
     done
 }
 #split#
@@ -317,18 +317,18 @@ function prep () {
 #help: usage : push (path)
 function push () {
     if [[ -n $1 ]]; then
-	if [[ -d $1 ]]; then
-	    pushd -n $1 &>/dev/null
-	else
-	    read -p 'new dir: ' -e -i "$1"
-	    [[ -n $REPLY ]] || return 0
-	    mkdir -p "$REPLY"
-	    pushd -n "$REPLY" &>/dev/null
-	fi
+        if [[ -d $1 ]]; then
+            pushd -n $1 &>/dev/null
+        else
+            read -p 'new dir: ' -e -i "$1"
+            [[ -n $REPLY ]] || return 0
+            mkdir -p "$REPLY"
+            pushd -n "$REPLY" &>/dev/null
+        fi
     fi
     pushd &>/dev/null
     dirs -l -v
-}	
+}       
 #split#
 #help: spx : simple function to do aspell
 #help: usage : spx word [word ...]
@@ -358,16 +358,16 @@ function stp () {
         while read x; do
             case $x in 
                 0|1)
-		    _PromptShow[$key]=$x
+                    _PromptShow[$key]=$x
                     ;;
                 @($colorPat))
-		    _PromptColor[$key]=$x
+                    _PromptColor[$key]=$x
                     ;;
-		+([[:digit:]]))
-		    _PromptColor[$key]=$x
-		    ;;
-		    *|'')
-		    [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$x
+                +([[:digit:]]))
+                    _PromptColor[$key]=$x
+                    ;;
+                    *|'')
+                    [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$x
                     ;;
             esac
         done < <(echo ${x#*=} | sed -nr 's/=/\n/g;p')
@@ -379,13 +379,13 @@ function stp () {
     for x in num extra tag user host spath lpath prompt; do
         [[ ${_PromptShow[$x]} = 0 ]] && continue
         [[ ${_PromptCfg[$x]} = '' ]] && continue
-	if [[ ${_PromptColor[$x]} =~ [0-9] ]]; then
-	    num="38:5:${_PromptColor[$x]}"
-	else
-	    color=${_PromptColor[$x]}
-	    num=${_ColorNum[$color]}
-	fi
-	PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
+        if [[ ${_PromptColor[$x]} =~ [0-9] ]]; then
+            num="38:5:${_PromptColor[$x]}"
+        else
+            color=${_PromptColor[$x]}
+            num=${_ColorNum[$color]}
+        fi
+        PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
     done
     PS1+=$'\[\e[m\]'
 }
@@ -402,7 +402,7 @@ function  tag () {
 function ulist () {
     declare -a list
     while read; do
-	[[ ${list[@]} =~ :$REPLY ]] || list+=(":$REPLY")
+        [[ ${list[@]} =~ :$REPLY ]] || list+=(":$REPLY")
     done < <(cat -)
     printf "%s\n" "${list[@]/:}"
 }
@@ -413,7 +413,7 @@ function xtfn () {
     declare x list=$(grep -l $1 $MAINDIR/*.rc)
     [[ -f $MAINDIR/$1 ]] && list+=($MAINDIR/$1)
     for x in ${list[@]}; do
-	echo $1 found in $x ...
-	sed -nr "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $x
+        echo $1 found in $x ...
+        sed -nr "/^function $1 /{:1;p;n;/^}/!b1;p;q}" $x
     done
 }

@@ -3,7 +3,7 @@
 function colorsamples () {
     declare x
     for x in $@; do
-	echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
+        echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
     done
 }
 #split#
@@ -77,10 +77,10 @@ function killdir () {
 function mlinker () {
     declare orig remote=${1/#\/} local=${2/%\/}
     while read; do
-	echo $REPLY
-	need=$(echo $REPLY | cut -f2 -d/)
-	[[ -d $local/$need ]] || mkdir "$local/$need"
-	ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
+        echo $REPLY
+        need=$(echo $REPLY | cut -f2 -d/)
+        [[ -d $local/$need ]] || mkdir "$local/$need"
+        ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
     done < <(cat $3)
 }
 #split#

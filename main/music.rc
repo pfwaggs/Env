@@ -9,14 +9,14 @@ function cdsizer () {
 function m3uredo () {
     declare x path disk type track
     for x in $*; do
-	while read; do
-	    IFS=$';'
-	    read disk track path < <(echo "$REPLY")
-	    IFS=$' \t\n'
-	    type=${REPLY##*.}
-	    [[ -d $disk ]] || mkdir $disk
-	    cp -H "$path" $disk/$disk$track.$type
-	done < <(grep $x pairs.csv);
+        while read; do
+            IFS=$';'
+            read disk track path < <(echo "$REPLY")
+            IFS=$' \t\n'
+            type=${REPLY##*.}
+            [[ -d $disk ]] || mkdir $disk
+            cp -H "$path" $disk/$disk$track.$type
+        done < <(grep $x pairs.csv);
     done
 }
 #split#
@@ -29,9 +29,9 @@ function m3urndm () {
     [[ -d $dest ]] && { echo $dest exists; return 1; } || mkdir $dest
     ln xx000 $dest
     for x in $(ls -I[^xX]* -Ixx000); do
-	echo $RANDOM $x
+        echo $RANDOM $x
     done | sort -n |
-	awk -v d=$dest '{print d"/"$2}' | paste <(ls -I[^xX]* -Ixx000) - | xargs -L 1 ln 
+        awk -v d=$dest '{print d"/"$2}' | paste <(ls -I[^xX]* -Ixx000) - | xargs -L 1 ln 
     cat $dest/* > rndm.m3u
     rm -r $dest
 }
@@ -43,14 +43,14 @@ function m3usplitter () {
     max=$((700*10**6))
     sed -n '/#/!p' $1 | while read; do stat -L -c "%s:%n" "$REPLY"; done |
     while read; do
-	s=${REPLY%:*}
-	((sum+=$s))
-	if (( $sum < $max )); then
-	    echo "$REPLY"
-	else
-	    echo -e "\n$REPLY"
-	    sum=$s
-	fi
+        s=${REPLY%:*}
+        ((sum+=$s))
+        if (( $sum < $max )); then
+            echo "$REPLY"
+        else
+            echo -e "\n$REPLY"
+            sum=$s
+        fi
     done | csplit - /^$/ {*}
 }
 #split#
@@ -61,16 +61,16 @@ function mp3dedupe () {
     declare x old input=$1
     rm /tmp/??.titles
     awk -F/ '{print $NF}' $input | cut -c6- | sort | uniq -c |
-	while read n title; do
-	    printf -v dest "/tmp/%02d.titles" $n
-	    echo "$title" >> $dest
-	done
+        while read n title; do
+            printf -v dest "/tmp/%02d.titles" $n
+            echo "$title" >> $dest
+        done
     rm /tmp/masterMP3.txt &>/dev/null
     for x in /tmp/*.titles; do
-	echo cleaning $x >&2
-	while read; do
-	    grep -m 1 -F "$REPLY" $input
-	done < $x >> /tmp/masterMP3.txt
+        echo cleaning $x >&2
+        while read; do
+            grep -m 1 -F "$REPLY" $input
+        done < $x >> /tmp/masterMP3.txt
     done
 }
 #split#
@@ -91,21 +91,21 @@ function trknamer () {
     declare type track tcount dir dcount
     declare dbfile=pairs.csv
     if [[ -f $dbfile ]]; then
-	dcount=$(sed -n '2,$p' $dbfile | cut -f1 -d\; | sort -r | sed -n '1p')
-	dcount=$((1+10#${dcount/d}))
+        dcount=$(sed -n '2,$p' $dbfile | cut -f1 -d\; | sort -r | sed -n '1p')
+        dcount=$((1+10#${dcount/d}))
     else
-	dcount=1
+        dcount=1
     fi
     for x in xx*; do
-	printf -v dir "d%04d" $((dcount++))
-	[[ -d $dir ]] || mkdir $dir
-	tcount=1
-	while read; do
-	    [[ -n $REPLY ]] || continue
-	    type=${REPLY##*.}
-	    printf -v track "%s%03d" ${type:0:1} $((tcount++))
-	    cp -H "$REPLY" $dir/$dir$track.$type && echo "$dir;$track;$REPLY"
-	done < <(cut -f2 -d: $x) >> pairs
-	awk -v n=$x -F: '{sum+=$1}END{print n":"NR":"sum}' $x
+        printf -v dir "d%04d" $((dcount++))
+        [[ -d $dir ]] || mkdir $dir
+        tcount=1
+        while read; do
+            [[ -n $REPLY ]] || continue
+            type=${REPLY##*.}
+            printf -v track "%s%03d" ${type:0:1} $((tcount++))
+            cp -H "$REPLY" $dir/$dir$track.$type && echo "$dir;$track;$REPLY"
+        done < <(cut -f2 -d: $x) >> pairs
+        awk -v n=$x -F: '{sum+=$1}END{print n":"NR":"sum}' $x
     done
 }
