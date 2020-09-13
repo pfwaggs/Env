@@ -251,6 +251,7 @@ function load () {
     declare list x y 
     for x in $@; do
         [[ $x =~ .rc$ ]] && [[ -s $MAINDIR/$x ]] && source $MAINDIR/$x && continue
+	[[ -s $MAINDIR/$x.rc ]] && source $MAINDIR/$x.rc && continue
         list=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null)
         [[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
         for y in $list; do
