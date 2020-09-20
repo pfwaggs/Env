@@ -106,6 +106,28 @@ function psfu () {
     ps -f -u ${1:-$(id -un)}
 }
 #split#
+#help: ruler : draws ruler on screen
+#help: usage : ruler
+#help: :
+function ruler () {
+    declare base dots str x ROWS COLS
+    read ROWS COLS < <(stty size)
+    for x in 100 10 1; do
+        str=
+        base=
+        if (( $x > 1 )); then
+            dots=$(eval "echo .{1..$((x-1))}" | sed -n 's/ //gp' | tr -d '[0-9]')
+            base=$(echo -n 1234567890 | sed -n "s/./${dots}&/gp")
+            base=${base//\./ }
+        fi
+        while [[ ${#str} -lt $COLS ]]; do
+            str+=${base:-....,....0}
+        done
+        [[ $COLS -ge $x ]] || continue
+        echo "${str:0:COLS}"
+    done
+}
+#split#
 #help: stk : dir stack operations to save, load and clear the dirstack
 #help: usage : stk [save|load] filename
 #help: : stk clear (n ...)

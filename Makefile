@@ -132,14 +132,15 @@ filelist :
 	@cd $(MAINDIR) &>/dev/null; load fsplit; fsplit prime.rc extra.rc 2>/dev/null
 	@echo $(MAKEFILE) > $@
 	@find $(ENVDIR)/{main,dotinstall,support} -maxdepth 2 -type f | \
-	    grep -v '.rc' | sort >> $@
+	    grep -v '\.rc' | sort >> $@
 	-@echo removing old print files; rm -r long* short* md5sums* 2>/dev/null
 
 #help: long : output in portrait, duplex
 #help: short : output in landscape, 2-up, duplex
 long short : filelist
 	@echo $(ENVDIR) > $@.txt
-	@load cksumit; PRUNE=$(ENVDIR) cksumit $$(cat $^) >> $@.txt
+#	@load cksumit; PRUNE=$(ENVDIR) cksumit $$(cat $^) >> $@.txt
+	@cat $^ | while read; do echo $$REPLY; cat "$$REPLY"; done >> $@.txt
 	@enscript $(OPT_ENSCRIPT) -o $@.ps $@.txt
 	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sums.ps md5sums.txt || :
 	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null

@@ -1,5 +1,6 @@
 
 [[ $- =~ i ]] || return 0
+unset ENVTAG
 if [[ -L ~/Env/testing ]]; then
     read -p 'found testing branch. use? ' -t 3
     [[ ${REPLY:-no} =~ ^[yY] ]] && ENVTAG=testing || echo ''

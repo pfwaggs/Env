@@ -154,6 +154,18 @@ function show () {
 }
 complete -C '_Show' show
 #split#
+#help: check : used to check if anything has changed in a src dir
+#help: usage : check name.rc
+#help: :
+function check () {
+    declare x bob test
+    for x in $ENVDIR/main/src_${1/.rc}/*; do
+        cat $x
+        echo '#split#'
+    done | expand | sed '$d' >| /tmp/check
+    diff -q /tmp/check $ENVDIR/main/$1 && rm /tmp/check || :
+}
+#split#
 #help: cksumit : provides a line checksum for given files.
 #help: usage : cksumit file [file ...]
 function cksumit () {
@@ -226,7 +238,9 @@ function fsplit () {
         find $outputDir -type f -empty -exec rm {} \;
         for x in $outputDir/*; do
             new=$(awk '/^function / {print $2;exit}' $x)
-            [[ -n $new ]] && mv $x $outputDir/$new
+            [[ -n $new ]] || continue
+            expand $x > $outputDir/$new
+            rm $x
         done
     done
 }
@@ -251,7 +265,7 @@ function load () {
     declare list x y 
     for x in $@; do
         [[ $x =~ .rc$ ]] && [[ -s $MAINDIR/$x ]] && source $MAINDIR/$x && continue
-	[[ -s $MAINDIR/$x.rc ]] && source $MAINDIR/$x.rc && continue
+        [[ -s $MAINDIR/$x.rc ]] && source $MAINDIR/$x.rc && continue
         list=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null)
         [[ -n $list ]] || { echo skipping $x, not found in $MAINDIR; continue; }
         for y in $list; do
@@ -406,6 +420,25 @@ function ulist () {
         [[ ${list[@]} =~ :$REPLY ]] || list+=(":$REPLY")
     done < <(cat -)
     printf "%s\n" "${list[@]/:}"
+}
+#split#
+#help: unload : unloads a function or an entire library
+#help: usage : unload [function|library]
+#help: :
+function unload () {
+    declare x all=$(compgen -A function)
+    declare -a list dump
+    for x in $@; do
+        if [[ $x =~ .rc$ ]]; then
+            list+=($(awk '/^function / {print $2}' $ENVDIR/main/$x))
+        else
+            list+=($x)
+        fi
+    done
+    for x in ${list[@]}; do
+        [[ "$all" =~ $x ]] && dump+=($x)
+    done
+    [[ ${#dump[@]} -gt 0 ]] && { printf "%s\n" ${dump[@]}; unset -f ${dump[@]}; }
 }
 #split#
 #help: xtfn : function to extract a function from an rc file
