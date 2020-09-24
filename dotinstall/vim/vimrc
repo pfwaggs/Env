@@ -17,6 +17,7 @@
 :set modelines=5
 :set nowrap
 :set ruler
+:set relativenumber
 :filetype plugin indent on
 :set iskeyword+=:
 " this turns off the matchparen annoyance

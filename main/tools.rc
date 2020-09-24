@@ -1,0 +1,76 @@
+#help: check : used to check if anything has changed in a src dir
+#help: usage : check name.rc
+#help: :
+function check () {
+    declare x bob test
+    for x in $MAINDIR/src_${1/.rc}/*; do
+        cat $x
+        echo '#split#'
+    done | expand | sed '$d' >| /tmp/check
+    diff -q /tmp/check $MAINDIR/$1 && rm /tmp/check || :
+}
+#split#
+#help: cksumit : provides a line checksum for given files.
+#help: usage : cksumit file [file ...]
+function cksumit () {
+    for x in $@; do
+        echo ${x#$PRUNE/}
+        while read -r; do
+            ck=$(echo $REPLY | tr -d '[[:space:]]' | sum)
+            echo ${ck%% *} "$REPLY"
+        done < $x
+        echo ''
+    done
+}
+#split#
+#help: fjoin : takes a dir of functions and makes a function file
+#help: usage : fjoin dir
+#help: : dir is the directory you want to turn into a dir.rc file
+function fjoin () {
+    declare dir=${1%/}
+    [[ -d $dir ]] || { echo  $dir does not exist, skipping; continue; }
+    declare file=$dir.rc
+    mv $file $file.bk
+    for x in $dir/*; do
+        cat $x
+        echo '#split#'
+    done | expand > $file
+    sed -i '$d' $file || return
+    rm -I $dir/* || return
+    rmdir $dir || return
+    rm -i $file.bk || return
+}
+#split#
+#help: fsplit : splits a file of functions into a dir of separate functions
+#help: usage : fsplit file
+function fsplit () {
+    declare x
+    [[ $1 =~ .rc$ ]] || { echo skipping $1: bad input name; return; }
+    [[ -s $1 ]] || { echo "can not find <$1>, skipping"; return; }
+    declare -x dir=${1%.rc}
+    [[ -d $dir ]] && { echo $dir already exists; return; }
+    mkdir $dir &>/dev/null || { echo mkdir $dir failed; return; }
+    pushd $dir &>/dev/null || { echo pushd failed; return; }
+    csplit -s -z --prefix=AA ../$1 /^#split#$/ {*}
+    sed -i -s '/^#split#$/d' *
+    find -type f -empty -exec rm {} \;
+    for x in *; do
+        new=$(awk '/^function / {print $2;exit}' $x)
+        [[ -n $new ]] || continue
+        expand $x > $new
+        rm $x
+    done
+    popd &>/dev/null
+}
+#split#
+#help: xtfn : function to extract a function from an rc file
+#help: usage : xtfn function
+function xtfn () {
+    declare x list=$(grep -l "^function $1 " $MAINDIR/*.rc)
+    [[ -f $MAINDIR/$1 ]] && list+=" $MAINDIR/$1"
+    for x in ${list[@]}; do
+        echo $1 found in $x ... >&2
+        sed -nr "/^#help: $1 :/{:1;p;n;/^#split#/!b1;q}" $x
+        echo ''
+    done
+}
