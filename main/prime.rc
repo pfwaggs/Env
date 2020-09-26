@@ -67,14 +67,14 @@ function _ArgParser () {
 complete -o filenames -C '_ArgParser' cd
 complete -o filenames -C '_ArgParser' stkdiff
 #split#
-#help: _FixList :  some basic list operations:
-#help: :  -s sort
-#help: :  -e exists
-#help: :  -r reverse
-#help: :  -l resolve links
-#help: :  -c clear items
-#help: :  -u unique items
-#help: :  -S output a single string
+#help: _FixList : some basic list operations:
+#help: : -s sort
+#help: : -e exists
+#help: : -r reverse
+#help: : -l resolve links
+#help: : -c clear items
+#help: : -u unique items
+#help: : -S output a single string
 function _FixList () {
     declare p opt
     declare -a nlist list opts
@@ -183,12 +183,18 @@ function extra () {
 #help: usage : hlp
 function hlp () {
     declare flist=$(echo $MAINDIR/*.rc)
+    declare all=$(compgen -A function)
     if [[ $# -eq 1 ]]; then
-        sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist | cut -f2- -d: | column -n -s: -t
+        sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist |
+            cut -f2- -d: | column -n -s: -t
     else
         awk '/^function / {printf "#help: %s :\n",$2}' $flist |
-            grep -f - $flist | sed -n "s|$MAINDIR/||p" |
-            cut -f1,3- -d: | column -s: -t | sort -k1,1r -k2,2 
+            grep -f - $flist | sed -r 's|/.*/main/||;s|\s?:\s|:|g' |
+            while read line; do
+                f=$(echo -n $line | awk -F: '{print $3}')
+                [[ $all =~ $f ]] && r=x || r=' '
+                echo $line | sed "s|#help|$r|"
+            done | column -s: -t | sort -k1,1 -k3,3 
     fi
 }
 #split#
@@ -281,7 +287,7 @@ function spx () {
     echo $@ | aspell -a
 }
 #split#
-#help: stp :: utility to set prompt line characteristics
+#help: stp : utility to set prompt line characteristics
 #help: usage : stp [args...]
 #help: : args are: key[=0|1][=color][=text]
 #help: : keys are:
