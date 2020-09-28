@@ -2,12 +2,12 @@
 #help: usage : check name.rc
 #help: :
 function check () {
-    declare x bob test
-    for x in $MAINDIR/src_${1/.rc}/*; do
+    declare x bob test file=check_${1%.rc}.$$
+    for x in ${1%.rc}/*; do
         cat $x
         echo '#split#'
-    done | expand | sed '$d' >| /tmp/check
-    diff -q /tmp/check $MAINDIR/$1 && rm /tmp/check || :
+    done | expand | sed '$d' > $file
+    diff -q $file $1 && rm $file
 }
 #split#
 #help: cksumit : provides a line checksum for given files.
