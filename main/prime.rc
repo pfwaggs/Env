@@ -182,14 +182,16 @@ function extra () {
 #help: usage : hlp function
 #help: usage : hlp
 function hlp () {
-    declare flist=$(echo $MAINDIR/*.rc)
-    declare all=$(compgen -A function)
+    declare flist all=$(compgen -A function)
+    if [[ $# -eq 1 ]]; then
+        [[ $1 =~ .rc$ ]] && flist=$MAINDIR/$1 && shift || flist=$MAINDIR/*.rc
+    fi
     if [[ $# -eq 1 ]]; then
         sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist |
             cut -f2- -d: | column -n -s: -t
     else
         awk '/^function / {printf "#help: %s :\n",$2}' $flist |
-            grep -f - $flist | sed -r 's|/.*/main/||;s|\s?:\s|:|g' |
+            grep -f - -H $flist | sed -r 's|/.*/main/||;s|\s?:\s|:|g' |
             while read line; do
                 f=$(echo -n $line | awk -F: '{print $3}')
                 [[ $all =~ $f ]] && r=x || r=' '
