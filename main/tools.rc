@@ -1,15 +1,16 @@
+#split# 6c87f13fe06e809f8bc1f9cd8eef4111 tools/check
 #help: check : used to check if anything has changed in a src dir
 #help: usage : check name.rc
 #help: :
 function check () {
-    declare x bob test file=check_${1%.rc}.$$
+    declare x file=check_${1%.rc}.$$
     for x in ${1%.rc}/*; do
+        echo '#split# '$(md5sum $x)
         cat $x
-        echo '#split#'
-    done | expand | sed '$d' > $file
+    done | expand > $file
     diff -q $file $1 && rm $file
 }
-#split#
+#split# 0f10aeeee32fe4043f2910606834b5bb tools/cksumit
 #help: cksumit : provides a line checksum for given files.
 #help: usage : cksumit file [file ...]
 function cksumit () {
@@ -22,7 +23,7 @@ function cksumit () {
         echo ''
     done
 }
-#split#
+#split# c8383ee121279908d52d85071de62276 tools/fjoin
 #help: fjoin : takes a dir of functions and makes a function file
 #help: usage : fjoin dir
 #help: : dir is the directory you want to turn into a dir.rc file
@@ -32,15 +33,14 @@ function fjoin () {
     declare file=$dir.rc
     mv $file $file.bk
     for x in $dir/*; do
+        echo '#split# '$(md5sum $x)
         cat $x
-        echo '#split#'
     done | expand > $file
-    sed -i '$d' $file || return
     rm -I $dir/* || return
     rmdir $dir || return
     rm -i $file.bk || return
 }
-#split#
+#split# 470dc54dd3f950239b511b53be942fa5 tools/fsplit
 #help: fsplit : splits a file of functions into a dir of separate functions
 #help: usage : fsplit file
 function fsplit () {
@@ -51,8 +51,8 @@ function fsplit () {
     [[ -d $dir ]] && { echo $dir already exists; return; }
     mkdir $dir &>/dev/null || { echo mkdir $dir failed; return; }
     pushd $dir &>/dev/null || { echo pushd failed; return; }
-    csplit -s -z --prefix=AA ../$1 /^#split#$/ {*}
-    sed -i -s '/^#split#$/d' *
+    csplit -s -z --prefix=AA ../$1 /^#split#/ {*}
+    sed -i -s '/^#split#/d' *
     find -type f -empty -exec rm {} \;
     for x in *; do
         new=$(awk '/^function / {print $2;exit}' $x)
@@ -62,7 +62,7 @@ function fsplit () {
     done
     popd &>/dev/null
 }
-#split#
+#split# 4a8f21bb2d01089b116a51da06325635 tools/xtfn
 #help: xtfn : function to extract a function from an rc file
 #help: usage : xtfn function
 function xtfn () {

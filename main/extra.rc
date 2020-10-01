@@ -1,3 +1,4 @@
+#split# 0bd380a6bb34ab099db1937a1056752c extra/colorsamples
 #help: colorsamples : show sample text in specified colors of 256 values
 #help: usage : colorsamples num [num ...]
 function colorsamples () {
@@ -6,13 +7,13 @@ function colorsamples () {
         echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
     done
 }
-#split#
+#split# e2196e4c088b7cb84087f0f33c35fd18 extra/commas
 #help: commas : commafy numeric fields in input stream
 #help: usage : <-> | commas
 function commas () {
     rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
 }
-#split#
+#split# c65839d8face313b53efc3fa0716f160 extra/ffix
 #help: ffix : useful to grab a function and edit it for testing
 #help: usage : ffix function (the edited file will be in /tmp)
 function ffix () {
@@ -21,7 +22,7 @@ function ffix () {
     vim $x
     . $x
 }
-#split#
+#split# f7662d1af40253be0356fe4515a09210 extra/inunits
 #help: inunits : convert a number to a SI value
 #help: usage : inunits number (base)
 #help: : n.b. the default base is 1000
@@ -33,7 +34,7 @@ function inunits () {
     declare x=$(echo "scale=3; $1/($b^$s)" | bc -l)
     echo $x${U:s:1}
 }
-#split#
+#split# b1a1f37a11ebd67baef6094ae81124c4 extra/julian
 #help: julian : presents dates in julian format and converts back
 #help: usage : julian [date]
 #help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
@@ -56,7 +57,7 @@ function julian () {
             ;;
     esac
 }
-#split#
+#split# 077999dc5dcea83fb72a907b89e74b4e extra/killdir
 #help: killdir : moves you to the parent and removes the dir you were in
 #help: usage : killdir
 function killdir () {
@@ -69,21 +70,7 @@ function killdir () {
     popd +1 &>/dev/null
     dirs -v
 }
-#split#
-#help: mlinker : mlinker creates the links for music dirs
-#help: usage : mlinker (mp3|flac) localParent file
-#help: : file needs to be the base paths you want mounted. the mount point is
-#help: : given on the command line
-function mlinker () {
-    declare orig remote=${1/#\/} local=${2/%\/}
-    while read; do
-        echo $REPLY
-        need=$(echo $REPLY | cut -f2 -d/)
-        [[ -d $local/$need ]] || mkdir "$local/$need"
-        ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
-    done < <(cat $3)
-}
-#split#
+#split# 6ad780461dc52f2b762d8d72fbded1b6 extra/mydd
 #help: mydd : convenience wrapper for dd/dcfldd
 #help: usage : mydd object <tab> [option ...]
 #help: : this lets you use tab complete for filename
@@ -99,13 +86,13 @@ function mydd () {
             ;;
     esac
 }
-#split#
+#split# 8435ebf8ba528bdd5243c48faf90a0ca extra/psfu
 #help: psfu : checks the process table for specified user
 #help: usage : psfu sid
 function psfu () {
     ps -f -u ${1:-$(id -un)}
 }
-#split#
+#split# efb8c6b915dccf43ac1fd5c46774be3a extra/ruler
 #help: ruler : draws ruler on screen
 #help: usage : ruler
 #help: :
@@ -127,7 +114,7 @@ function ruler () {
         echo "${str:0:COLS}"
     done
 }
-#split#
+#split# 0e5a71afff2b8bf538cda2e0f59893b2 extra/stk
 #help: stk : dir stack operations to save, load and clear the dirstack
 #help: usage : stk [save|load] filename
 #help: : stk clear (n ...)
@@ -160,7 +147,7 @@ function stk () {
     esac
     dirs -l -v
 }
-#split#
+#split# 22bd94b958d967db296481b7fd2e6002 extra/stkdiff
 #help: stkdiff : convenient differences between stack elements
 #help: usage : stkdiff (does diff -qr . ~1)
 #help: : stkdiff filename (does diff -y filename ~1/filename)
@@ -180,7 +167,7 @@ function stkdiff () {
     esac
     return
 }
-#split#
+#split# 369a9e4a38115cbb4949b19634ec0d45 extra/tinfo
 #help: tinfo : generates some metatdata for a path versions of given filename
 #help: usage : tinfo file
 function tinfo () {
@@ -195,13 +182,13 @@ function tinfo () {
         done
     done
 }
-#split#
+#split# 5f86a87acf113dc5d0485ad6babc3ec5 extra/tname
 #help: tname : modifies titlename
 #help: usage : tname (str)
 function tname () {
     printf "\033k%s\033\\" ${1:-bash}
 }
-#split#
+#split# 1db817aa29e11a590a31bcff9f8faa72 extra/typer
 #help: typer : used to examine files based on type
 #help: usage : typer file
 function typer () {
@@ -226,7 +213,7 @@ function typer () {
         esac
     done
 }
-#split#
+#split# db0b140c6e61417223710388759ff797 extra/wup
 #help: wup : function to wake up machines on the network
 #help: usage : wup machine_name
 function wup () {
@@ -234,7 +221,7 @@ function wup () {
     declare ip=$(dig +search +short -t txt $1)
     eval $cmd $ip
 }
-#split#
+#split# 87412e1f5881c3352190adcecd0ee340 extra/xmn
 #help: xmn : used to produce a detailed listing
 #help:     : of source code with some extra stuff
 function xmn () {

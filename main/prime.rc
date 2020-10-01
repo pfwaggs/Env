@@ -1,3 +1,4 @@
+#split# abe16ce6faa45c1ef27487ec544340b8 prime/AA00
 # alias definitions
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -25,7 +26,7 @@ alias sshFingerPrint='ssh-keygen -E md5 -lf ~/.ssh/id_rsa'
 alias xme='ssh-agent startxfce4'
 alias addkeys='ssh-add ~/.ssh/{github,id}_rsa'
 alias vimh='vim +:help +:only'
-#split#
+#split# 67619ce838c648551a8d9e576522a139 prime/L
 #help: L : provides ls support for hidden (dot) files
 #help: usage : L [options] [dir]
 function L () {
@@ -46,7 +47,7 @@ function L () {
         ls -$opts "$x"/.??* 2> /dev/null
     done
 }
-#split#
+#split# be61e73d3b4ec9cc583953850f6a43f5 prime/_ArgParser
 #help: _ArgParser : assists in parsing command line args
 function _ArgParser () { 
     declare path file partial dir;
@@ -66,7 +67,7 @@ function _ArgParser () {
 
 complete -o filenames -C '_ArgParser' cd
 complete -o filenames -C '_ArgParser' stkdiff
-#split#
+#split# 7a3c5c00187f0bfd5e5bc22530fec612 prime/_FixList
 #help: _FixList : some basic list operations:
 #help: : -s sort
 #help: : -e exists
@@ -131,7 +132,7 @@ function _FixList () {
     done
     printf '%s\n' "${list[@]}"
 }
-#split#
+#split# a7cd551cab06191186c5b7247b5f8991 prime/_Show
 #help: _Show : complete function for the show function
 function _Show () {
     declare x
@@ -153,7 +154,7 @@ function show () {
     fi
 }
 complete -C '_Show' show
-#split#
+#split# 02095038373b230891e455974468c473 prime/configEd
 #help: configEd : configure the editor of your choice (emacs, vim)
 #help: usage : configEd [emacs|vim]
 function configEd () {
@@ -171,13 +172,13 @@ function configEd () {
             ;;
     esac
 }
-#split#
+#split# c791e77a406bc7342ea370396e9677d0 prime/extra
 #help: extra : shortcut to set extra for the prompt
 #help: usage : extra [color=]'text'
 function extra () {
     stp extra=1="$*"
 }
-#split#
+#split# 29bcfeb0c980debac0683604732b99c1 prime/hlp
 #help: hlp : help for functions loaded
 #help: usage : hlp function
 #help: usage : hlp
@@ -199,7 +200,7 @@ function hlp () {
             done | column -s: -t | sort -k1,1 -k3,3 
     fi
 }
-#split#
+#split# cdae9443e51c6d2a8587dd36ee5201be prime/load
 #help: load : loads MAINDIR rc files
 #help: usage : load function|name.rc [...]
 function load () {
@@ -214,7 +215,7 @@ function load () {
         rm /tmp/$x
     done
 }
-#split#
+#split# d201bbc8a1225b91c6476611aa917159 prime/lsu
 #help: lsu : a long listing of dirs moving up the dir path
 #help: usage : lsu
 function lsu () {
@@ -224,7 +225,7 @@ function lsu () {
     done
     ls -ld "${np[@]}"
 }
-#split#
+#split# 9974e6ff93578e3524bc000a001784d8 prime/mkwdir
 #help: mkwdir : creates a new arg.nn dir based on arg
 #help: usage : mkwdir (base)
 #help: : default arg is the date
@@ -235,14 +236,14 @@ function mkwdir () {
     printf -v dir "%s.%02d" $pat $((1+count))
     mkdir -v $dir
 }
-#split#
+#split# 458173085928a391779fabf74d1c34b0 prime/pop
 #help: pop : simple wrapper for popd; pops given entry (default is current)
 #help: usage : pop [n]
 function pop () {
     popd ${1:++$1} > /dev/null
     dirs -l -v
 }
-#split#
+#split# 3395ac3adac049d740423bb2182db180 prime/prep
 #help: prep : used to give a boilerplate file for editing
 #help: usage : prep file.(sh||fn|pl|pm|py)
 #help: : based on extension;
@@ -265,7 +266,7 @@ function prep () {
         echo prepped $dest as ${map[$type]/_/ }
     done
 }
-#split#
+#split# 031fc0e0b0ced44d842fbb34f5d8cfef prime/push
 #help: push : simple wrapper for pushd
 #help: usage : push (path)
 function push () {
@@ -282,13 +283,13 @@ function push () {
     pushd &>/dev/null
     dirs -l -v
 }       
-#split#
+#split# 0321e5691e5da69c3d74a9077869b630 prime/spx
 #help: spx : simple function to do aspell
 #help: usage : spx word [word ...]
 function spx () {
     echo $@ | aspell -a
 }
-#split#
+#split# c6b14ba9770b817a111fbb7d0d5f076f prime/stp
 #help: stp : utility to set prompt line characteristics
 #help: usage : stp [args...]
 #help: : args are: key[=0|1][=color][=text]
@@ -342,13 +343,13 @@ function stp () {
     done
     PS1+=$'\[\e[m\]'
 }
-#split#
+#split# f8e9c9a97b5482722f5dd4710cff6349 prime/tag
 #help: tag : shortcut to set tag for the prompt
 #help: usage : tag [color=]'text'
 function  tag () {
     stp tag=1="$*"
 }
-#split#
+#split# 4d582327987ff79e75a5220645c2c872 prime/ulist
 #help: ulist : finds, in order, the unique items in a list.
 #help: usage : .. | ulist
 #help: :
@@ -359,7 +360,7 @@ function ulist () {
     done < <(cat -)
     printf "%s\n" "${list[@]/:}"
 }
-#split#
+#split# e699c15095e6d8bf5681f808960bb192 prime/unload
 #help: unload : unloads a function or an entire library
 #help: usage : unload [function|library]
 #help: :
