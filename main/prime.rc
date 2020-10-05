@@ -1,4 +1,4 @@
-#split# abe16ce6faa45c1ef27487ec544340b8 prime/AA00
+#split# prime.rc/AA00 d41d8cd98f00b204e9800998ecf8427e
 # alias definitions
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -26,30 +26,10 @@ alias sshFingerPrint='ssh-keygen -E md5 -lf ~/.ssh/id_rsa'
 alias xme='ssh-agent startxfce4'
 alias addkeys='ssh-add ~/.ssh/{github,id}_rsa'
 alias vimh='vim +:help +:only'
-#split# 67619ce838c648551a8d9e576522a139 prime/L
-#help: L : provides ls support for hidden (dot) files
-#help: usage : L [options] [dir]
-function L () {
-    declare -a args
-    declare opts=lAd
-    for x in $*; do
-        case $x in
-            -?)
-                opts+=${x/-}
-                ;;
-            *)
-                args+=("$x")
-                ;;
-        esac
-    done
-    [[ ${#args[@]} -gt 0 ]] || args+=(.)
-    for x in "${args[@]}"; do
-        ls -$opts "$x"/.??* 2> /dev/null
-    done
-}
-#split# be61e73d3b4ec9cc583953850f6a43f5 prime/_ArgParser
-#help: _ArgParser : assists in parsing command line args
-function _ArgParser () { 
+#split# prime.rc/ArgParser_ eb3591be81ee2a68a96185c3724e8a49
+#help: ArgParser_ : assists in parsing command line args
+function ArgParser_ () { 
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare path file partial dir;
     declare -a list;
     [[ -n COMP_LINE ]] && x=$2 || x=$1;
@@ -65,10 +45,10 @@ function _ArgParser () {
     [[ ${#list[@]} -gt 0 ]] && printf "%s\n" "${list[@]}" | ulist
 }
 
-complete -o filenames -C '_ArgParser' cd
-complete -o filenames -C '_ArgParser' stkdiff
-#split# 7a3c5c00187f0bfd5e5bc22530fec612 prime/_FixList
-#help: _FixList : some basic list operations:
+complete -o filenames -C 'ArgParser_' cd
+complete -o filenames -C 'ArgParser_' stkdiff
+#split# prime.rc/FixList_ d66ab46ffadcd71fd5e24a17f3c6796c
+#help: FixList_ : some basic list operations:
 #help: : -s sort
 #help: : -e exists
 #help: : -r reverse
@@ -76,7 +56,8 @@ complete -o filenames -C '_ArgParser' stkdiff
 #help: : -c clear items
 #help: : -u unique items
 #help: : -S output a single string
-function _FixList () {
+function FixList_ () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare p opt
     declare -a nlist list opts
     for p in "$@"; do
@@ -132,9 +113,32 @@ function _FixList () {
     done
     printf '%s\n' "${list[@]}"
 }
-#split# a7cd551cab06191186c5b7247b5f8991 prime/_Show
-#help: _Show : complete function for the show function
-function _Show () {
+#split# prime.rc/L c8eb8b665163befba16e307d6b4aa1c1
+#help: L : provides ls support for hidden (dot) files
+#help: usage : L [options] [dir]
+function L () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    declare -a args
+    declare opts=lAd
+    for x in $*; do
+        case $x in
+            -?)
+                opts+=${x/-}
+                ;;
+            *)
+                args+=("$x")
+                ;;
+        esac
+    done
+    [[ ${#args[@]} -gt 0 ]] || args+=(.)
+    for x in "${args[@]}"; do
+        ls -$opts "$x"/.??* 2> /dev/null
+    done
+}
+#split# prime.rc/Show_ 9f2afb8829dd1295f3ba0b5a014170e4
+#help: Show_ : complete function for the show function
+function Show_ () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare x
     [[ -n $COMP_LINE ]] && x=$2 || x=$1
     compgen -v | grep -i "^$x"
@@ -143,6 +147,7 @@ function _Show () {
 #help: usage : show var
 #help: : type values in lowercase and <tab> will uppercase if needed
 function show () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare x=$(declare -p $1 | awk '{print $2}')
     if [[ $x =~ [aA] ]]; then
         echo array $1:
@@ -153,11 +158,12 @@ function show () {
         echo $1 = ${!1}
     fi
 }
-complete -C '_Show' show
-#split# 02095038373b230891e455974468c473 prime/configEd
+complete -C 'Show_' show
+#split# prime.rc/configEd c0233f5f155e645709472955db62da70
 #help: configEd : configure the editor of your choice (emacs, vim)
 #help: usage : configEd [emacs|vim]
 function configEd () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     case $1 in
         emacs)
             ps -f -C emacs | grep -q daemon || emacs --daemon
@@ -172,41 +178,42 @@ function configEd () {
             ;;
     esac
 }
-#split# c791e77a406bc7342ea370396e9677d0 prime/extra
-#help: extra : shortcut to set extra for the prompt
-#help: usage : extra [color=]'text'
-function extra () {
-    stp extra=1="$*"
-}
-#split# 29bcfeb0c980debac0683604732b99c1 prime/hlp
-#help: hlp : help for functions loaded
-#help: usage : hlp function
-#help: usage : hlp
-function hlp () {
-    declare flist=$MAINDIR/*.rc all=$(compgen -A function)
+#split# prime.rc/hmo fe47fc5a1e9720cf4e28779a78ef8899
+#help: hmo : help for functions loaded
+#help: usage : hmo [-h]|[name]
+#help: : hmo [name]
+#help: : -h : help
+#help: : n.b. name can be either a function or a rc file.
+#help: : and the .rc extension is optional
+function hmo () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    declare function flist=$MAINDIR/*.rc all=$(compgen -A function)
     if [[ $# -eq 1 ]]; then
-        [[ $1 =~ .rc$ ]] && flist=$MAINDIR/$1 && shift
+        [[ -f ${1%.rc}.rc ]] && flist=$MAINDIR/${1%.rc}.rc && shift
     fi
     if [[ $# -eq 1 ]]; then
-        sed -nr "/^#help: $1 :/{:1;p;n;/^function/!b1}" $flist |
+        sed -nr "/^#help: $1/{:1;p;n;/^function/!b1}" $flist |
             cut -f2- -d: | column -n -s: -t
     else
         awk '/^function / {printf "#help: %s :\n",$2}' $flist |
+            grep -E ': [[:alpha:]]+ ' | # this is because mawk sux
             grep -f - -H $flist | sed -r 's|/.*/main/||;s|\s?:\s|:|g' |
             while read line; do
                 f=$(echo -n $line | awk -F: '{print $3}')
-                [[ $all =~ $f ]] && r=x || r=' '
+                [[ $all =~ $f ]] && r=' x ' || r='xxx'
                 echo $line | sed "s|#help|$r|"
-            done | column -s: -t | sort -k1,1 -k3,3 
+            done | sort -k1,1 -k3,3 -t: | sed -n 's/xxx/   /;p' | column -s: -t
     fi
 }
-#split# cdae9443e51c6d2a8587dd36ee5201be prime/load
+#split# prime.rc/load 8267de6ebe43177c3d1d715f7f039883
 #help: load : loads MAINDIR rc files
 #help: usage : load function|name.rc [...]
 function load () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare x y 
     for x in $@; do
         [[ -s $MAINDIR/$x ]] && source $MAINDIR/$x && continue
+        [[ -s $MAINDIR/$x.rc ]] && source $MAINDIR/$x.rc && continue
         y=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null | sed -n '$p')
         [[ -n $y ]] || { echo skipping $x; continue; }
         echo loading $x from $y
@@ -215,35 +222,38 @@ function load () {
         rm /tmp/$x
     done
 }
-#split# d201bbc8a1225b91c6476611aa917159 prime/lsu
+#split# prime.rc/lsu a17d633b36e73caef25f763605da7029
 #help: lsu : a long listing of dirs moving up the dir path
 #help: usage : lsu
 function lsu () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare -a np=(/ "${1:-$PWD}")
     while [[ -n ${np[-1]%/*} ]]; do
         np+=(${np[-1]%/*})
     done
     ls -ld "${np[@]}"
 }
-#split# 9974e6ff93578e3524bc000a001784d8 prime/mkwdir
+#split# prime.rc/mkwdir 419590ce8fa9c1b1a69eaa7a442db42e
 #help: mkwdir : creates a new arg.nn dir based on arg
 #help: usage : mkwdir (base)
 #help: : default arg is the date
 function mkwdir () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare count dir pat date=$(date +%F | tr '-' '_')
     pat=${1:=$date}
     count=$(ls -d $pat.?? 2>/dev/null | wc -l)
     printf -v dir "%s.%02d" $pat $((1+count))
     mkdir -v $dir
 }
-#split# 458173085928a391779fabf74d1c34b0 prime/pop
+#split# prime.rc/pop 5fbc475295e87b6d4223dc6be7b7e094
 #help: pop : simple wrapper for popd; pops given entry (default is current)
 #help: usage : pop [n]
 function pop () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     popd ${1:++$1} > /dev/null
     dirs -l -v
 }
-#split# 3395ac3adac049d740423bb2182db180 prime/prep
+#split# prime.rc/prep 7bc66690ec008738c37913e768c49cda
 #help: prep : used to give a boilerplate file for editing
 #help: usage : prep file.(sh||fn|pl|pm|py)
 #help: : based on extension;
@@ -253,6 +263,7 @@ function pop () {
 #help: : fn for bash functions
 #help: : pm for perl module
 function prep () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare PREPDIR=${MAINDIR/main/support}/prep_files
     declare dest base file type
     source ${PREPDIR}/map
@@ -266,10 +277,11 @@ function prep () {
         echo prepped $dest as ${map[$type]/_/ }
     done
 }
-#split# 031fc0e0b0ced44d842fbb34f5d8cfef prime/push
+#split# prime.rc/push 5eeb54cb5fb992628225855e5b7ab9ea
 #help: push : simple wrapper for pushd
 #help: usage : push (path)
 function push () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     if [[ -n $1 ]]; then
         if [[ -d $1 ]]; then
             pushd -n $1 &>/dev/null
@@ -283,13 +295,28 @@ function push () {
     pushd &>/dev/null
     dirs -l -v
 }       
-#split# 0321e5691e5da69c3d74a9077869b630 prime/spx
+#split# prime.rc/setextra cc70e439c18bd253b0be5f71ba29f75c
+#help: setextra : shortcut to set extra for the prompt
+#help: usage : setextra [color=]'text'
+function setextra () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    stp extra=1="$*"
+}
+#split# prime.rc/settag fa57ed945f63a79e8b0c3be34926125e
+#help: settag : shortcut to set tag for the prompt
+#help: usage : settag [color=]'text'
+function  settag () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    stp tag=1="$*"
+}
+#split# prime.rc/spx 1f03697088e22f7ae4e2b2a905a8c5ff
 #help: spx : simple function to do aspell
 #help: usage : spx word [word ...]
 function spx () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     echo $@ | aspell -a
 }
-#split# c6b14ba9770b817a111fbb7d0d5f076f prime/stp
+#split# prime.rc/stp 1bc6dbcf11ab0ae2ccc0b5cf7f6b7d42
 #help: stp : utility to set prompt line characteristics
 #help: usage : stp [args...]
 #help: : args are: key[=0|1][=color][=text]
@@ -303,68 +330,65 @@ function spx () {
 #help: : lpath : full path
 #help: : prompt : prompt symbol (# for root, $ for loader)
 function stp () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare x key
     declare flip color text
-    declare colors=${!_ColorNum[*]}
+    declare colors=${!ColorNum_[*]}
     declare colorPat=${colors// /|}
     for x in "$@"; do
         key=${x%%=*}
         while read x; do
             case $x in 
                 0|1)
-                    _PromptShow[$key]=$x
+                    PromptShow_[$key]=$x
                     ;;
                 @($colorPat))
-                    _PromptColor[$key]=$x
+                    PromptColor_[$key]=$x
                     ;;
                 +([[:digit:]]))
-                    _PromptColor[$key]=$x
+                    PromptColor_[$key]=$x
                     ;;
                     *|'')
-                    [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$x
+                    [[ $key =~ tag|extra ]] && PromptCfg_[$key]=$x
                     ;;
             esac
         done < <(echo ${x#*=} | sed -nr 's/=/\n/g;p')
         unset text color flip key
     done
-    _PromptShow[host]=1
-    _PromptShow[prompt]=1
+    PromptShow_[host]=1
+    PromptShow_[prompt]=1
     PS1=
     for x in num extra tag user host spath lpath prompt; do
-        [[ ${_PromptShow[$x]} = 0 ]] && continue
-        [[ ${_PromptCfg[$x]} = '' ]] && continue
-        if [[ ${_PromptColor[$x]} =~ [0-9] ]]; then
-            num="38:5:${_PromptColor[$x]}"
+        [[ ${PromptShow_[$x]} = 0 ]] && continue
+        [[ ${PromptCfg_[$x]} = '' ]] && continue
+        if [[ ${PromptColor_[$x]} =~ [0-9] ]]; then
+            num="38:5:${PromptColor_[$x]}"
         else
-            color=${_PromptColor[$x]}
-            num=${_ColorNum[$color]}
+            color=${PromptColor_[$x]}
+            num=${ColorNum_[$color]}
         fi
-        PS1+=$'\[\e['${num}m$'\]'${_PromptCfg[$x]}' '
+        PS1+=$'\[\e['${num}m$'\]'${PromptCfg_[$x]}' '
     done
     PS1+=$'\[\e[m\]'
 }
-#split# f8e9c9a97b5482722f5dd4710cff6349 prime/tag
-#help: tag : shortcut to set tag for the prompt
-#help: usage : tag [color=]'text'
-function  tag () {
-    stp tag=1="$*"
-}
-#split# 4d582327987ff79e75a5220645c2c872 prime/ulist
+#split# prime.rc/ulist aa61ffa5ac8f6c457e7fa69eaaca144a
 #help: ulist : finds, in order, the unique items in a list.
 #help: usage : .. | ulist
 #help: :
 function ulist () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare -a list
     while read; do
         [[ ${list[@]} =~ :$REPLY ]] || list+=(":$REPLY")
     done < <(cat -)
     printf "%s\n" "${list[@]/:}"
 }
-#split# e699c15095e6d8bf5681f808960bb192 prime/unload
+#split# prime.rc/unload 35bed1477b47762245e67dd4c54146be
 #help: unload : unloads a function or an entire library
 #help: usage : unload [function|library]
 #help: :
 function unload () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare x all=$(compgen -A function)
     declare -a list dump
     for x in $@; do

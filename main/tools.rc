@@ -1,19 +1,32 @@
-#split# 6c87f13fe06e809f8bc1f9cd8eef4111 tools/check
-#help: check : used to check if anything has changed in a src dir
-#help: usage : check name.rc
-#help: :
+#split# tools.rc/check e4116fde316e544b5f88c99bed3afca9
+#help: check : used to check if anything has changed in a src dir or function
+#help: usage : check [-hf] name
+#help: : -h : help
+#help: : -f : check a function
 function check () {
-    declare x file=check_${1%.rc}.$$
-    for x in ${1%.rc}/*; do
-        echo '#split# '$(md5sum $x)
-        cat $x
-    done | expand > $file
-    diff -q $file $1 && rm $file
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    declare m x infile dir outfile
+    if [[ $1 = -f ]]; then
+        shift
+        declare found=$(grep -l "^function $1 " $MAINDIR/*.rc 2>/dev/null)
+        echo 'loaded function: '$(xtfn -f $1 | md5sum | cut -c1-32)
+        echo '   dev function: '$(awk "/#split# .*\/$1/"'{print $NF}' $found)
+    else
+        infile=$1 dir=${1%.rc} outfile=$1.test
+        for x in $dir/*; do
+            m=$(expand $x | tee tmp | sed -n '/^function/,$p' | md5sum)
+            echo "#split# ${x/$dir/$infile} ${m:0:32}"
+            cat tmp
+        done | tee $outfile | diff -q - $infile || return
+        echo $dir is current with $infile
+        rm tmp $outfile
+    fi
 }
-#split# 0f10aeeee32fe4043f2910606834b5bb tools/cksumit
+#split# tools.rc/cksumit 82f082a1ee6d7208b928edc7bbea6e3d
 #help: cksumit : provides a line checksum for given files.
 #help: usage : cksumit file [file ...]
 function cksumit () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     for x in $@; do
         echo ${x#$PRUNE/}
         while read -r; do
@@ -23,31 +36,45 @@ function cksumit () {
         echo ''
     done
 }
-#split# c8383ee121279908d52d85071de62276 tools/fjoin
+#split# tools.rc/envage cdd7c12f306705da94397f1915f184e2
+#help: envage : how old is the config?
+#help: usage : envage
+function envage () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+#    [[ $MAINDIR =~ main ]] && { echo this is a dev branch; return; }
+    declare diff past today=$(date +%F)
+#    declare past=$(echo -n $MAINDIR | awk -F/ '{print $5}' | cut -f1 -d.)
+    declare env=$(date -d ${1//_/-} +%s)
+    declare git=$(git -C ~/Git/Env log -1 --date=format:%s | grep Date: | cut -f2 -d:)
+    declare days=$(((git-env)/86400))
+    ((days < 7)) || { echo you need to upgrade; return; }
+}
+#split# tools.rc/fjoin 69aff54cbada37fbcf6155b721b84e59
 #help: fjoin : takes a dir of functions and makes a function file
 #help: usage : fjoin dir
 #help: : dir is the directory you want to turn into a dir.rc file
 function fjoin () {
-    declare dir=${1%/}
-    [[ -d $dir ]] || { echo  $dir does not exist, skipping; continue; }
-    declare file=$dir.rc
-    mv $file $file.bk
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    declare m dir=${1%/}
+    [[ -d $dir ]] || { echo  $dir does not exist, ignoring; return; }
+    declare outfile=$dir.rc save=$dir.rc.save
+    mv $outfile $save
     for x in $dir/*; do
-        echo '#split# '$(md5sum $x)
-        cat $x
-    done | expand > $file
-    rm -I $dir/* || return
-    rmdir $dir || return
-    rm -i $file.bk || return
+        m=$(expand $x | tee tmp | sed -n '/^function/,$p' | md5sum)
+        echo "#split# ${x/$dir/$outfile} ${m:0:32}"
+        cat tmp
+    done > $outfile
+    rm -r tmp $dir
 }
-#split# 470dc54dd3f950239b511b53be942fa5 tools/fsplit
+#split# tools.rc/fsplit 6297e69b15f34592b469fb363d9a6dcc
 #help: fsplit : splits a file of functions into a dir of separate functions
 #help: usage : fsplit file
 function fsplit () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare x
     [[ $1 =~ .rc$ ]] || { echo skipping $1: bad input name; return; }
     [[ -s $1 ]] || { echo "can not find <$1>, skipping"; return; }
-    declare -x dir=${1%.rc}
+    declare dir=${1%.rc}
     [[ -d $dir ]] && { echo $dir already exists; return; }
     mkdir $dir &>/dev/null || { echo mkdir $dir failed; return; }
     pushd $dir &>/dev/null || { echo pushd failed; return; }
@@ -62,15 +89,19 @@ function fsplit () {
     done
     popd &>/dev/null
 }
-#split# 4a8f21bb2d01089b116a51da06325635 tools/xtfn
+#split# tools.rc/xtfn 13b7e7f2570b57b877bbf40c65435d1a
 #help: xtfn : function to extract a function from an rc file
-#help: usage : xtfn function
+#help: usage : xtfn [-hf] function
+#help: : -h : help
+#help: : -f : function only
 function xtfn () {
-    declare x list=$(grep -l "^function $1 " $MAINDIR/*.rc)
-    [[ -f $MAINDIR/$1 ]] && list+=" $MAINDIR/$1"
-    for x in ${list[@]}; do
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    declare x leadin='#help'
+    [[ $1 = -f ]] && { leadin='function'; shift; }
+    declare found=$(grep -l "^function $1 " $MAINDIR/*.rc $MAINDIR/$1 2>/dev/null)
+    for x in $found; do
         echo $1 found in $x ... >&2
-        sed -nr "/^#help: $1 :/{:1;p;n;/^#split#/!b1;q}" $x
-        echo ''
+        sed -nr "/^$leadin $1 /{:1;p;n;/^#split#/!b1;q}" $x
+        [[ $leadin =~ help ]] && echo ''
     done
 }
