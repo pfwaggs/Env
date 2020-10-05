@@ -89,14 +89,14 @@ function fsplit () {
     done
     popd &>/dev/null
 }
-#split# tools.rc/xtfn 13b7e7f2570b57b877bbf40c65435d1a
+#split# tools.rc/xtfn bf9e72868dbbdebdfa8569b4a8d2cb75
 #help: xtfn : function to extract a function from an rc file
 #help: usage : xtfn [-hf] function
 #help: : -h : help
 #help: : -f : function only
 function xtfn () {
     [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
-    declare x leadin='#help'
+    declare x leadin='#help:'
     [[ $1 = -f ]] && { leadin='function'; shift; }
     declare found=$(grep -l "^function $1 " $MAINDIR/*.rc $MAINDIR/$1 2>/dev/null)
     for x in $found; do
