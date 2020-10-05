@@ -178,7 +178,7 @@ function configEd () {
             ;;
     esac
 }
-#split# prime.rc/hmo fe47fc5a1e9720cf4e28779a78ef8899
+#split# prime.rc/hmo a3a35024be19811efe5845b8217213df
 #help: hmo : help for functions loaded
 #help: usage : hmo [-h]|[name]
 #help: : hmo [name]
@@ -189,14 +189,14 @@ function hmo () {
     [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     declare function flist=$MAINDIR/*.rc all=$(compgen -A function)
     if [[ $# -eq 1 ]]; then
-        [[ -f ${1%.rc}.rc ]] && flist=$MAINDIR/${1%.rc}.rc && shift
+        [[ -f $MAINDIR/${1%.rc}.rc ]] && flist=$MAINDIR/${1%.rc}.rc && shift
     fi
     if [[ $# -eq 1 ]]; then
         sed -nr "/^#help: $1/{:1;p;n;/^function/!b1}" $flist |
             cut -f2- -d: | column -n -s: -t
     else
         awk '/^function / {printf "#help: %s :\n",$2}' $flist |
-            grep -E ': [[:alpha:]]+ ' | # this is because mawk sux
+            grep -E ': [[:alpha:]]+ ' | tee | # this is because mawk sux
             grep -f - -H $flist | sed -r 's|/.*/main/||;s|\s?:\s|:|g' |
             while read line; do
                 f=$(echo -n $line | awk -F: '{print $3}')
