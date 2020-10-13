@@ -1,4 +1,4 @@
-#split# tools.rc/check e4116fde316e544b5f88c99bed3afca9
+#split# tools.rc/check da931ae256c5461f28e12d9659f95b97
 #help: check : used to check if anything has changed in a src dir or function
 #help: usage : check [-hf] name
 #help: : -h : help
@@ -17,7 +17,8 @@ function check () {
             m=$(expand $x | tee tmp | sed -n '/^function/,$p' | md5sum)
             echo "#split# ${x/$dir/$infile} ${m:0:32}"
             cat tmp
-        done | tee $outfile | diff -q - $infile || return
+        done > $outfile
+        diff -q $outfile $infile || return
         echo $dir is current with $infile
         rm tmp $outfile
     fi

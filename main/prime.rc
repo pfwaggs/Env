@@ -135,7 +135,7 @@ function L () {
         ls -$opts "$x"/.??* 2> /dev/null
     done
 }
-#split# prime.rc/Show_ 9f2afb8829dd1295f3ba0b5a014170e4
+#split# prime.rc/Show_ 3d17f8d9e1ecc4666481df8fa896b872
 #help: Show_ : complete function for the show function
 function Show_ () {
     [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
@@ -143,22 +143,6 @@ function Show_ () {
     [[ -n $COMP_LINE ]] && x=$2 || x=$1
     compgen -v | grep -i "^$x"
 }
-#help: show : used to show variable values
-#help: usage : show var
-#help: : type values in lowercase and <tab> will uppercase if needed
-function show () {
-    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
-    declare x=$(declare -p $1 | awk '{print $2}')
-    if [[ $x =~ [aA] ]]; then
-        echo array $1:
-        for x in $(eval "echo \${!$1[@]}"); do
-            eval "echo $x = \${$1[$x]}"
-        done
-    else
-        echo $1 = ${!1}
-    fi
-}
-complete -C 'Show_' show
 #split# prime.rc/configEd c0233f5f155e645709472955db62da70
 #help: configEd : configure the editor of your choice (emacs, vim)
 #help: usage : configEd [emacs|vim]
@@ -178,32 +162,43 @@ function configEd () {
             ;;
     esac
 }
-#split# prime.rc/hmo a3a35024be19811efe5845b8217213df
-#help: hmo : help for functions loaded
-#help: usage : hmo [-h]|[name]
-#help: : hmo [name]
+#split# prime.rc/hmo 34f738232babfb66784b4a16e8aaa345
+#help: hmo : help for functions
+#help: usage : hmo [-hqa]
+#help: usage : hmo [function|lib] ...
 #help: : -h : help
-#help: : n.b. name can be either a function or a rc file.
-#help: : and the .rc extension is optional
+#help: : -q : show function libs
+#help: : -a : display all func/libs
 function hmo () {
+    declare -a list=($MAINDIR/*.rc)
     [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
-    declare function flist=$MAINDIR/*.rc all=$(compgen -A function)
-    if [[ $# -eq 1 ]]; then
-        [[ -f $MAINDIR/${1%.rc}.rc ]] && flist=$MAINDIR/${1%.rc}.rc && shift
-    fi
-    if [[ $# -eq 1 ]]; then
-        sed -nr "/^#help: $1/{:1;p;n;/^function/!b1}" $flist |
-            cut -f2- -d: | column -n -s: -t
-    else
-        awk '/^function / {printf "#help: %s :\n",$2}' $flist |
-            grep -E ': [[:alpha:]]+ ' | tee | # this is because mawk sux
-            grep -f - -H $flist | sed -r 's|/.*/main/||;s|\s?:\s|:|g' |
-            while read line; do
-                f=$(echo -n $line | awk -F: '{print $3}')
-                [[ $all =~ $f ]] && r=' x ' || r='xxx'
-                echo $line | sed "s|#help|$r|"
-            done | sort -k1,1 -k3,3 -t: | sed -n 's/xxx/   /;p' | column -s: -t
-    fi
+    [[ $1 = -q ]] && { printf "%s\n" ${list[@]##*/}; return; }
+    [[ $1 = -a ]] && set -- ${list[@]##*/}
+    declare y x lib all=$(compgen -A function)
+    for x in ${@:-prime.rc}; do
+        if [[ -f $MAINDIR/${x%.rc}.rc ]]; then
+            y=$MAINDIR/${x%.rc}.rc
+            echo ${x%.rc}.rc
+            awk '/^function / {printf "#help: %s :\n",$2}' $y |
+                grep -E ': [[:alpha:]]+ ' |
+                grep -f - $y | sed -r 's|/.*/main/||;s|\s?:\s|:|g' |
+                while read line; do
+                    f=$(echo -n $line | awk -F: '{print $2}')
+                    [[ $all =~ $f ]] && r=' x ' || r='xxx'
+                    echo $line | sed "s|#help|:$r|"
+                done |
+                sort -k3,3 -t: | sed -n 's/xxx/   /;p' |
+                column -s: -t |
+                sed -r 's/^/    /'
+        else
+            y=$(grep -l -E "^#help: $x" ${list[@]})
+            echo ${y##*/}
+            sed -nr "/^#help: $x/{:1;p;n;/^function/!b1}" $y |
+                cut -f2- -d: |
+                column -n -s: -t |
+                sed -r 's/^/    /'
+        fi
+    done
 }
 #split# prime.rc/load 8267de6ebe43177c3d1d715f7f039883
 #help: load : loads MAINDIR rc files
@@ -309,6 +304,23 @@ function  settag () {
     [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
     stp tag=1="$*"
 }
+#split# prime.rc/show 9301f62c7bcc48a49cb6281172606d93
+#help: show : used to show variable values
+#help: usage : show var
+#help: : type values in lowercase and <tab> will uppercase if needed
+function show () {
+    [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
+    declare x=$(declare -p $1 | awk '{print $2}')
+    if [[ $x =~ [aA] ]]; then
+        echo array $1:
+        for x in $(eval "echo \${!$1[@]}"); do
+            eval "echo $x = \${$1[$x]}"
+        done
+    else
+        echo $1 = ${!1}
+    fi
+}
+complete -C 'Show_' show
 #split# prime.rc/spx 1f03697088e22f7ae4e2b2a905a8c5ff
 #help: spx : simple function to do aspell
 #help: usage : spx word [word ...]
