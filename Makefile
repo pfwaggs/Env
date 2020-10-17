@@ -41,8 +41,8 @@ DATE = $(shell date +%F | tr '-' '_')
 SEQ = $(shell c=$$(ls -d $(DATE)* 2>/dev/null | wc -l); printf "%02d" $$((c+1)))
 REV = $(shell git $(GITPREFIX) rev-parse --short HEAD)
 ARCHIVE = $(filter-out $(CURRENT) $(SAVE) $(TESTING),$(LIST))
-NEEDUPDATE = $(if $(findstring $(REV),$(LIST)),,$(DATE).$(SEQ)-$(REV))
-STATUS = DOTSRCDIR PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV NEEDUPDATE 
+UPDATETO = $(if $(findstring $(REV),$(LIST)),,$(DATE).$(SEQ)-$(REV))
+STATUS = DOTSRCDIR PWD GITHOME BRANCH LAST CURRENT SAVE TESTING DATE SEQ REV UPDATETO 
 export $(STATUS)
 
 .PHONY: archive
@@ -97,8 +97,8 @@ archive :
 
 #help: snapshot : takes a snapshot into a derived dir
 update :
-	@[[ -n $(NEEDUPDATE) ]] || { echo no update needed.; exit 1; }
-	@git $(GITPREFIX) archive --format=tar --prefix=$(NEEDUPDATE)/ HEAD | tar -x
+	@[[ -n $(UPDATETO) ]] || { echo no update needed.; exit 1; }
+	@git $(GITPREFIX) archive --format=tar --prefix=$(UPDATETO)/ HEAD | tar -x
 
 #help: (%-)current : makes the named (latest) version current
 #help: (%-)testing : makes the named (lastest) version testing
