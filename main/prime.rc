@@ -200,15 +200,17 @@ function hmo () {
         fi
     done
 }
-#split# prime.rc/load 8267de6ebe43177c3d1d715f7f039883
+#split# prime.rc/load 36c5cf2237b30b57d03f0f531fe06f9c
 #help: load : loads MAINDIR rc files
 #help: usage : load function|name.rc [...]
 function load () {
     [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
-    declare x y 
+    declare x y
     for x in $@; do
-        [[ -s $MAINDIR/$x ]] && source $MAINDIR/$x && continue
-        [[ -s $MAINDIR/$x.rc ]] && source $MAINDIR/$x.rc && continue
+        y=$MAINDIR/$x
+        [[ -s $y ]] && { echo loading $y; source $y; continue; }
+        y=$MAINDIR/$x.rc
+        [[ -s $y ]] && { echo loading $y; source $y; continue; }
         y=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null | sed -n '$p')
         [[ -n $y ]] || { echo skipping $x; continue; }
         echo loading $x from $y
