@@ -30,28 +30,38 @@
 
 "put all swap files together in one place
 if isdirectory($VIMHOME . '.vimrec/swaps') == 0
-    :silent !mkdir -p $VIMHOME/.vimrec/swaps >/dev/null 2>&1
+    :silent !mkdir -p $VIMHOME/.vimrec/swaps &>/dev/null
 endif
 set dir=$VIMHOME/.vimrec/swaps//
 
 "put all backup files together in one place
 if isdirectory($VIMHOME . '.vimrec/backups') == 0
-    :silent !mkdir -p $VIMHOME/.vimrec/backups >/dev/null 2>&1
+    :silent !mkdir -p $VIMHOME/.vimrec/backups &>/dev/null
 endif
 set backupdir=$VIMHOME/.vimrec/backups//
 set backup
 
 "put all undo files together in one place
 if isdirectory($VIMHOME . '.vimrec/undos') == 0
-    :silent !mkdir -p $VIMHOME/.vimrec/undos >/dev/null 2>&1
+    :silent !mkdir -p $VIMHOME/.vimrec/undos &>/dev/null
 endif
 set undodir=$VIMHOME/.vimrec/undos//
 set undofile
 
+"put contain views for folds
+if isdirectory($VIMHOME . '.vimrec/view') == 0
+    :silent !mkdir -p $VIMHOME/.vimrec/view &>/dev/null
+endif
+set viewdir=$VIMHOME/.vimrec/views//
+
+set viminfo=<100,%,'10,/10,:50,f1,h
+set viminfofile=$VIMHOME/.vimrec/viminfo
+
 " yes, folding is good
-"set foldcolumn=4
-"set foldmethod=marker
-"set foldmarker=AzA,ZaZ
+set foldcolumn=4
+set foldmethod=manual
+autocmd BufWinLeave *.* mkview
+autocmd BufWinEnter *.* silent loadview
 
 "abbreviations and mappings
 :source $VIMDIR/vimrc-abbr
