@@ -114,35 +114,37 @@ function ruler () {
         echo "${str:0:COLS}"
     done
 }
-#split# extra.rc/stk 6f055577a09950cab38dd762d658fd40
+#split# extra.rc/stk 86886f51da4e335ad82a7adab6db1051
 #help: stk : dir stack operations to save, load and clear the dirstack
 #help: usage : stk [save|load] filename
 #help: : stk clear (n ...)
 function stk () {
-    declare n line cmd=$1
-    shift
-    case $cmd in
-        save)
-            : ${1:?missing input filename}
-            dirs -p > $1
+    declare x opt OPTIND OPTARG
+    getopts ':s:l:c' opt
+    case $opt in
+        s)
+            dirs -p > $OPTARG
             return
             ;;
-        clear)
-            if [[ $# -gt 1 ]]; then
-                for n in $(echo ${@:2} | xargs -n 1 | sort -rn); do
-                    popd +$n
+        l)
+            for x in $(tac $OPTARG); do
+                [[ -s $x ]] || continue
+                push -n "$x" &>/dev/null
+            done
+            ;;
+        c)
+            if (( $# > 0 )); then
+                for x in $(printf "%s\x" ${@//,/ } | sort -rn); do
+                    popd +$x &>/dev/null
                 done
             else
-                pushd ~
+                pushd ~ &>/dev/null
                 dirs -c
             fi
             ;;
-        load)
-            : ${1:?missing input filename}
-            for line in $(tac $1); do
-                [[ -d $line ]] || continue
-                push -n "$line"
-            done
+        ?)
+            echo command line option/arg error
+            return
             ;;
     esac
     dirs -l -v
