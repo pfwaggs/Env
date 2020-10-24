@@ -200,19 +200,20 @@ function hmo () {
         fi
     done
 }
-#split# prime.rc/load 7ff9e59763a64b478cd5e5b0f6d38bb3
+#split# prime.rc/load b3cdaf7519ab14246d4736c417caa618
 #help: load : loads MAINDIR rc files
 #help: usage : load function|name.rc [...]
 function load () {
     [[ $1 = -h ]] && { hmo ${FUNCNAME[0]}; return; }
-    [[ $1 = -d ]] && { source $(find ~/Git/Env/main -type f -name $2); return; }
+    declare BASE
+    [[ $1 = -d ]] && { BASE=~/Git/Env/main; shift; } || BASE=$MAINDIR
     declare x y
-    for x in $@; do
-        y=$MAINDIR/$x
+    for x in ${@:-prime.rc}; do
+        y=$BASE/$x
         [[ -s $y ]] && { echo loading $y; source $y; continue; }
-        y=$MAINDIR/$x.rc
+        y=$BASE/$x.rc
         [[ -s $y ]] && { echo loading $y; source $y; continue; }
-        y=$(grep -l -w "^function $x " $MAINDIR/*.rc $MAINDIR/$x 2>/dev/null | sed -n '$p')
+        y=$(grep -l -w "^function $x " $(find $BASE -type f) | sed -n '$p')
         [[ -n $y ]] || { echo skipping $x; continue; }
         echo loading $x from $y
         sed -nr "/^#help: $x :/{:1;p;n;/^#split#/q;b1}" $y > /tmp/$x
