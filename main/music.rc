@@ -1,90 +1,61 @@
-#split# music.rc/cdsizer a1f2cf99433afb03a349ef636bdfb17e
-#help: cdsizer : shows the size of a possible cd
-#help: usage : cdsizer file
-function cdsizer () { 
-    awk -F: '{sum+=$1}END{print NR":"sum}' $1
-}
-#split# music.rc/m3ucsv 7b42deedafaa25319b1a3af699de9875
-#help: m3ucsv : converts a m3u file to a csv format
-#help: usage : m3ucsv file
-#help: : n.b. this takes a file and writes output to stdout
-#help: : also, note that it will create a temporary file if the 
-#help: : input file is dos (crlf) format. the temporary files is
-#help: : removed at the end.
-function m3ucsv () {
-    declare secs size dir
-    echo 'Time|Size|Path'
+#split# music.rc/cdrndm 4367014c95126ec93f2967a50b97b5bf
+#help: cdrndm : randomize a preburn cd track list
+#help: usage : cdrndm preburn
+function cdrndm () {
+    rm random &>/dev/null
     while read; do
-        [[ $REPLY = '#EXTM3U' ]] && continue
-        if [[ $REPLY =~ '#EXTINF' ]]; then
-            secs=${REPLY#*:}
-            secs=${secs%%,*}
-            continue
-        fi
-        size=$(stat --printf='%s' "$REPLY")
-        echo "$secs|$size|$REPLY"
-    done < $1
+        echo ${RANDOM}:${REPLY}
+    done < "$1" | tee | sort -k1,1n -t: | cut -f2- -d: > random
 }
-#split# music.rc/m3uredo 58452190e7fadddb161bf44fe885bb53
-#help: m3uredo : redo the cds for given inputs
-#help: usage : m3uredo d#### [d#### ...]
-function m3uredo () {
-    declare x path disk type track
-    for x in $*; do
-        while read; do
-            IFS=$';'
-            read disk track path < <(echo "$REPLY")
-            IFS=$' \t\n'
-            type=${REPLY##*.}
-            [[ -d $disk ]] || mkdir $disk
-            cp -H "$path" $disk/$disk$track.$type
-        done < <(grep $x pairs.csv);
-    done
-}
-#split# music.rc/m3urndm 169c6ca8343046b7cde10c7fc3fbb5e6
-#help: m3urndm : randomizes an m3u file
-#help: usage : m3urndm 
-#help: : this requires you to have already split the m3u into a dir
-#help: : and run the script from inside that dir
-function m3urndm () {
-    declare x y dest=tmp
-    [[ -d $dest ]] && { echo $dest exists; return 1; } || mkdir $dest
-    ln xx000 $dest
-    for x in $(ls -I[^xX]* -Ixx000); do
-        echo $RANDOM $x
-    done | sort -n |
-        awk -v d=$dest '{print d"/"$2}' | paste <(ls -I[^xX]* -Ixx000) - | xargs -L 1 ln 
-    cat $dest/* > rndm.m3u
-    rm -r $dest
-}
-#split# music.rc/m3usplitter 0c5a9920f8a7177817181c2e48565bb6
-#help: m3usplitter : splits an m3u file into pieces to burn to cd
-#help: usage : m3usplitter file.m3u
-function m3usplitter () {
-    sum=0
-    max=$((700*10**6))
-    sed -n '/#/!p' $1 |
-    while read; do
-        s=$(stat -L -c "%s" "$REPLY")
-        ((sum+=$s))
-        [[ $sum -lt $max ]] || { echo ''; sum=$s; }
-        echo "$REPLY"
-    done | csplit - /^$/ {*}
-}
-#split# music.rc/matcher 3ea06481f9cfd580f685b450d6e80677
-#help: matcher : finds matching titles
-#help: usage : matcher file
+#split# music.rc/dedupe 2c68bc913ba2d37ee18b1f08be7285dd
+#help: mp3dedupe : takes a list of mp3 files and creates a uniq list of titles
+#help: usage : mp3dedupe file
 #help: :
-function matcher () {
-    declare name n str master text
-    declare -a files
-    rm /tmp/*.titles
-    grep '^/home/' $1 | sed -nr 's|(.*/[0-9]+ - )(.*)|\2|;s/.mp3$//p' |
-        sort | uniq -c |
-        while read n text; do
-            [[ -n ${files[$n]} ]] || printf -v files[$n] "/tmp/%02d.titles" $n
-            echo $text >> ${files[$n]}
-        done
+function mp3dedupe () {
+    declare path size time keep str max count input=$1 trackdb=${1/m3u/csv}
+    declare -a list
+    [[ -s $trackdb ]] || mkdb $input
+    rm singles dupes preburn &>/dev/null
+    # n.b. trackdb uses | for fields but awk is using / as the delimiter so
+    # the last field for awk is the track name
+    awk -F/ '{print $NF}' $trackdb | cut -c6- | sed 's/.mp3$//' |
+    sed -r 's/\(.*\)//g;s/\(.*//;s/ +$//' | sort | uniq -c | sort -k1,1n |
+    while read n pattern; do
+        (( $n == 1 )) && echo "$pattern" >> singles || echo "$pattern" >> dupes
+    done
+    echo grepping singles to preburn
+    grep -F -f singles $trackdb > preburn
+    echo cleaning dupes
+    str=$(wc -l dupes)
+    max=${str%% *}
+    count=0
+    exec 5< <(cat dupes)
+    while read -u 5 str; do
+        clear
+        printf "%3d items to dedupe\n" $((max-count++))
+        list=()
+        while read; do
+            list+=("$REPLY")
+        done < <(grep "$str" $trackdb)
+        select str in "${list[@]}"; do break; done
+        echo "$str" >> preburn
+    done
+    exec 5<&-
+}
+#split# music.rc/mkdb c3ec83e08f64aaae98eb0b193ac3de0d
+#help: mkdb : builds the csv db from m3u list
+#help: usage : mkdb m3ufile
+function mkdb () {
+    declare input=$1 trackdb=${1/m3u/csv} count=$(grep -v '^#' "$1" | wc -l)
+    echo patience! exiftool takes time...
+    sed -n '/^#/!p' $input |
+        while read path; do
+            size=$(stat -c %s "$path")
+            printf "\r%4d" $((count--)) >&2
+            time=$(exiftool -Duration "$path" | grep -o -E '[0-9][0-9:]+')
+            echo "$size|$time|$path"
+        done > $trackdb 
+    echo ''
 }
 #split# music.rc/mlinker 9e289ff726054928c89f87bb2cdd815f
 #help: mlinker : mlinker creates the links for music dirs
@@ -100,25 +71,12 @@ function mlinker () {
         ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
     done < <(cat $3)
 }
-#split# music.rc/mp3dedupe b3ac84d768cf14776b7213926e74eef4
-#help: mp3dedupe : takes a list of mp3 files and creates a uniq list of titles
-#help: usage : mp3dedupe file
-#help: :
-function mp3dedupe () {
-    declare x old input=$1
-    rm /tmp/??.titles
-    awk -F/ '{print $NF}' $input | cut -c6- | sort | uniq -c |
-        while read n title; do
-            printf -v dest "/tmp/%02d.titles" $n
-            echo "$title" >> $dest
-        done
-    rm /tmp/masterMP3.txt &>/dev/null
-    for x in /tmp/*.titles; do
-        echo cleaning $x >&2
-        while read; do
-            grep -m 1 -F "$REPLY" $input
-        done < $x >> /tmp/masterMP3.txt
-    done
+#split# music.rc/mp3x ddcc6532aabd1bd71afe98ce2cf128f2
+#help: mp3x : extract just the mp3 lines
+#help: usage : mp3x file
+#help: : n.b. writes to stdout
+function mp3x () {
+    cat "${1:--}" | sed '/^#/d'
 }
 #split# music.rc/repath 5894271c532d1005466a54be932f5136
 #help: repath : repath rewrites the path in m3u files to be absolute
@@ -134,6 +92,22 @@ function repath () {
         title=${REPLY##*/}
         echo "$dir/$title"
     done < $input > $output
+}
+#split# music.rc/splitter 55bc28b4aeddf693d6eea5c1b1829948
+#help: splitter : splits a csv file into pieces to burn to cd
+#help: usage : splitter file
+function splitter () {
+    declare sum max size time path
+    sum=0
+    max=$((700*10**6))
+    exec 5< <(sed 's/|/ /g' "$1")
+    while read -u 5 size time path; do
+        ((sum+=$size))
+        (( $sum < $max )) || { echo ''; sum=$size; }
+        echo "$path"
+    done | csplit - /^$/ {*}
+    exec 5<&-
+    sed -i '/^$/d' xx*
 }
 #split# music.rc/trknamer 67c0b87fc681e693cf3558b70274c85d
 #help: trknamer : used to name the tracks in a simple fashion
