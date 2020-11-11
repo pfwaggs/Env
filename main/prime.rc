@@ -200,7 +200,7 @@ function hmo () {
         fi
     done
 }
-#split# prime.rc/load b3cdaf7519ab14246d4736c417caa618
+#split# prime.rc/load 1fadd8ef998b88dfdccbf66eed419ad1
 #help: load : loads MAINDIR rc files
 #help: usage : load function|name.rc [...]
 function load () {
@@ -213,7 +213,7 @@ function load () {
         [[ -s $y ]] && { echo loading $y; source $y; continue; }
         y=$BASE/$x.rc
         [[ -s $y ]] && { echo loading $y; source $y; continue; }
-        y=$(grep -l -w "^function $x " $(find $BASE -type f) | sed -n '$p')
+        y=$(grep -l -w "^function $x " $(find $BASE -type f) | sed 1q)
         [[ -n $y ]] || { echo skipping $x; continue; }
         echo loading $x from $y
         sed -nr "/^#help: $x :/{:1;p;n;/^#split#/q;b1}" $y > /tmp/$x
