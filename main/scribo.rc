@@ -1,0 +1,54 @@
+#split# scribo.rc/csvheaders 960e940e265072a7ec57f452ad96edaf
+#help: csvheaders : show the header line from a csv file
+#help: usage : csvheaders file
+function csvheaders () {
+    csvstat -d\; -n $1
+}
+#split# scribo.rc/csvhelp b0b8db4ebdfe0df370eba82e89b6edc2
+#help: csvhelp :
+#help: usage :
+#help: :
+function csvhelp () {
+    csv$1 -h | less
+}
+#split# scribo.rc/fink c08ae9f0224c311825dc7bd04595ebf5
+#help: fink :
+#help: usage :
+#help: :
+function fink () {
+    declare file=$1
+    shift
+    declare x col val letter rest reg pipes
+    for x in "$@"; do
+        [[ $x =~ = ]] || continue
+        read col val < <(echo ${x/=/ })
+        letter=${val:0:1}
+        rest=${val/$letter}
+        reg="[${letter^}|$letter]$rest"
+        pipes+="csvgrep -c ${col^} -r '$reg' | "
+    done
+    eval "csvformat -d\; $file | ${pipes:0:(-2)}" | csvlook
+}
+#split# scribo.rc/grepfield 9b04dfac2151199a24a1572114f8d9a3
+#help: grepfield : used to grep a single field from csv file
+#help: usage : grepfield field=str [field=str ...] file
+#help: :
+function grepfield () {
+    declare srch x key val file
+    for x; do
+        [[ $x =~ = ]] || { file=$x; continue; }
+        read key val < <(echo ${x/=/ })
+        if [[ $val =~ / ]]; then
+            srch+="csvgrep -c $key -m '$val' | "
+        else
+            srch+="csvgrep -c $key -r '${val//\/}' | "
+        fi
+    done
+    eval "csvformat -d\; $file | ${srch:0:(-2)}" | csvlook
+}
+#split# scribo.rc/whohas 2ab6440ae047c3cd4a0ab3248511a33d
+#help: whohas : locate vendors for a given ink
+#help: usage : whohas brand
+function whohas () {
+    grep -l -i $1 ${MAINDIR%/*}/support/inkProviders/*; }
+}

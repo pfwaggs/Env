@@ -7,5 +7,6 @@ use v5.22;
 use Data::Printer;
 use Path::Tiny;
 use YAML::Tiny qw(LoadFile DumpFile);
+use JSON::PP;
 
 1;

@@ -1,13 +1,108 @@
-#split# music.rc/cdrndm 4367014c95126ec93f2967a50b97b5bf
+#split# music.rc/burnprep dc398bada713e7e99ae99e14be9abe86
+#help: burnprep : randomize a preburn cd track list
+#help: usage : burnprep -s # preburn
+function burnprep () {
+
+    declare x dset file size time path prefix input
+    declare max=$((700*10**6)) trk=0 disk=0 sum=0
+    declare opt OPTIND OPTARG
+    while getopts ':s:p:' opt; do
+        case $opt in
+            s)
+                dset=$OPTARG
+                ;;
+            *)
+                echo illegal option or missing opt value
+                return 1
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+    printf -v prefix "disk%02d" ${dset:?set has no dset value}
+
+    if [[ ! -f $prefix ]]; then
+        input=${1:?no input file given}
+        while read; do
+            echo "${RANDOM}:${REPLY}"
+        done < $input | tee | sort -k1,1n -t: | cut -f2- -d: > $prefix
+    fi
+    ls $prefix?? 2>/dev/null
+    if (( $? != 0 )); then
+        printf -v file '%s%02d' $prefix $((disk+=1))
+        echo $file
+        while read size time path; do
+            ((sum+=$size))
+            if (( $sum > $max )); then
+                trk=0
+                sum=$size
+                printf -v file '%s%02d' $prefix $((disk+=1))
+                echo $file
+            fi
+            printf "trk%02d.%s %s\n" $((trk+=1)) ${path##*.} "$path" >> $file
+        done < <(sed 's/|/ /g' $prefix)
+    fi
+
+    for x in $prefix??; do
+        echo $x.d
+        mkdir $x.d 2>/dev/null || continue
+        while read track path; do
+            cp "$path" $x.d/t${x/disk}${track/trk}
+        done < $x
+    done
+}
+#split# music.rc/cdrndm b1c9aabe755da4f400f82b1309ae2aa6
 #help: cdrndm : randomize a preburn cd track list
 #help: usage : cdrndm preburn
 function cdrndm () {
     rm random &>/dev/null
     while read; do
-        echo ${RANDOM}:${REPLY}
+        echo "${RANDOM}:${REPLY}"
     done < "$1" | tee | sort -k1,1n -t: | cut -f2- -d: > random
 }
-#split# music.rc/dedupe 2c68bc913ba2d37ee18b1f08be7285dd
+#split# music.rc/mkburn 580c6a19e476e65aec33590c03d96497
+#help: mkburn : create the burnable cds dirs
+#help: usage : mkburn file (...)
+#help: :
+function mkburn () {
+    declare x
+    for x; do
+        mkdir $x.d || { echo $x.d exists; return 1; }
+        echo $x
+        while read track path; do
+            cp "$path" $x.d/t${x/disk}${track/trk}
+        done < $x
+    done
+}
+#split# music.rc/mkdb c3ec83e08f64aaae98eb0b193ac3de0d
+#help: mkdb : builds the csv db from m3u list
+#help: usage : mkdb m3ufile
+function mkdb () {
+    declare input=$1 trackdb=${1/m3u/csv} count=$(grep -v '^#' "$1" | wc -l)
+    echo patience! exiftool takes time...
+    sed -n '/^#/!p' $input |
+        while read path; do
+            size=$(stat -c %s "$path")
+            printf "\r%4d" $((count--)) >&2
+            time=$(exiftool -Duration "$path" | grep -o -E '[0-9][0-9:]+')
+            echo "$size|$time|$path"
+        done > $trackdb 
+    echo ''
+}
+#split# music.rc/mlinker 9e289ff726054928c89f87bb2cdd815f
+#help: mlinker : mlinker creates the links for music dirs
+#help: usage : mlinker (mp3|flac) localParent file
+#help: : file needs to be the base paths you want mounted. the mount point is
+#help: : given on the command line
+function mlinker () {
+    declare orig remote=${1/#\/} local=${2/%\/}
+    while read; do
+        echo $REPLY
+        need=$(echo $REPLY | cut -f2 -d/)
+        [[ -d $local/$need ]] || mkdir "$local/$need"
+        ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
+    done < <(cat $3)
+}
+#split# music.rc/mp3dedupe 2c68bc913ba2d37ee18b1f08be7285dd
 #help: mp3dedupe : takes a list of mp3 files and creates a uniq list of titles
 #help: usage : mp3dedupe file
 #help: :
@@ -42,35 +137,6 @@ function mp3dedupe () {
     done
     exec 5<&-
 }
-#split# music.rc/mkdb c3ec83e08f64aaae98eb0b193ac3de0d
-#help: mkdb : builds the csv db from m3u list
-#help: usage : mkdb m3ufile
-function mkdb () {
-    declare input=$1 trackdb=${1/m3u/csv} count=$(grep -v '^#' "$1" | wc -l)
-    echo patience! exiftool takes time...
-    sed -n '/^#/!p' $input |
-        while read path; do
-            size=$(stat -c %s "$path")
-            printf "\r%4d" $((count--)) >&2
-            time=$(exiftool -Duration "$path" | grep -o -E '[0-9][0-9:]+')
-            echo "$size|$time|$path"
-        done > $trackdb 
-    echo ''
-}
-#split# music.rc/mlinker 9e289ff726054928c89f87bb2cdd815f
-#help: mlinker : mlinker creates the links for music dirs
-#help: usage : mlinker (mp3|flac) localParent file
-#help: : file needs to be the base paths you want mounted. the mount point is
-#help: : given on the command line
-function mlinker () {
-    declare orig remote=${1/#\/} local=${2/%\/}
-    while read; do
-        echo $REPLY
-        need=$(echo $REPLY | cut -f2 -d/)
-        [[ -d $local/$need ]] || mkdir "$local/$need"
-        ln -s "/$remote/$REPLY" "$local/${REPLY#*/}"
-    done < <(cat $3)
-}
 #split# music.rc/mp3x ddcc6532aabd1bd71afe98ce2cf128f2
 #help: mp3x : extract just the mp3 lines
 #help: usage : mp3x file
@@ -93,21 +159,37 @@ function repath () {
         echo "$dir/$title"
     done < $input > $output
 }
-#split# music.rc/splitter 55bc28b4aeddf693d6eea5c1b1829948
+#split# music.rc/splitter 40775b38f0af56fbc6edda52f60781b0
 #help: splitter : splits a csv file into pieces to burn to cd
 #help: usage : splitter file
 function splitter () {
-    declare sum max size time path
-    sum=0
-    max=$((700*10**6))
-    exec 5< <(sed 's/|/ /g' "$1")
-    while read -u 5 size time path; do
+    declare dset file size time path
+    declare max=$((700*10**6)) trk=0 disk=0 sum=0
+    declare opt OPTIND OPTARG
+    while getopts ':s:' opt; do
+        case $opt in
+            s)
+                dset=$OPTARG
+                ;;
+            *)
+                echo illegal option or missing opt value
+                return 1
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+    : ${dset:?set has no dset value}
+    : ${1:?no input file given}
+    printf -v file 'disk%02d%02d' $dset $((disk+=1))
+    while read size time path; do
         ((sum+=$size))
-        (( $sum < $max )) || { echo ''; sum=$size; }
-        echo "$path"
-    done | csplit - /^$/ {*}
-    exec 5<&-
-    sed -i '/^$/d' xx*
+        if (( $sum > $max )); then
+            trk=0
+            sum=$size
+            printf -v file 'disk%02d%02d' $dset $((disk+=1))
+        fi
+        printf "trk%02d.%s %s\n" $((trk+=1)) ${path##*.} "$path" >> $file
+    done < <(sed 's/|/ /g' "$1")
 }
 #split# music.rc/trknamer 67c0b87fc681e693cf3558b70274c85d
 #help: trknamer : used to name the tracks in a simple fashion

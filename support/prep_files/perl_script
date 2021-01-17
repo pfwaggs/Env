@@ -4,7 +4,7 @@
 use warnings;
 use strict;
 use v5.22;
-use experimental qw(postderef signatures smartmatch);
+use experimental qw(postderef signatures);
 use Path::Tiny;
 use Data::Printer;
 
