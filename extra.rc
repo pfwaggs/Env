@@ -1,0 +1,271 @@
+#help: colorsamples : show sample text in specified colors of 256 values
+#help: usage : colorsamples num [num ...]
+function colorsamples () {
+    declare x
+    for x in $@; do
+        echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
+    done
+}
+#help: commas : commafy numeric fields in input stream
+#help: usage : <-> | commas
+function commas () {
+    rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
+}
+#help: ffix : useful to grab a function and edit it for testing
+#help: usage : ffix function (the edited file will be in /tmp)
+function ffix () {
+    declare x=/tmp/${1}2
+    type $1 | sed  "1d;s/${1}/${1}2/" > $x
+    vim $x
+    . $x
+}
+#help: inunits : convert a number to a SI value
+#help: usage : inunits number (base)
+#help: : n.b. the default base is 1000
+function inunits () { 
+    declare U=' KMGT' b=${2:-1000}
+    declare s=$(echo "scale=2; l($1)/l(10)" | bc -l)
+    s=${s%.*}
+    ((s=(s-s%3)/3))
+    declare x=$(echo "scale=3; $1/($b^$s)" | bc -l)
+    echo $x${U:s:1}
+}
+#help: julian : presents dates in julian format and converts back
+#help: usage : julian [date]
+#help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
+#help: : date defaults to today
+function julian () {
+    case ${1//[0-9]/x} in
+        '')
+            date +%Y.%j
+            ;;
+        xxxx-xx-xx)
+            date -u -d $1 +%Y.%j
+            ;;
+        xxxx.xxx)
+            declare y d
+            read y d < <(echo ${1/./ })
+            date -u -d "$y-01-01 $((d-1)) days" +%F
+            ;;
+        *)
+            echo 'unknown request'
+            ;;
+    esac
+}
+#help: killdir : moves you to the parent and removes the dir you were in
+#help: usage : killdir
+function killdir () {
+    [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
+    read -p "remove < $PWD > ? "
+    [[ $REPLY =~ ^[yY] ]] || return 0
+    pushd .. >/dev/null
+    echo deleting: ~1
+    rm -r ~1
+    popd +1 &>/dev/null
+    dirs -v
+}
+#help: mydd : convenience wrapper for dd/dcfldd
+#help: usage : mydd object <tab> [option ...]
+#help: : this lets you use tab complete for filename
+function mydd () {
+    declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
+    shift
+    case $DD in
+        dd)
+            $DD if="$if" "$@" style=progress
+            ;;
+        dcfldd)
+            $DD if="$if" "$@"
+            ;;
+    esac
+}
+#help: psfu : checks the process table for specified user
+#help: usage : psfu sid
+function psfu () {
+    ps -f -u ${1:-$(id -un)}
+}
+#help: ruler : draws ruler on screen
+#help: usage : ruler
+#help: :
+function ruler () {
+    declare base dots str x ROWS COLS
+    read ROWS COLS < <(stty size)
+    for x in 100 10 1; do
+        str=
+        base=
+        if (( $x > 1 )); then
+            dots=$(eval "echo .{1..$((x-1))}" | sed -n 's/ //gp' | tr -d '[0-9]')
+            base=$(echo -n 1234567890 | sed -n "s/./${dots}&/gp")
+            base=${base//\./ }
+        fi
+        while [[ ${#str} -lt $COLS ]]; do
+            str+=${base:-....,....0}
+        done
+        [[ $COLS -ge $x ]] || continue
+        echo "${str:0:COLS}"
+    done
+}
+#help: stk : dir stack operations to save, load and clear the dirstack
+#help: usage : stk [save|load] filename
+#help: : stk clear (n ...)
+function stk () {
+    declare x opt OPTIND OPTARG
+    getopts ':s:l:c' opt
+    case $opt in
+        s)
+            dirs -p > $OPTARG
+            return
+            ;;
+        l)
+            for x in $(tac $OPTARG); do
+                [[ -s $x ]] || continue
+                push -n "$x" &>/dev/null
+            done
+            ;;
+        c)
+            if (( $# > 0 )); then
+                for x in $(printf "%s\x" ${@//,/ } | sort -rn); do
+                    popd +$x &>/dev/null
+                done
+            else
+                pushd ~ &>/dev/null
+                dirs -c
+            fi
+            ;;
+        ?)
+            echo command line option/arg error
+            return
+            ;;
+    esac
+    dirs -l -v
+}
+#help: stkdiff : convenient differences between stack elements
+#help: usage : stkdiff (does diff -qr . ~1)
+#help: : stkdiff filename (does diff -y filename ~1/filename)
+#help: : stkdiff x y (does diff -qr ~x ~y)
+function stkdiff () {
+    [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
+    case $# in
+        2)
+            eval "diff -qr ~$1 ~$2"
+            ;;
+        1)
+            [[ -f $1 && -f ~1/$1 ]] && diff -y $1 ~1/$1
+            ;;
+        0)
+            diff -qr . ~1
+            ;;
+    esac
+    return
+}
+#help: tinfo : generates some metatdata for a path versions of given filename
+#help: usage : tinfo file
+function tinfo () {
+    declare x y
+    for x; do
+        for y in $(type -a -p $x); do   
+            ls -l $y
+            md5sum $y
+            echo -ne $'\n'
+            file -k $y
+            echo -e $'\n\n\n'
+        done
+    done
+}
+#help: tname : modifies titlename
+#help: usage : tname (str)
+function tname () {
+    printf "\033k%s\033\\" ${1:-bash}
+}
+#help: typer : used to examine files based on type
+#help: usage : typer file
+function typer () {
+    declare mtype x
+    for mtype in $(type -at $1); do
+        case $mtype in
+            function)
+                read name num loc < <(ffunc $1)
+                xmn a $loc
+                ;;
+            file)
+                for x in $(type -aP $1); do
+                    xmn t "$n"
+                done
+                ;;
+            alias)
+                alias $1
+                ;;
+            *)
+                continue;
+                ;;
+        esac
+    done
+}
+#help: wup : function to wake up machines on the network
+#help: usage : wup machine_name
+function wup () {
+    declare cmd=$(type -p etherwake wol)
+    declare ip=$(dig +search +short -t txt $1)
+    eval $cmd $ip
+}
+#help: xmn : used to produce a detailed listing
+#help:     : of source code with some extra stuff
+function xmn () {
+    declare opt infile tmp n arg file OPTIND=1 keep=0
+    declare -a opts flist
+    while getopts 'acf:KmMptw' arg; do
+        case $arg in
+            a)
+                opts+=(m c w)
+                ;;
+            [cKmMptw])
+                opts+=($arg)
+                ;;
+            f)
+                file=$OPTARG
+                ;;
+        esac
+    done
+    opts=($(FixList_ -u ${opts[@]}))
+    shift $((OPTIND-1))
+    [[ -n $file ]] && flist=($(cat $file | xargs)) || :
+    for infile in ${flist[@]} $@; do
+        echo -e "\n#### ${infile##*/}"
+        tmp=/tmp/${infile##*/}
+        expand $infile | sed -r 's/ +$//' > $tmp
+        for opt in ${opts[@]}; do
+            case $opt in
+                p)
+                    cat -n $tmp
+                    ;;
+                c)
+                    [[ -f $tmp ]] || continue
+                    while read -r n; do
+                        printf "%3d %s\n" ${#n} $(echo -E "$n" | sum | cut -c1-5)
+                    done < $tmp | paste -d ' ' - <(sed 's/^/^/;s/$/$/' $tmp) | cat -n
+                    ;;
+                w)
+                    [[ -f $tmp ]] || continue
+                    wc $tmp
+                    ;;
+                m)
+                    md5sum $infile
+                    ;;
+                M)
+                    [[ -f $tmp ]] || continue
+                    md5sum $tmp
+                    ;;
+                t)
+                    ls -l $infile
+                    file $infile
+                    stat $infile
+                    ;;
+                K)
+                    ((keep=1-keep))
+                    ;;
+            esac
+        done
+        ((keep)) || rm $tmp >/dev/null
+        echo ''
+    done
+}

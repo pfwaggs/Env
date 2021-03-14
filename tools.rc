@@ -1,0 +1,115 @@
+function check () {
+#help: check : used to check a function for changes from the lib and the src dir
+#help: usage : check [-hd] func [fund ...]
+#help: opts :
+#help: : -h help
+#help: : -d show the full diff between the functions
+#help: note : the file should containe one function definition. this function
+#help: : will be checked against the library version.
+    [[ ${@:(-1)} =~ -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
+    declare funcs=$(echo $@ | tr ' ' '\n' | sed -r '/^-/d' | xargs)
+    declare rcs=$(ls *.rc &>/dev/null && echo 1 || echo 0)
+    declare lib file tlib tfile
+    declare func
+    for func in $funcs; do
+	if [[ $rcs = 1 ]]; then
+	    lib=$(grep -l -E "$func \(\) " *.rc)
+	    file=$(grep -l -E "$func \(\) " ${lib%.rc}/*)
+	else
+	    lib=$(grep -l -E "$func \(\) " ../*.rc)
+	    file=$(grep -l -E "$func \(\) " *)
+	fi
+	sed -r "/$func \(\) /{:1;n;/^}$/!b1;n};d" $file | expand > /tmp/$func.file
+	sed -r "/$func \(\) /{:1;n;/^}$/!b1;n};d" $lib  | expand > /tmp/$func.lib
+	if [[ $opts =~ -d ]]; then
+	    diff /tmp/$func.{lib,file}
+	else
+	read tlib tfile < <(md5sum /tmp/$func.* | cut -c1-32 | xargs)
+	    [[ $tlib = $tfile ]] || echo $func
+	fi
+	rm /tmp/$func.{lib,file}
+    done
+}
+function cksumit () {
+#help: cksumit : provides a line checksum for given files.
+#help: usage : cksumit file [file ...]
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    for x in $@; do
+        echo ${x#$PRUNE/}
+        while read -r; do
+            ck=$(echo $REPLY | tr -d '[[:space:]]' | sum)
+            echo ${ck%% *} "$REPLY"
+        done < $x
+        echo ''
+    done
+}
+function envage () {
+#help: envage : how old is the config?
+#help: usage : envage
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+#    [[ $MAINDIR =~ main ]] && { echo this is a dev branch; return; }
+    declare diff past today=$(date +%F)
+#    declare past=$(echo -n $MAINDIR | awk -F/ '{print $5}' | cut -f1 -d.)
+    declare env=$(date -d ${1//_/-} +%s)
+    declare git=$(git -C ~/Git/Env log -1 --date=format:%s | grep Date: | cut -f2 -d:)
+    declare days=$(((git-env)/86400))
+    ((days < 7)) || { echo you need to upgrade; return; }
+}
+function libjoin () {
+#help: libjoin : takes a dir of functions and makes a function file
+#help: usage : libjoin dir
+#help: : dir is the directory you want to turn into a dir.rc file
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
+    declare dir=$(echo $@ | tr ' ' '\n' | sed -r '/^-/d;1!d')
+    [[ -d $dir ]] || { echo  $dir does not exist; return; }
+    declare savefile=$dir.rc.save outfile=$dir.rc
+    [[ -f $savefile ]] && { echo will not overwrite $savefile; return; } 
+    mv $outfile $savefile
+    cat $dir/* > $outfile
+    [[ $opts =~ -k ]] || rm -r $dir
+}
+function liblist () {
+#help: liblist : list the library contents for bash and perl libraries
+#help: usage : liblist library
+    declare pat suffix=${1#*.}
+    [[ $suffix = rc ]] && pat='^function '
+    [[ $suffix = pm ]] && pat='^sub '
+    awk "/$pat/"'{print $2}' $1
+}
+function libsplit () {
+#help: libsplit : splits a file of functions into a dir of separate functions
+#help: usage : libsplit file
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    ls AA* &>/dev/null && { echo AA files exist; return; }
+    declare new file dir
+    for file in $@; do
+	[[ $file =~ .rc$ ]] || { echo skipping $file; continue; }
+	[[ -f $file ]] || { echo $file is missing; continue; }
+	dir=${file%.rc}
+	[[ -d $dir ]] && { echo skipping $file because $dir exists; continue; }
+	mkdir $dir &>/dev/null || { echo mkdir $dir failed; continue; }
+	echo -n splitting $file ... >&2
+	csplit -s -z --prefix=AA $file /^function\ / {*}
+	for split in AA*; do
+	    new=$(awk '/^function/ {print $2}' $split)
+	    mv $split $dir/${new:-$split}
+	done
+	echo done >&2
+    done
+}
+function xtfn () {
+#help: xtfn : function to extract a function from an rc file
+#help: usage : xtfn function [lib]
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
+    declare func lib
+    read func lib < <(echo $@ | tr ' ' '\n' | sed -r '/^-/d' | xargs) 
+    declare x leadin
+    declare found=$(grep -l -E "^(function )?$func " ${lib:-$ENVBASH/*.rc} 2>/dev/null)
+    for x in $found; do
+        echo $func found in $x ... >&2
+	sed -r "/^(function )?$func /{:1;n;/^}$/!b1;n};d" $x
+    done
+}

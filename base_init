@@ -1,0 +1,64 @@
+
+declare -x  HISTFILE=~/.history
+
+host=${HOSTNAME%%.*}
+host2=$(echo $host | perl -nlE 'print s/(\d+)$/ $1/r')
+
+export LOCAL=/usr/local
+export PRINTER=tombstone #lpadmin -p tombstone -E -v socket://tombstone.wanted.net
+export Prompt=${ENVFILES%%:*}
+
+export LANG=en_US.UTF-8
+export TZ=America/New_York
+export LC_COLLATE=C
+export CDPATH=".:..:../..:~:~/Git"
+
+export GS_FONTPATH=~/.fonts
+
+export INPUTRC=~/.inputrc
+
+export ALTERNATIVE_EDITOR=$(type -p emacs | head -n 1)
+export VIMHOME=~
+export VIMDIR=$VIMHOME/.vim
+export VIMINIT=":source $VIMDIR/vimrc"
+
+
+#check usual places for actual directories and not symlinks
+for x in {/usr{/local,},}/{sbin,bin} /usr/games; do
+    [[ -L $x ]] && continue
+    [[ -d $x ]] || continue
+    [[ -n $(ls -A $x) ]] || continue
+    npath+=$x:
+done
+PATH=${npath%:}
+unset npath
+
+export FIGNORE='~'
+
+# had to move these here because of path and function issues.
+export PAGER=$(type -p less more | head -n 1)
+[[ $PAGER =~ less ]] && export LESS='-RCMqs~' || :
+[[ -v LESS ]] && export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
+
+declare -A ColorNum_ PromptColor_
+declare -A PromptCfg_=([num]=$'\!' [user]=$'\u' [host]=$'\h' [prompt]=$'\$' [spath]=$'\W' [lpath]=$'\w')
+declare -A PromptShow_=([num]=0 [spath]=0 [lpath]=0 [tag]=0 [extra]=0 [user]=0 [host]=1 [prompt]=1)
+
+ColorNum_[black]=30
+ColorNum_[red]=31
+ColorNum_[green]=32
+ColorNum_[yellow]=33
+ColorNum_[blue]=34
+ColorNum_[magenta]=35
+ColorNum_[cyan]=36
+ColorNum_[white]=37
+
+PromptColor_[num]=white
+PromptColor_[user]=blue
+PromptColor_[spath]=green
+PromptColor_[lpath]=green
+PromptColor_[extra]=red
+PromptColor_[tag]=magenta
+PromptColor_[prompt]=green
+PromptColor_[host]=$([[ $UID -eq 0 ]] && echo red || echo cyan)
+

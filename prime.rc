@@ -1,0 +1,396 @@
+# alias definitions
+alias ..='cd ..'
+alias ...='cd ../..'
+alias c='clear'
+alias ?='dirs -l -v'
+alias edit='$EDITOR'
+alias e='emacsclient -nw '
+alias h='history'
+alias l='ls -F'
+alias ll='l -l'
+alias lr='ll -R'
+alias now='date +%F; date -u; date +"%a %h %d %T"; date +%s'
+alias p='$PAGER'
+alias ic='tr [:lower:][:upper:] [:upper:][:lower:] <<< '
+alias brewon='source ~/perl5/perlbrew/etc/bashrc'
+alias dateme='ntpdate 0.pool.ntp.org'
+alias pacman='sudo /usr/bin/pacman'
+alias pmnew='sudo /usr/bin/pacman -Sy; sudo /usr/bin/pacman -Qu'
+alias pmup='sudo /usr/bin/pacman -Su'
+alias su='sudo /bin/su -'
+alias Cat='clear; cat '
+alias gitbr='b=play-$(date +%Y.%j); git branch $b; git checkout $b'
+alias sshFingerPrint='ssh-keygen -E md5 -lf ~/.ssh/id_rsa'
+alias xme='ssh-agent startxfce4'
+alias addkeys='ssh-add ~/.ssh/{github,id}_rsa'
+alias vimh='vim +:help +:only'
+function L () {
+#help: L : provides ls support for hidden (dot) files
+#help: usage : L [options] [dir]
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare -a args
+    declare opts=lAd
+    for x in $*; do
+        case $x in
+            -?)
+                opts+=${x/-}
+                ;;
+            *)
+                args+=("$x")
+                ;;
+        esac
+    done
+    [[ ${#args[@]} -gt 0 ]] || args+=(.)
+    for x in "${args[@]}"; do
+        ls -$opts "$x"/.??* 2> /dev/null
+    done
+}
+_argParser () {
+#help: _argParser : assists in parsing command line args
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare path file partial dir;
+    declare -a list;
+    [[ -n COMP_LINE ]] && x=$2 || x=$1;
+    partial=${x/\~/$HOME};
+    file=${partial##*/};
+    for dir in "${partial%/*}" "${DIRSTACK[@]}" ${CDPATH//:/ };
+    do
+        [[ ${#list[@]} -eq 0 ]] || break;
+        while read -r path; do
+            [[ -d $path ]] && list+=("$path");
+        done < <(compgen -G "${dir:-.}/$file*" | sort);
+    done;
+    [[ ${#list[@]} -gt 0 ]] && printf "%s\n" "${list[@]}" | ulist
+}
+
+complete -o filenames -C '_argParser' cd
+complete -o filenames -C '_argParser' stkdiff
+_fixList () {
+#help: _fixList : some basic list operations:
+#help: : -s sort
+#help: : -e exists
+#help: : -r reverse
+#help: : -l resolve links
+#help: : -c clear items
+#help: : -u unique items
+#help: : -S output a single string
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare p opt
+    declare -a nlist list opts
+    for p in "$@"; do
+        [[ $p =~ ^-.* ]] && opts+=($p) || list+=("$p")
+    done
+    if [[ ${#list[@]} -eq 0 ]]; then
+        while read p; do
+            list+=("$p")
+        done < <(cat -- -)
+    fi
+    for opt in ${opts[@]}; do
+        nlist=()
+        case $opt in
+            -s)
+                while read -r p; do
+                    nlist+=("$p")
+                done < <(printf '%s\n' "${list[@]}" | sort)
+                ;;
+            -e)
+                for p in "${list[@]}"; do
+                    [[ -e "$p" ]] && nlist+=("$p") || continue
+                done
+                ;;
+            -r)
+                while read -r p; do
+                    nlist+=("$p")
+                done < <(printf '%s\n' "${list[@]}" | tac)
+                ;;
+            -l)
+                for p in "${list[@]}"; do
+                    [[ -L "$p" ]] && p=$(readlink -e "$p") || :
+                    nlist+=("$p")
+                done
+                ;;
+            -c)
+                for p in "${list[@]:1}"; do
+                    [[ $p =~ ${list[0]}.* ]] || nlist+=("$p")
+                done
+                ;;
+            -u)
+                for p in "${list[@]}"; do
+                    [[ ${nlist[@]} =~ :$p ]] || nlist+=(":$p")
+                done
+                nlist=("${nlist[@]/#:}")
+                ;;
+            -S|*)
+                declare IFS=${SEP:-:}$IFS
+                echo "${list[*]}"
+                return
+                ;;
+        esac
+        list=("${nlist[@]}")
+    done
+    printf '%s\n' "${list[@]}"
+}
+function configEd () {
+#help: configEd : configure the editor of your choice (emacs, vim)
+#help: usage : configEd [emacs|vim]
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    case $1 in
+        emacs)
+            ps -f -C emacs | grep -q daemon || emacs --daemon
+            export EDITOR=$(type -p emacsclient | head -n 1)
+            export VISUAL=$EDITOR
+            set -o emacs
+            ;;
+        vim)
+            export EDITOR=$(type -p vim vi | head -n 1)
+            export VISUAL=$EDITOR
+            set -o vi
+            ;;
+    esac
+}
+function hmo () {
+#help: hmo : help for functions
+#help: usage : hmo [-hqa]
+#help: usage : hmo [function|lib] ...
+#help: : -h display help
+#help: : -q show function libs
+#help: : -a display all func/libs
+    declare -a libs=($ENVDIR/*.rc) funcs=$(compgen -A function | grep -v '_' | xargs)
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare opts=$(echo $@ | tr ' ' '\n' | sed '/^-/!d' | xargs)
+    declare arg=$(echo $@ | tr ' ' '\n' | sed '/^-/d'  | sed 1q)
+    [[ $opts = -q ]] && { printf "%s\n" ${list[@]##*/}; return; }
+    [[ $opts = -a ]] && { _libHelp ${list[@]##*/}; return; }
+    [[ ${libs[@]} =~ $arg ]] && _libHelp $arg || _funcHelp $arg
+}
+_libHelp () {
+    declare  inlib x loaded=$(compgen -A function | grep -v _ | xargs)
+    for x in ${@:-prime.rc}; do
+	[[ -f $x ]] || { echo $x not found; continue; }
+	x=$ENVDIR/${x##*/}
+	echo ${x##*/}
+	[[ -f $x ]] || { echo $x not found; continue; }
+	inlib=$(awk '/^function /{print $2}' $x | grep -v _ | xargs)
+	sed -r "/^#help: (${inlib// /|}) /!d" $x |
+	    while read line; do
+		[[ $line =~ ': '(${loaded// /|})' :' ]] && r=' x ' || r='xxx'
+		echo ${line/\#help/:$r}
+	    done | sort -k3,3 -t:
+    done | sed 's/xxx/   /' | column -s: -t | sed -r 's/^/    /'
+}
+_funcHelp () {
+    declare FNC=$1 FNCSRC=${2:-$(grep -l $1 $ENVDIR/*.rc)}
+    sed -r "/^function $FNC /"'{:1;n;/^}$/!b1;n};d' $FNCSRC | grep -E '^#help:' |
+    cut -f2- -d: | column -n -s: -t | sed -r 's/^/    /'
+}
+function load () {
+#help: load : loads ENVDIR rc files
+#help: usage : load function|name.rc [...]
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare x y
+    for x in ${@:-prime.rc}; do
+        y=$ENVDIR/$x
+        [[ -s $y ]] && { echo loading $y; source $y; continue; }
+        y=$ENVDIR/$x.rc
+        [[ -s $y ]] && { echo loading $y; source $y; continue; }
+        y=$(grep -l -w "^function $x " $(find $ENVDIR/*.rc -type f) | sed 1q)
+        [[ -n $y ]] || { echo skipping $x; continue; }
+        echo loading $x from $y
+        sed -nr "/^#help: $x :/{:1;p;n;/^#split#/q;b1}" $y > /tmp/$x
+        . /tmp/$x
+        rm /tmp/$x
+    done
+}
+function lsu () {
+#help: lsu : a long listing of dirs moving up the dir path
+#help: usage : lsu
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare -a np=(/ "${1:-$PWD}")
+    while [[ -n ${np[-1]%/*} ]]; do
+        np+=(${np[-1]%/*})
+    done
+    ls -ld "${np[@]}"
+}
+function mkwdir () {
+#help: mkwdir : creates a new arg.nn dir based on arg
+#help: usage : mkwdir (base)
+#help: : default arg is the date
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare count dir pat date=$(date +%F | tr '-' '_')
+    pat=${1:=$date}
+    count=$(ls -d $pat.?? 2>/dev/null | wc -l)
+    printf -v dir "%s.%02d" $pat $((1+count))
+    mkdir -v $dir
+}
+function pop () {
+#help: pop : simple wrapper for popd; pops given entry (default is current)
+#help: usage : pop [n]
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    popd ${1:++$1} > /dev/null
+    dirs -l -v
+}
+function prep () {
+#help: prep : used to give a boilerplate file for editing
+#help: usage : prep file.(sh||fn|pl|pm|py)
+#help: : based on extension;
+#help: : sh for shell scripts
+#help: : pl for perl scripts
+#help: : py for python scripts
+#help: : fn for bash functions
+#help: : pm for perl module
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare PREPDIR=$ENVDIR/support/prep_files
+    declare dest base file type
+    source ${PREPDIR}/map
+    for file in $@; do
+        read base type < <(echo ${file/./ })
+        [[ $type =~ fn ]] && dest=$base || dest=$file
+        [[ -s $dest ]] && echo $dest exists: skipping && continue
+        sed -e "s/zZz/$base/" $PREPDIR/${map[$type]} > $dest
+        [[ -s $dest ]] || { echo sed failed; continue; }
+        [[ $type =~ (sh|pl|py) ]] && chmod 755 $dest
+        echo prepped $dest as ${map[$type]/_/ }
+    done
+}
+function push () {
+#help: push : simple wrapper for pushd
+#help: usage : push (path)
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    if [[ -n $1 ]]; then
+        if [[ -d $1 ]]; then
+            pushd -n $1 &>/dev/null
+        else
+            read -p 'new dir: ' -e -i "$1"
+            [[ -n $REPLY ]] || return 0
+            mkdir -p "$REPLY"
+            pushd -n "$REPLY" &>/dev/null
+        fi
+    fi
+    pushd &>/dev/null
+    dirs -l -v
+}
+function setextra () {
+#help: setextra : shortcut to set extra for the prompt
+#help: usage : setextra [color=]'text'
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    stp extra=1="$*"
+}
+function  settag () {
+#help: settag : shortcut to set tag for the prompt
+#help: usage : settag [color=]'text'
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    stp tag=1="$*"
+}
+function show () {
+#help: show : used to show variable values
+#help: usage : show var
+#help: : type values in lowercase and <tab> will uppercase if needed
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare x=$(declare -p $1 | awk '{print $2}')
+    if [[ $x =~ [aA] ]]; then
+        echo array $1:
+        for x in $(eval "echo \${!$1[@]}"); do
+            eval "echo $x = \${$1[$x]}"
+        done
+    else
+        echo $1 = ${!1}
+    fi
+}
+_show () {
+#help: _show : complete function for the show function
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare x
+    [[ -n $COMP_LINE ]] && x=$2 || x=$1
+    compgen -v | grep -i "^$x"
+}
+complete -C '_show' show
+function spx () {
+#help: spx : simple function to do aspell
+#help: usage : spx word [word ...]
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    echo $@ | aspell -a
+}
+function stp () {
+#help: stp : utility to set prompt line characteristics
+#help: usage : stp [args...]
+#help: : args are: key[=0|1][=color][=text]
+#help: : keys are:
+#help: : num : history number at beginning
+#help: : extra : extra field
+#help: : tag : tag field
+#help: : user : the users sid
+#help: : host : hostname
+#help: : spath : short path
+#help: : lpath : full path
+#help: : prompt : prompt symbol (# for root, $ for loader)
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare x key
+    declare flip color text
+    declare colors=${!ColorNum_[*]}
+    declare colorPat=${colors// /|}
+    for x in "$@"; do
+        key=${x%%=*}
+        while read x; do
+            case $x in
+                0|1)
+                    PromptShow_[$key]=$x
+                    ;;
+                @($colorPat))
+                    PromptColor_[$key]=$x
+                    ;;
+                +([[:digit:]]))
+                    PromptColor_[$key]=$x
+                    ;;
+                    *|'')
+                    [[ $key =~ tag|extra ]] && PromptCfg_[$key]=$x
+                    ;;
+            esac
+        done < <(echo ${x#*=} | sed -nr 's/=/\n/g;p')
+        unset text color flip key
+    done
+    PromptShow_[host]=1
+    PromptShow_[prompt]=1
+    PS1=
+    for x in num extra tag user host spath lpath prompt; do
+        [[ ${PromptShow_[$x]} = 0 ]] && continue
+        [[ ${PromptCfg_[$x]} = '' ]] && continue
+        if [[ ${PromptColor_[$x]} =~ [0-9] ]]; then
+            num="38:5:${PromptColor_[$x]}"
+        else
+            color=${PromptColor_[$x]}
+            num=${ColorNum_[$color]}
+        fi
+        PS1+=$'\[\e['${num}m$'\]'${PromptCfg_[$x]}' '
+    done
+    PS1+=$'\[\e[m\]'
+}
+function ulist () {
+#help: ulist : finds, in order, the unique items in a list.
+#help: usage : .. | ulist
+#help: :
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare -a list
+    while read; do
+        [[ ${list[@]} =~ :$REPLY ]] || list+=(":$REPLY")
+    done < <(cat -)
+    printf "%s\n" "${list[@]/:}"
+}
+function unload () {
+#help: unload : unloads a function or an entire library
+#help: usage : unload [function|library]
+#help: :
+    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    declare x all=$(compgen -A function)
+    declare -a list dump
+    for x in $@; do
+        if [[ $x =~ .rc$ ]]; then
+            list+=($(awk '/^function / {print $2}' $ENVDIR/$x))
+        else
+            list+=($x)
+        fi
+    done
+    for x in ${list[@]}; do
+        [[ "$all" =~ $x ]] && dump+=($x)
+    done
+    [[ ${#dump[@]} -gt 0 ]] && { printf "%s\n" ${dump[@]}; unset -f ${dump[@]}; }
+}
