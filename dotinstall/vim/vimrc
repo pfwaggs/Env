@@ -49,13 +49,12 @@ set undodir=$VIMHOME/.vimrec/undos//
 set undofile
 
 "put contain views for folds
-if isdirectory($VIMHOME . '.vimrec/view') == 0
-    :silent !mkdir -p $VIMHOME/.vimrec/view &>/dev/null
+if isdirectory($VIMHOME . '.vimrec/views') == 0
+    :silent !mkdir -p $VIMHOME/.vimrec/views &>/dev/null
 endif
 set viewdir=$VIMHOME/.vimrec/views//
 
-set viminfo=<100,%,'10,/10,:50,f1,h
-set viminfofile=$VIMHOME/.vimrec/viminfo
+set viminfo=<100,%,'10,/10,:50,f1,h,n$VIMHOME/.vimrec/viminfo
 
 " yes, folding is good
 set foldcolumn=4

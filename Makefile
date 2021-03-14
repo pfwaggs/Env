@@ -127,11 +127,11 @@ dotcheck :
 #help: filelist : generates the list of files to print
 #	@sed -n 's/\\$/\\\\/;p' Makefile > Makefile.txt; echo Makefile.txt > filelist
 filelist :
-	@[[ ! -d $(MAINDIR)/prime ]] || { echo $(MAINDIR)/prime exits; exit 1; }
-	@[[ ! -d $(MAINDIR)/extra ]] || { echo $(MAINDIR)/extra exits; exit 1; }
-	@cd $(MAINDIR) &>/dev/null; load fsplit; fsplit prime.rc extra.rc 2>/dev/null
+	@[[ ! -d $(ENVDIR)/prime ]] || { echo $(ENVDIR)/prime exits; exit 1; }
+	@[[ ! -d $(ENVDIR)/extra ]] || { echo $(ENVDIR)/extra exits; exit 1; }
+	@cd $(ENVDIR) &>/dev/null; load fsplit; fsplit prime.rc extra.rc 2>/dev/null
 	@echo $(MAKEFILE) > $@
-	@find $(ENVDIR)/{main,dotinstall,support} -maxdepth 2 -type f | \
+	@find $(ENVDIR)/{,dotinstall,support} -maxdepth 2 -type f | \
 	    grep -v '\.rc' | sort >> $@
 	-@echo removing old print files; rm -r long* short* md5sums* 2>/dev/null
 
@@ -143,7 +143,7 @@ long short : filelist
 	@cat $^ | while read; do echo $$REPLY; cat "$$REPLY"; done >> $@.txt
 	@enscript $(OPT_ENSCRIPT) -o $@.ps $@.txt
 	@[[ -s md5sums.txt ]] && enscript $(OPT_ENSCRIPT) -o md5sums.ps md5sums.txt || :
-	-@rm -r -v $(MAINDIR)/{prime,extra} 2>/dev/null
+	-@rm -r -v $(ENVDIR)/{prime,extra} 2>/dev/null
 
 #help: md5sums : generates md5sums for files in the filelist
 md5sums : filelist
