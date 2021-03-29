@@ -40,25 +40,52 @@ export PAGER=$(type -p less more | head -n 1)
 [[ $PAGER =~ less ]] && export LESS='-RCMqs~' || :
 [[ -v LESS ]] && export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
 
-declare -A ColorNum_ PromptColor_
-declare -A PromptCfg_=([num]=$'\!' [user]=$'\u' [host]=$'\h' [prompt]=$'\$' [spath]=$'\W' [lpath]=$'\w')
-declare -A PromptShow_=([num]=0 [spath]=0 [lpath]=0 [tag]=0 [extra]=0 [user]=0 [host]=1 [prompt]=1)
+declare -A _PromptCfg=(\
+    [num]=$'\!'\
+    [user]=$'\u'\
+    [host]=$'\h'\
+    [prompt]=$'\$'\
+    [spath]=$'\W'\
+    [lpath]=$'\w'\
+)
 
-ColorNum_[black]=30
-ColorNum_[red]=31
-ColorNum_[green]=32
-ColorNum_[yellow]=33
-ColorNum_[blue]=34
-ColorNum_[magenta]=35
-ColorNum_[cyan]=36
-ColorNum_[white]=37
+declare -A _PromptShow=(\
+    [num]=0\
+    [spath]=0\
+    [lpath]=0\
+    [tag]=0\
+    [extra]=0\
+    [user]=0\
+    [host]=1\
+    [prompt]=1\
+)
 
-PromptColor_[num]=white
-PromptColor_[user]=blue
-PromptColor_[spath]=green
-PromptColor_[lpath]=green
-PromptColor_[extra]=red
-PromptColor_[tag]=magenta
-PromptColor_[prompt]=green
-PromptColor_[host]=$([[ $UID -eq 0 ]] && echo red || echo cyan)
+declare -A -x _ColorNum=(\
+    [black]=30\
+    [red]=31\
+    [green]=32\
+    [yellow]=33\
+    [blue]=34\
+    [magenta]=35\
+    [cyan]=36\
+    [white]=37\
+)
+
+declare -A -x _PromptColor=(\
+    [num]=white\
+    [user]=blue\
+    [spath]=green\
+    [lpath]=green\
+    [extra]=red\
+    [tag]=magenta\
+    [prompt]=green\
+)
+
+for x in ${_PromptColor[*]}; do
+    str=${_PromptColor[$x]}
+    _PromptColor[$x]=${_ColorNum[$str]}m
+done
+unset x str
+
+[host]=$([[ $UID -eq 0 ]] && echo red || echo cyan)
 

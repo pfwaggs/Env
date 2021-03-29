@@ -323,44 +323,47 @@ function stp () {
 #help: : spath : short path
 #help: : lpath : full path
 #help: : prompt : prompt symbol (# for root, $ for loader)
-    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    declare x key
-    declare flip color text
-    declare colors=${!ColorNum_[*]}
+    [[ ${@:(-1)} =~ -h) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} =~ -i) ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
+    declare OPTIND
+    declare x key arg
+    declare color text
+    declare colors=${!_ColorNum[*]}
     declare colorPat=${colors// /|}
-    for x in "$@"; do
-        key=${x%%=*}
-        while read x; do
-            case $x in
-                0|1)
-                    PromptShow_[$key]=$x
-                    ;;
-                @($colorPat))
-                    PromptColor_[$key]=$x
-                    ;;
-                +([[:digit:]]))
-                    PromptColor_[$key]=$x
-                    ;;
-                    *|'')
-                    [[ $key =~ tag|extra ]] && PromptCfg_[$key]=$x
-                    ;;
-            esac
-        done < <(echo ${x#*=} | sed -nr 's/=/\n/g;p')
-        unset text color flip key
+    while getopts ":k:c:t:s:" arg; do
+	case $arg in
+	    k) key=$OPTARG ;;
+	    c) color=$OPTARG ;;
+	    t) text=$OPTARG ;;
+	    s) state=$OPTARG ;;
+	esac
     done
-    PromptShow_[host]=1
-    PromptShow_[prompt]=1
+    [[ ${!_PromptShow[*]} =~ $key ]] || { echo invalid key; return; }
+    [[ $state =~ 0|1 ]] && ${_PromptShow[$key]}=$state
+    [[ -n $text ]] && [[ $key =~ tag|extra ]] && ${_PromptCfg[$key]}=$text
+    case $color in
+	@($colorPat))
+	    str=${_ColorNum[$color]}m
+	    _PromptColor[$key]=$'\[\e['$str$'\]'
+	    ;;
+	+([0-9]))
+	    _PromptColor[$key]=$'\[\e[38;5;'${color}m$'\]'
+	    ;;
+	+([a-fA-F]))
+	    read r g b < <(echo -n "${color/\#}" | sed 's/../& /g')
+	    str=$(echo $((0x$r));)
+	    str+=$(echo $((0x$g));)
+	    str+=$(echo $((0x$b)))m
+	    _PromptColor[$key]=$'\[\e[38;2;'$str$'\]'
+	    ;;
+    esac
+    _PromptShow[host]=1
+    _PromptShow[prompt]=1
     PS1=
     for x in num extra tag user host spath lpath prompt; do
-        [[ ${PromptShow_[$x]} = 0 ]] && continue
-        [[ ${PromptCfg_[$x]} = '' ]] && continue
-        if [[ ${PromptColor_[$x]} =~ [0-9] ]]; then
-            num="38:5:${PromptColor_[$x]}"
-        else
-            color=${PromptColor_[$x]}
-            num=${ColorNum_[$color]}
-        fi
-        PS1+=$'\[\e['${num}m$'\]'${PromptCfg_[$x]}' '
+        [[ ${_PromptShow[$x]} = 0 ]] && continue
+        [[ ${_PromptCfg[$x]} = '' ]] && continue
+        PS1+=${_PromptColor[$x]}${_PromptCfg[$x]}' '
     done
     PS1+=$'\[\e[m\]'
 }

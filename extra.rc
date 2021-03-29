@@ -1,28 +1,28 @@
+function colorsamples () {
 #help: colorsamples : show sample text in specified colors of 256 values
 #help: usage : colorsamples num [num ...]
-function colorsamples () {
     declare x
     for x in $@; do
         echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
     done
 }
+function commas () {
 #help: commas : commafy numeric fields in input stream
 #help: usage : <-> | commas
-function commas () {
     rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
 }
+function ffix () {
 #help: ffix : useful to grab a function and edit it for testing
 #help: usage : ffix function (the edited file will be in /tmp)
-function ffix () {
     declare x=/tmp/${1}2
     type $1 | sed  "1d;s/${1}/${1}2/" > $x
     vim $x
     . $x
 }
+function inunits () { 
 #help: inunits : convert a number to a SI value
 #help: usage : inunits number (base)
 #help: : n.b. the default base is 1000
-function inunits () { 
     declare U=' KMGT' b=${2:-1000}
     declare s=$(echo "scale=2; l($1)/l(10)" | bc -l)
     s=${s%.*}
@@ -30,11 +30,11 @@ function inunits () {
     declare x=$(echo "scale=3; $1/($b^$s)" | bc -l)
     echo $x${U:s:1}
 }
+function julian () {
 #help: julian : presents dates in julian format and converts back
 #help: usage : julian [date]
 #help: : args : date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
 #help: : date defaults to today
-function julian () {
     case ${1//[0-9]/x} in
         '')
             date +%Y.%j
@@ -52,9 +52,9 @@ function julian () {
             ;;
     esac
 }
+function killdir () {
 #help: killdir : moves you to the parent and removes the dir you were in
 #help: usage : killdir
-function killdir () {
     [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
     read -p "remove < $PWD > ? "
     [[ $REPLY =~ ^[yY] ]] || return 0
@@ -64,10 +64,10 @@ function killdir () {
     popd +1 &>/dev/null
     dirs -v
 }
+function mydd () {
 #help: mydd : convenience wrapper for dd/dcfldd
 #help: usage : mydd object <tab> [option ...]
 #help: : this lets you use tab complete for filename
-function mydd () {
     declare if="$1" DD=$(type -p dcfldd dd | head -n 1)
     shift
     case $DD in
@@ -79,15 +79,15 @@ function mydd () {
             ;;
     esac
 }
+function psfu () {
 #help: psfu : checks the process table for specified user
 #help: usage : psfu sid
-function psfu () {
     ps -f -u ${1:-$(id -un)}
 }
+function ruler () {
 #help: ruler : draws ruler on screen
 #help: usage : ruler
 #help: :
-function ruler () {
     declare base dots str x ROWS COLS
     read ROWS COLS < <(stty size)
     for x in 100 10 1; do
@@ -105,10 +105,10 @@ function ruler () {
         echo "${str:0:COLS}"
     done
 }
+function stk () {
 #help: stk : dir stack operations to save, load and clear the dirstack
 #help: usage : stk [save|load] filename
 #help: : stk clear (n ...)
-function stk () {
     declare x opt OPTIND OPTARG
     getopts ':s:l:c' opt
     case $opt in
@@ -139,11 +139,11 @@ function stk () {
     esac
     dirs -l -v
 }
+function stkdiff () {
 #help: stkdiff : convenient differences between stack elements
 #help: usage : stkdiff (does diff -qr . ~1)
 #help: : stkdiff filename (does diff -y filename ~1/filename)
 #help: : stkdiff x y (does diff -qr ~x ~y)
-function stkdiff () {
     [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
     case $# in
         2)
@@ -158,9 +158,9 @@ function stkdiff () {
     esac
     return
 }
+function tinfo () {
 #help: tinfo : generates some metatdata for a path versions of given filename
 #help: usage : tinfo file
-function tinfo () {
     declare x y
     for x; do
         for y in $(type -a -p $x); do   
@@ -172,14 +172,14 @@ function tinfo () {
         done
     done
 }
-#help: tname : modifies titlename
-#help: usage : tname (str)
-function tname () {
-    printf "\033k%s\033\\" ${1:-bash}
-}
+#function tname () {
+##help: tname : modifies titlename
+##help: usage : tname (str)
+#    printf "\033k%s\033\\" ${1:-bash}
+#}
+function typer () {
 #help: typer : used to examine files based on type
 #help: usage : typer file
-function typer () {
     declare mtype x
     for mtype in $(type -at $1); do
         case $mtype in
@@ -201,16 +201,16 @@ function typer () {
         esac
     done
 }
+function wup () {
 #help: wup : function to wake up machines on the network
 #help: usage : wup machine_name
-function wup () {
     declare cmd=$(type -p etherwake wol)
     declare ip=$(dig +search +short -t txt $1)
     eval $cmd $ip
 }
+function xmn () {
 #help: xmn : used to produce a detailed listing
 #help:     : of source code with some extra stuff
-function xmn () {
     declare opt infile tmp n arg file OPTIND=1 keep=0
     declare -a opts flist
     while getopts 'acf:KmMptw' arg; do
