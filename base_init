@@ -40,7 +40,7 @@ export PAGER=$(type -p less more | head -n 1)
 [[ $PAGER =~ less ]] && export LESS='-RCMqs~' || :
 [[ -v LESS ]] && export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
 
-declare -A _PromptCfg=(\
+declare -x -A _PromptCfg=(\
     [num]=$'\!'\
     [user]=$'\u'\
     [host]=$'\h'\
@@ -49,7 +49,7 @@ declare -A _PromptCfg=(\
     [lpath]=$'\w'\
 )
 
-declare -A _PromptShow=(\
+declare -x -A _PromptShow=(\
     [num]=0\
     [spath]=0\
     [lpath]=0\
@@ -60,7 +60,7 @@ declare -A _PromptShow=(\
     [prompt]=1\
 )
 
-declare -A -x _ColorNum=(\
+declare -x -A _ColorNum=(\
     [black]=30\
     [red]=31\
     [green]=32\
@@ -71,7 +71,7 @@ declare -A -x _ColorNum=(\
     [white]=37\
 )
 
-declare -A -x _PromptColor=(\
+declare -x -A _InitialColors=(\
     [num]=white\
     [user]=blue\
     [spath]=green\
@@ -79,13 +79,16 @@ declare -A -x _PromptColor=(\
     [extra]=red\
     [tag]=magenta\
     [prompt]=green\
+    [host]=cyan\
 )
+[[ $UID -eq 0 ]] && _InitialColors[host]=red
+declare -r _InitialColors
 
-for x in ${_PromptColor[*]}; do
-    str=${_PromptColor[$x]}
-    _PromptColor[$x]=${_ColorNum[$str]}m
+declare -x -A _PromptColor
+for x in ${!_InitialColors[*]}; do
+    str=${_InitialColors[$x]}
+    _PromptColor[$x]=${str}
 done
 unset x str
 
-[host]=$([[ $UID -eq 0 ]] && echo red || echo cyan)
 
