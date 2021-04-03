@@ -330,12 +330,18 @@ function stp () {
     declare color text
     declare colors=${!_ColorNum[*]}
     declare colorPat=${colors// /|}
-    while getopts ":k:c:t:s:" arg; do
+    while getopts ":k:c:t:s:C" arg; do
 	case $arg in
 	    k) key=$OPTARG ;;
 	    c) color=${OPTARG/\#} ;;
 	    t) text=$OPTARG ;;
 	    s) state=$OPTARG ;;
+	    C)
+		_PromptColor[host]=36
+		_PromptColor[prompt]=32
+		_ShowPrompt
+		return
+		;;
 	esac
     done
     [[ ${!_PromptShow[*]} =~ $key ]] || { echo invalid key; return; }
@@ -343,29 +349,27 @@ function stp () {
     [[ -n $text ]] && [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$text
     case $color in
 	@($colorPat))
-	    str=${_ColorNum[$color]}
-#	    _PromptColor[$key]=$'\[\e['$str$'\]'
+	    _PromptColor[$key]=${_ColorNum[$color]}
 	    ;;
 	+([0-9]))
-	    str=${color}
-#	    _PromptColor[$key]=$'\[\e[38;5;'${color}m$'\]'
+	    _PromptColor[$key]="38;5;$color"
 	    ;;
 	+([a-fA-F0-9]))
 	    read r g b < <(echo -n $color | sed 's/../& /g')
-	    str=$(eval "echo \$((0x$r))")
-	    str+=';'$(eval "echo \$((0x$g))")
-	    str+=';'$(eval "echo \$((0x$b))")
-#	    _PromptColor[$key]=$'\[\e[38;2;'$str$'\]'
+	    _PromptColor[$key]="38;2;$((0x$r));$((0x$g));$((0x$b))"
 	    ;;
     esac
     [[ -n $str ]] && _PromptColor[$key]=${str}
+    _ShowPrompt
+}
+function _ShowPrompt () {
     _PromptShow[host]=1
     _PromptShow[prompt]=1
     PS1=
     for x in num extra tag user host spath lpath prompt; do
         [[ ${_PromptShow[$x]} = 0 ]] && continue
         [[ ${_PromptCfg[$x]} = '' ]] && continue
-        PS1+=$'\[\e['${_PromptColor[$x]}m${_PromptCfg[$x]}$'\]'' '
+        PS1+=$'\[\e['${_PromptColor[$x]}m$'\]'${_PromptCfg[$x]}' '
     done
     PS1+=$'\[\e[m\]'
 }

@@ -86,9 +86,7 @@ declare -r _InitialColors
 
 declare -x -A _PromptColor
 for x in ${!_InitialColors[*]}; do
-    str=${_InitialColors[$x]}
-    _PromptColor[$x]=${str}
+    color=${_InitialColors[$x]}
+    _PromptColor[$x]=${_ColorNum[$color]}
 done
-unset x str
-
-
+unset x color

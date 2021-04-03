@@ -102,12 +102,11 @@ function libsplit () {
 function xtfn () {
 #help: xtfn : function to extract a function from an rc file
 #help: usage : xtfn function [lib]
-    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    declare opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
-    declare func lib
-    read func lib < <(echo $@ | tr ' ' '\n' | sed -r '/^-/d' | xargs) 
+    [[ ${@:(-1)} == -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} == -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
+    declare func=$1 lib=$2
     declare x leadin
-    declare found=$(grep -l -E "^(function )?$func " ${lib:-$ENVBASH/*.rc} 2>/dev/null)
+    declare found=$(grep -l -E "^(function )?$func \(\)" ${lib:-$ENVDIR/*.rc} 2>/dev/null)
     for x in $found; do
         echo $func found in $x ... >&2
 	sed -r "/^(function )?$func /{:1;n;/^}$/!b1;n};d" $x
