@@ -7,6 +7,7 @@ function check () {
 #help: note : the file should containe one function definition. this function
 #help: : will be checked against the library version.
     [[ ${@:(-1)} =~ -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} == -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
     declare opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
     declare funcs=$(echo $@ | tr ' ' '\n' | sed -r '/^-/d' | xargs)
     declare rcs=$(ls *.rc &>/dev/null && echo 1 || echo 0)
@@ -34,7 +35,8 @@ function check () {
 function cksumit () {
 #help: cksumit : provides a line checksum for given files.
 #help: usage : cksumit file [file ...]
-    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} =~ -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} == -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
     for x in $@; do
         echo ${x#$PRUNE/}
         while read -r; do
@@ -47,7 +49,8 @@ function cksumit () {
 function envage () {
 #help: envage : how old is the config?
 #help: usage : envage
-    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} =~ -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} == -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
 #    [[ $MAINDIR =~ main ]] && { echo this is a dev branch; return; }
     declare diff past today=$(date +%F)
 #    declare past=$(echo -n $MAINDIR | awk -F/ '{print $5}' | cut -f1 -d.)
@@ -60,7 +63,8 @@ function libjoin () {
 #help: libjoin : takes a dir of functions and makes a function file
 #help: usage : libjoin dir
 #help: : dir is the directory you want to turn into a dir.rc file
-    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} =~ -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} == -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
     declare opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
     declare dir=$(echo $@ | tr ' ' '\n' | sed -r '/^-/d;1!d')
     [[ -d $dir ]] || { echo  $dir does not exist; return; }
@@ -73,6 +77,8 @@ function libjoin () {
 function liblist () {
 #help: liblist : list the library contents for bash and perl libraries
 #help: usage : liblist library
+    [[ ${@:(-1)} =~ -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} == -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
     declare pat suffix=${1#*.}
     [[ $suffix = rc ]] && pat='^function '
     [[ $suffix = pm ]] && pat='^sub '
@@ -81,7 +87,8 @@ function liblist () {
 function libsplit () {
 #help: libsplit : splits a file of functions into a dir of separate functions
 #help: usage : libsplit file
-    [[ ${@:(-1)} =~ -(h|help) ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} =~ -h ]] && { _funcHelp ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} == -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]})"; return; }
     ls AA* &>/dev/null && { echo AA files exist; return; }
     declare new file dir
     for file in $@; do

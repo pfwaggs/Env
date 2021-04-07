@@ -17,9 +17,10 @@ ifeq (,$(findstring $(BRANCH),master))
   $(error branch is not master. please change branches)
 endif
 
-ifeq (short,$(findstring short,$(MAKECMDGOALS)))
-  OPT_ENSCRIPT = -2 -r -f Courier8
-endif
+#ifeq (short,$(findstring short,$(MAKECMDGOALS)))
+#  OPT_ENSCRIPT = -2 -r -f Courier8
+#endif
+OPT_ENSCRIPT = -2 -r -f Courier8
 OPT_ENSCRIPT += -DDuplex:true
 
 ifdef TUMBLE
@@ -150,3 +151,6 @@ md5sums : filelist
 	@echo $(ENVDIR) >$@.txt
 	@while read; do md5sum $$REPLY; done < $^ | sed "s|$(ENVDIR)/||" >> $@.txt
 
+lp-% :
+	@wc -l $(ENVDIR)/$*
+	@enscript $(OPT_ENSCRIPT) -o $*.ps $(ENVDIR)/$*

@@ -84,6 +84,23 @@ function psfu () {
 #help: usage : psfu sid
     ps -f -u ${1:-$(id -un)}
 }
+#help: r94 :
+#help: usage :
+#help: :
+function r94 () {
+    declare -a hex
+    declare x c chars vals
+    declare vals=$(eval "echo {1..${1:-12}}")
+    for x in $vals; do
+	printf -v c "%x" $((32+RANDOM%94))
+	hex+=($c)
+    done
+    chars=$(echo ${hex[@]} | xxd -r -p)
+    for x in ${!hex[@]}; do
+	echo "${hex[x]} = ${chars:x:1}" >&2
+    done
+    echo $chars
+}
 function ruler () {
 #help: ruler : draws ruler on screen
 #help: usage : ruler
