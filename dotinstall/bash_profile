@@ -3,5 +3,5 @@
 [[ ${opt:-no} =~ ^[yY] ]] && ENVTAG=testing || ENVTAG=current
 echo ''
 declare -rx ENVTAG
-run=~/Env/$ENVTAG/main/bash_profile
+run=~/Env/$ENVTAG/bash_profile
 [[ -s $run ]] && . $run

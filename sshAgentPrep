@@ -1,13 +1,6 @@
-
 if [[ -f ~/.agentfile ]]; then
-    AGENTFILE=$(cat ~/.agentfile)
-    [[ -e $AGENTFILE ]] || { ssh-agent -k; rm ~/.agentfile /tmp/agentInit*; unset AGENTFILE; }
+    ps -ef | grep -q -i [s]sh-agent || { echo ssh-agent is MIA; rm ~/.agentfile /tmp/agentInit*; return; }
+else
+    eval "$(ssh-agent | tee ~/.agentfile)"
 fi
-if [[ ${AGENTFILE:-no} = no ]]; then
-    AGENTFILE=$(echo /tmp/agentInit-$PPID | tee ~/.agentfile)
-    pid=$(grep AGENT $AGENTFILE 2>/dev/null | perl -n -E 'say /=(\d+)/')
-    eval "$(ssh-agent | tee $AGENTFILE)"
-fi
-declare -xr AGENTFILE
-. $AGENTFILE
-export SSH_AGENT_PID SSH_AUTH_SOCK
+. ~/.agentfile

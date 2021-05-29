@@ -4,8 +4,7 @@
 [[ -z $SSH_CLIENT ]] || exit 0
 #[[ $SSH_AGENT_PID ]] && ssh-agent -k
 #[[ -e $AGENTFILE ]] || rm ~/.agentfile
-printf "%s closing subshell @ %s\n\n" $(hostname):$LOGNAME "$(date)"
-read -p 'pause'
+echo $HOSTNAME:$LOGNAME closing subshell @ $(date)
 fortune=$(type -p fortune)
 [[ -n $fortune ]] && $fortune || exit 0
 printf "\n"

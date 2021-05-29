@@ -38,7 +38,7 @@ export FIGNORE='~'
 # had to move these here because of path and function issues.
 export PAGER=$(type -p less more | head -n 1)
 [[ $PAGER =~ less ]] && export LESS='-RCMqs~' || :
-[[ -v LESS ]] && export LESSOPEN="| /usr/share/source-highlight/src-hilite-lesspipe.sh %s"
+[[ -v LESS ]] && export LESSOPEN="| /usr/bin/lesspipe.sh %s"
 
 declare -x -A _PromptCfg=(\
     [num]=$'\!'\
