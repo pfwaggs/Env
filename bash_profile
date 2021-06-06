@@ -22,5 +22,4 @@ source $ENVDIR/prime.rc
 export -f load # needed for make files
 [[ -e ~/.no_agentprep ]] && echo not loading agentprep || source $ENVDIR/sshAgentPrep
 configEd vim
-stp -k host -c cyan -s 1
-stp -k prompt -c green -s 1
+stp reset

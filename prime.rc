@@ -63,6 +63,25 @@ function _ArgParser () (
     done;
     [[ ${#list[@]} -gt 0 ]] && printf "%s\n" "${list[@]}" | ulist
 )
+function _ConvertColor () (
+#help:_ConvertColor:converts color name/number/rgb to terminal string
+#help:usage:_ConvertColor value
+    [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    colors=${!_ColorMap[@]}
+    colors=${colors// /|}
+    if [[ $1 =~ $colors ]]; then
+	echo -n "38;5;$((${_ColorMap[$1]}))"
+    elif [[ $1 =~ ^0x[[:xdigit:]]{2}$ ]]; then
+	echo -n "38;5;$(($1))"
+    elif [[ $1 =~ ^0x[[:xdigit:]]{6}$ ]]; then
+	read r g b < <(echo -n ${1/#0x} | sed 's/../& /g')
+	echo -n "38;2;$((0x$r));$((0x$g));$((0x$b))"
+    else
+	echo $1 illegal value, using white >&2
+	echo -n "38;5;$((${_ColorMap[white]}))"
+    fi
+)
 function _FixList () (
 #help:_FixList :some basic list operations:
 #help: :-s sort
@@ -129,13 +148,16 @@ function _FixList () (
     printf '%s\n' "${list[@]}"
 )
 function _ShowPrompt () {
-    _PromptShow[host]=1
-    _PromptShow[prompt]=1
+    _PromptShow[host]=on
+    _PromptShow[prompt]=on
     PS1=
+    declare x color text
     for x in num extra tag user host spath lpath prompt; do
-        [[ ${_PromptShow[$x]} = 0 ]] && continue
-        [[ ${_PromptCfg[$x]} = '' ]] && continue
-        PS1+=$'\[\e['${_PromptColor[$x]}m$'\]'${_PromptCfg[$x]}' '
+        [[ ${_PromptShow[$x]} = on ]] || continue
+	text=${_PromptText[$x]:-${_InitialText[$x]}}
+        [[ -n $text ]] || continue
+	color=$(_ConvertColor ${_PromptColor[$x]})
+        PS1+=$'\[\e['${color}m$'\]'$text' '
     done
     PS1+=$'\[\e[m\]'
 }
@@ -147,18 +169,6 @@ function _LibHelp () (
     sed -r "/:(${all// /|}):/!d" $src |
 	sed -r "/:(${loaded// /|}):/s/^#help/  x  /" | column -s: -t |
 	sed -r 's/^#help/     /'
-#    for x in ${@:-prime.rc}; do
-#        [[ -f $x ]] || { echo $x not found; continue; }
-#        x=$ENVDIR/${x##*/}
-#        echo ${x##*/}
-#        [[ -f $x ]] || { echo $x not found; continue; }
-#        inlib=$(awk '/^function /{print $2}' $x | grep -v _ | xargs)
-#        sed -r "/^#help (${inlib// /|}) /!d" $x |
-#            while read line; do
-#                [[ $line =~ ': '(${loaded// /|})' :' ]] && r=' x ' || r='xxx'
-#                echo ${line/\#help/:$r}
-#            done | sort -k3,3 -t:
-#    done | sed 's/xxx/   /' | column -s: -t | sed -r 's/^/    /'
 )
 function _Help () (
     FNC=$1 SRC=${2:-$($1 -i | awk '{print $2}' | tr -d '()')}
@@ -307,20 +317,6 @@ function push () {
     pushd &>/dev/null
     dirs -l -v
 }
-##function setextra () {
-###help:setextra:shortcut to set extra for the prompt
-###help:usage:setextra [color=]'text'
-##    [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-##    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
-##    stp extra=1="$*"
-##}
-##function settag () {
-###help:settag:shortcut to set tag for the prompt
-###help:usage:settag [color=]'text'
-##    [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-##    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
-##    stp tag=1="$*"
-##}
 function show () (
 #help:show:used to show variable values
 #help:usage:show var
@@ -361,41 +357,37 @@ function stp () {
 #help: :-C resets the scheme
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
     [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
-    declare OPTIND
-    declare x key arg
-    declare color text
-    declare colors=${!_ColorNum[*]}
-    declare colorPat=${colors// /|}
-    while getopts ":k:c:t:s:C" arg; do
-        case $arg in
-            k) key=$OPTARG ;;
-            c) color=${OPTARG/\#} ;;
-            t) text=$OPTARG ;;
-            s) state=$OPTARG ;;
-            C)
-                _PromptColor[host]=36
-                _PromptColor[prompt]=32
-                _ShowPrompt
-                return
-                ;;
-        esac
+    declare x key keys=${!_InitialText[@]}
+    keys=${keys// /|}
+    declare colors=${!_ColorMap[*]}
+    colors=${colors// /|}"|0x[[:xdigit:]]+"
+    [[ $# -eq 0 ]] && { _ShowPrompt; return; }
+    for x in "$@"; do
+	if [[ $x = reset ]]; then
+	    for x in ${!_InitialText[@]}; do
+		_PromptColor[$x]=${_InitialColors[$x]}
+		_PromptShow[$x]=${_InitialShow[$x]}
+		_PromptText[$x]=${_InitialText[$x]}
+	    done
+	    _ShowPrompt
+	    return
+	elif [[ $x =~ ${keys} ]]; then
+	    key=$x
+	elif [[ $x =~ on|off ]]; then
+	    _PromptShow[tmp]=$x
+	elif [[ $x =~ ^$colors$ ]]; then
+	    _PromptColor[tmp]=$x
+	elif [[ $x =~ ^[[:alnum:]]+$ ]]; then
+	    _PromptText[tmp]=$x
+	else
+	    echo no match found >&2
+	    return
+	fi
     done
-    [[ ${!_PromptShow[*]} =~ $key ]] || { echo invalid key; return; }
-    [[ $state =~ 0|1 ]] && _PromptShow[$key]=$state
-    [[ -n $text ]] && [[ $key =~ tag|extra ]] && _PromptCfg[$key]=$text
-    case $color in
-        @($colorPat))
-            _PromptColor[$key]=${_ColorNum[$color]}
-            ;;
-        +([0-9]))
-            _PromptColor[$key]="38;5;$color"
-            ;;
-        +([a-fA-F0-9]))
-            read r g b < <(echo -n $color | sed 's/../& /g')
-            _PromptColor[$key]="38;2;$((0x$r));$((0x$g));$((0x$b))"
-            ;;
-    esac
-    [[ -n $str ]] && _PromptColor[$key]=${str}
+    [[ ${!_PromptShow[@]} =~ ${key:-empty} ]] || { echo invalid key; return; }
+    _PromptColor[$key]=${_PromptColor[tmp]:-white}
+    _PromptShow[$key]=${_PromptShow[tmp]:-off}
+    _PromptText[$key]=${_PromptText[tmp]}
     _ShowPrompt
 }
 function ulist () (
