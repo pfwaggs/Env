@@ -68,18 +68,14 @@ function _ConvertColor () (
 #help:usage:_ConvertColor value
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
     [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
-    colors=${!_ColorMap[@]}
-    colors=${colors// /|}
-    if [[ $1 =~ $colors ]]; then
-	echo -n "38;5;$((${_ColorMap[$1]}))"
-    elif [[ $1 =~ ^0x[[:xdigit:]]{2}$ ]]; then
-	echo -n "38;5;$(($1))"
-    elif [[ $1 =~ ^0x[[:xdigit:]]{6}$ ]]; then
+
+    if [[ $1 =~ ^0x[[:xdigit:]]{6}$ ]]; then
 	read r g b < <(echo -n ${1/#0x} | sed 's/../& /g')
 	echo -n "38;2;$((0x$r));$((0x$g));$((0x$b))"
+    elif [[ $1 =~ ^0x[[:xdigit:]]{2}$ ]]; then
+	echo -n "38;5;$(($1))"
     else
-	echo $1 illegal value, using white >&2
-	echo -n "38;5;$((${_ColorMap[white]}))"
+	_ConvertColor ${_ColorMap[${1:-white}]}
     fi
 )
 function _FixList () (
@@ -156,7 +152,7 @@ function _ShowPrompt () {
         [[ ${_PromptShow[$x]} = on ]] || continue
 	text=${_PromptText[$x]:-${_InitialText[$x]}}
         [[ -n $text ]] || continue
-	color=$(_ConvertColor ${_PromptColor[$x]})
+	color=$(_ConvertColor ${_PromptColors[$x]})
         PS1+=$'\[\e['${color}m$'\]'$text' '
     done
     PS1+=$'\[\e[m\]'
@@ -357,37 +353,44 @@ function stp () {
 #help: :-C resets the scheme
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
     [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
-    declare x key keys=${!_InitialText[@]}
-    keys=${keys// /|}
+    declare x key show color txt keys=${!_InitialText[@]}
+    declare keypat=${keys// /|}
     declare colors=${!_ColorMap[*]}
     colors=${colors// /|}"|0x[[:xdigit:]]+"
     [[ $# -eq 0 ]] && { _ShowPrompt; return; }
     for x in "$@"; do
 	if [[ $x = reset ]]; then
-	    for x in ${!_InitialText[@]}; do
-		_PromptColor[$x]=${_InitialColors[$x]}
+	    shift
+	    for x in ${@:-$keys}; do
+		_PromptColors[$x]=${_InitialColors[$x]}
 		_PromptShow[$x]=${_InitialShow[$x]}
 		_PromptText[$x]=${_InitialText[$x]}
 	    done
 	    _ShowPrompt
 	    return
-	elif [[ $x =~ ${keys} ]]; then
+	elif [[ $x = info ]]; then
+	    shift
+	    [[ $x = initial ]] && x=Initial || x=Prompt
+	    paste <(show _${x}Colors | sed 1d | sort) <(show _${x}Text | sed 1d | sort) <(show _${x}Show | sed 1d | sort) |
+		tr -d = | awk '{print $1, $2, $4, $6}' | sed "1i keys _${x}Colors _${x}Text _${x}Show" | column -t
+	    return
+	elif [[ $x =~ ${keypat} ]]; then
 	    key=$x
-	elif [[ $x =~ on|off ]]; then
-	    _PromptShow[tmp]=$x
+	elif [[ $x =~ (on|off) ]]; then
+	    show=$x
 	elif [[ $x =~ ^$colors$ ]]; then
-	    _PromptColor[tmp]=$x
+	    color=$x
 	elif [[ $x =~ ^[[:alnum:]]+$ ]]; then
-	    _PromptText[tmp]=$x
+	    txt=$x
 	else
-	    echo no match found >&2
+	    echo ">$x<" no match found >&2
 	    return
 	fi
     done
-    [[ ${!_PromptShow[@]} =~ ${key:-empty} ]] || { echo invalid key; return; }
-    _PromptColor[$key]=${_PromptColor[tmp]:-white}
-    _PromptShow[$key]=${_PromptShow[tmp]:-off}
-    _PromptText[$key]=${_PromptText[tmp]}
+    [[ -n $key ]] || { echo invalid key; return; }
+    [[ -n $color ]] && _PromptColors[$key]=$color
+    [[ -n $show ]] && _PromptShow[$key]=$show
+    [[ -n $txt ]] && _PromptText[$key]=$txt
     _ShowPrompt
 }
 function ulist () (

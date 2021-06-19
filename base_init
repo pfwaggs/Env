@@ -89,9 +89,8 @@ declare -x -A _ColorMap=(
 
 [[ -f ~/.colors ]] && . ~/.colors
 [[ $UID -eq 0 ]] && _InitialColors[host]=red
-declare -r _InitialColors
-declare -r _ColorMap
+declare -r _InitialColors _ColorMap
 
-declare -x -A _PromptColor
+declare -x -A _PromptColors
 declare -x -A _PromptText
 declare -x -A _PromptShow
