@@ -14,7 +14,7 @@ endif
 
 BRANCH = $(shell git $(GITPREFIX) rev-parse --abbrev-ref HEAD)
 ifeq (,$(findstring $(BRANCH),master))
-  $(info branch is not master. please change branches)
+  $(error branch is not master. please change branches)
 endif
 
 #ifeq (short,$(findstring short,$(MAKECMDGOALS)))
