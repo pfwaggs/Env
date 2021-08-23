@@ -2,7 +2,7 @@ function colorsamples () (
 #help:colorsamples:show sample text in specified colors of 256 values
 #help:usage:colorsamples num [num ...]
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     for x in $@; do
         echo -e "\e[38:5:${x}m"$x color sample text$'\e[0m'
     done
@@ -11,14 +11,14 @@ function commas () (
 #help:commas:commafy numeric fields in input stream
 #help:usage:<-> | commas
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     rev | perl -nl -E 's/(\d{3})/$1,/g; print s/,(\s|$)//gr' | rev;
 )
 function ffix () (
 #help:ffix:useful to grab a function and edit it for testing
 #help:usage:ffix function (the edited file will be in /tmp)
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     x=/tmp/${1}2
     type $1 | sed  "1d;s/${1}/${1}2/" > $x
     vim $x
@@ -29,7 +29,7 @@ function inunits () (
 #help:usage:inunits number (base)
 #help: :n.b. the default base is 1000
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     U=' KMGT' b=${2:-1000}
     s=$(echo "scale=2; l($1)/l(10)" | bc -l)
     s=${s%.*}
@@ -43,7 +43,7 @@ function julian () (
 #help: :args:date can be xxxx-xx-xx (standard date), xxxx.xxx (year.#day)
 #help: :date defaults to today
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     case ${1//[0-9]/x} in
         '')
             date +%Y.%j
@@ -65,7 +65,7 @@ function killdir () (
 #help:killdir:moves you to the parent and removes the dir you were in
 #help:usage:killdir
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     [[ -n ${PWD%/*} ]] || { echo parent is /; return 1; }
     read -p "remove < $PWD > ? "
     [[ $REPLY =~ ^[yY] ]] || return 0
@@ -80,7 +80,7 @@ function mydd () (
 #help:usage:mydd object <tab> [option ...]
 #help: :this lets you use tab complete for filename
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     if="$1"
     DD=$(type -p dcfldd dd | head -n 1)
     shift
@@ -97,14 +97,14 @@ function psfu () (
 #help:psfu:checks the process table for specified user
 #help:usage:psfu sid
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     ps -f -u ${1:-$(id -un)}
 )
 function pwgen () (
 #help:pwgen:generates a random string
 #help:usage:pwgen
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     for x; do
         [[ $x =~ ^[0-9]+$ ]] && num=$x || opt=$x
     done
@@ -139,7 +139,7 @@ function ruler () (
 #help:ruler:draws ruler on screen
 #help:usage:ruler
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     declare base dots str x ROWS COLS
     read ROWS COLS < <(stty size)
     for x in 100 10 1; do
@@ -162,7 +162,7 @@ function stk () {
 #help:usage:stk [save|load] filename
 #help: :stk clear (n ...)
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     declare x opt OPTIND OPTARG
     getopts ':s:l:c' opt
     case $opt in
@@ -199,7 +199,7 @@ function stkdiff () {
 #help: :stkdiff filename (does diff -y filename ~1/filename)
 #help: :stkdiff x y (does diff -qr ~x ~y)
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     [[ ${#DIRSTACK[@]} -gt 1 ]] || { echo dirstack too short; return; }
     case $# in
         2)
@@ -218,7 +218,7 @@ function tinfo () (
 #help:tinfo:generates some metatdata for a path versions of given filename
 #help:usage:tinfo file
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     declare x y
     for x; do
         for y in $(type -a -p $x); do   
@@ -239,7 +239,7 @@ function typer () (
 #help:typer:used to examine files based on type
 #help:usage:typer file
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     declare mtype x
     for mtype in $(type -at $1); do
         case $mtype in
@@ -265,7 +265,7 @@ function wup () (
 #help:wup:function to wake up machines on the network
 #help:usage:wup machine_name
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     cmd=$(type -p etherwake wol)
     ip=$(dig +search +short -t txt $1)
     eval $cmd $ip
@@ -274,7 +274,7 @@ function xmn () (
 #help:xmn:used to produce a detailed listing
 #help: :of source code with some extra stuff
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     OPTIND=1 keep=0
     declare -a opts flist
     while getopts 'acf:KmMptw' arg; do

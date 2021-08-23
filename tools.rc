@@ -7,7 +7,7 @@ function check () (
 #help:note:the file should containe one function definition. this function
 #help::will be checked against the library version.
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
     funcs=$(echo $@ | tr ' ' '\n' | sed -r '/^-/d' | xargs)
     rcs=$(ls *.rc &>/dev/null && echo 1 || echo 0)
@@ -34,7 +34,7 @@ function cksumit () (
 #help:cksumit:provides a line checksum for given files.
 #help:usage:cksumit file [file ...]
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     for x in $@; do
         echo ${x#$PRUNE/}
         while read -r; do
@@ -48,7 +48,7 @@ function envage () (
 #help:envage:how old is the config?
 #help:usage:envage
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
 #    [[ $MAINDIR =~ main ]] && { echo this is a dev branch; return; }
     today=$(date +%F)
 #    declare past=$(echo -n $MAINDIR | awk -F/ '{print $5}' | cut -f1 -d.)
@@ -62,7 +62,7 @@ function libjoin () (
 #help:usage:libjoin dir
 #help::dir is the directory you want to turn into a dir.rc file
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     opts=$(echo $@ | tr ' ' '\n' | sed -r '/^-/!d' | xargs)
     dir=$(echo $@ | tr ' ' '\n' | sed -r '/^-/d;1!d')
     [[ -d $dir ]] || { echo  $dir does not exist; return; }
@@ -76,7 +76,7 @@ function liblist () (
 #help:liblist:list the library contents for bash and perl libraries
 #help:usage:liblist library
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     suffix=${1#*.}
     [[ $suffix = rc ]] && pat='^function '
     [[ $suffix = pm ]] && pat='^sub '
@@ -86,7 +86,7 @@ function libsplit () (
 #help:libsplit:splits a file of functions into a dir of separate functions
 #help:usage:libsplit file
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     ls AA* &>/dev/null && { echo AA files exist; return; }
     args=$(echo $@ | xargs -n 1 | sed -r '/\.rc$/!d' | xargs)
     for file in $args; do
@@ -107,7 +107,7 @@ function xtfn () (
 #help:xtfn:function to extract a function from an rc file
 #help:usage:xtfn function [lib]
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
-    [[ ${@:(-1)} = -i ]] && { echo "${FUNCNAME[0]} (${BASH_SOURCE[0]/?tmp?})"; return; }
+    [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
     func=$1 lib=$2
     found=$(grep -l -E "^(function )?$func \(\)" ${lib:-$ENVDIR/*.rc} 2>/dev/null)
     for x in $found; do
