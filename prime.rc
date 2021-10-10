@@ -25,6 +25,8 @@ alias sshFingerPrint='ssh-keygen -E md5 -lf ~/.ssh/id_rsa'
 alias xme='ssh-agent startxfce4'
 alias addkeys='ssh-add ~/.ssh/{github,id}_rsa'
 alias vimh='vim +:help +:only'
+alias -- -d='&>/dev/null popd '
+alias -- +d='&>/dev/null pushd '
 function L () (
 #help:L:provides ls support for hidden (dot) files
 #help:usage:L [options] [dir]
@@ -238,7 +240,7 @@ function load () {
 	while read lib func; do
 	    echo $lib $func >&2
 	    sed -r "/^function $func \(\)/{:1;n;/^[})]/!b1;p};d" $lib >> ${libmap[$lib]}
-	done < <(egrep -o "^function (${funcs// /|}) " $libs | sed -r "s/:function//")
+	done < <(printf "^function %s\n" $funcs | egrep -H -o -f - $libs | sed -r "s/:function//")
     else
 	for lib in ${!libmap[@]}; do
 	    cp $lib ${libmap[$lib]}
@@ -247,9 +249,8 @@ function load () {
     for lib in ${libmap[@]}; do
 	[[ -f $lib ]] || continue
 	source $lib
-	rm $lib
     done
-    &>/dev/null popd
+    rm -f ${libmap[@]} && &>/dev/null popd
 }
 function lsu () (
 #help:lsu:a long listing of dirs moving up the dir path
@@ -268,8 +269,7 @@ function mkwdir () (
 #help: :default arg is the date
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
     [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
-    pat date=$(date +%F | tr '-' '_')
-    pat=${1:=$date}
+    pat=${1:-$(date +%F | tr '-' '_')}
     count=$(ls -d $pat.?? 2>/dev/null | wc -l)
     printf -v dir "%s.%02d" $pat $((1+count))
     mkdir -v $dir
@@ -329,14 +329,15 @@ function show () (
 #help: :type values in lowercase and <tab> will uppercase if needed
     [[ ${@:(-1)} = -h ]] && { _Help ${FUNCNAME[0]} ${BASH_SOURCE[0]}; return; }
     [[ ${@:(-1)} = -i ]] && { echo "${BASH_SOURCE[0]//:/\/}:${FUNCNAME[0]}"; return; }
-    x=$(declare -p $1 | awk '{print $2}')
+    read pre x str < <(declare -p $1 | cut -f1 -d=)
     if [[ $x =~ [aA] ]]; then
+	echo "$pre $x $str"
         echo array $1:
         for x in $(eval "echo \${!$1[@]}"); do
-            eval "echo $x = \${$1[$x]}"
-        done
+            eval "echo =$x=\${$1[$x]}"
+        done | column -t -s=
     else
-        echo $1 = ${!1}
+	declare -p $1
     fi
 )
 function spx () (
